@@ -1,7 +1,8 @@
 #![allow(dead_code)]
 use core::arch::global_asm;
 
-global_asm!(r#"
+global_asm!(
+    r#"
     .section .text.entry
     .globl _start
 _start:
@@ -29,5 +30,5 @@ _start:
     /* Jump to Rust */
     la   t0, rust_start
     jr   t0
-"#);
-
+"#
+);

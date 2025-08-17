@@ -25,7 +25,8 @@ use core::arch::global_asm;
   Total size = 152 bytes
 */
 
-global_asm!(r#"
+global_asm!(
+    r#"
     .section .text.trap
     .globl __trap_entry
 __trap_entry:
@@ -79,5 +80,5 @@ __trap_entry:
     ld      sp,   8(sp)
     addi    sp, sp, 152
     sret
-"#);
-
+"#
+);

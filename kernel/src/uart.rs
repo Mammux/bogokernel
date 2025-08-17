@@ -4,7 +4,7 @@ const UART0_BASE: usize = 0x1000_0000;
 
 /* 16550 registers (byte offsets) */
 const RBR_THR_DLL: usize = 0x00; // Rx Buffer / Tx Holding / Div Latch Low
-const LSR: usize        = 0x05; // Line Status Register
+const LSR: usize = 0x05; // Line Status Register
 
 /* LSR bits */
 const LSR_TX_IDLE: u8 = 1 << 5; // THR empty
@@ -17,7 +17,9 @@ fn mmio8(addr: usize) -> *mut u8 {
 pub struct Uart;
 
 impl Uart {
-    pub const fn new() -> Self { Uart }
+    pub const fn new() -> Self {
+        Uart
+    }
 
     #[inline(always)]
     fn lsr(&self) -> u8 {
@@ -46,4 +48,3 @@ impl fmt::Write for Uart {
         Ok(())
     }
 }
-

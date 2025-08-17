@@ -12,8 +12,8 @@ const TICK_INTERVAL: u64 = 100_000;
 
 pub fn init() {
     // Arm first tick
-    let now: u64 = time::read().try_into().unwrap();               // allowed in S-mode on QEMU virt (OpenSBI delegates time)
-    sbi::set_timer(now + TICK_INTERVAL);  // program next interrupt
+    let now: u64 = time::read().try_into().unwrap(); // allowed in S-mode on QEMU virt (OpenSBI delegates time)
+    sbi::set_timer(now + TICK_INTERVAL); // program next interrupt
 }
 
 pub fn on_timer() {
