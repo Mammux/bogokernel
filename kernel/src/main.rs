@@ -45,9 +45,7 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     let _ = writeln!(uart, "{}", info.message());
 
     loop {
-        unsafe {
-            riscv::asm::wfi();
-        }
+        riscv::asm::wfi();
     }
 }
 
@@ -82,6 +80,6 @@ extern "C" fn after_user() -> ! {
     let mut uart = uart::Uart::new();
     let _ = writeln!(uart, "user program exited; back in S-mode.");
     loop {
-        unsafe { riscv::asm::wfi() }
+        riscv::asm::wfi();
     }
 }

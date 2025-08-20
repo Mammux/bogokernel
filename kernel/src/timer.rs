@@ -24,7 +24,7 @@ pub fn on_timer() {
     let t = TICKS.fetch_add(1, Ordering::Relaxed) + 1;
 
     // light logging every 50 ticks to avoid spamming
-    if t % 50 == 0 {
+    if t.is_multiple_of(50) {
         use core::fmt::Write;
         let mut uart = crate::uart::Uart::new();
         let _ = writeln!(uart, "tick {t}");

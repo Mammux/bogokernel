@@ -1,7 +1,7 @@
 // kernel/src/trap.rs
 use riscv::register::{scause, sepc, sie, sstatus, stvec};
 
-pub use scause::{Exception, Interrupt, Trap};
+pub use scause::Trap;
 
 #[repr(C)]
 pub struct TrapFrame {
