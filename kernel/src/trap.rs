@@ -1,5 +1,5 @@
 // kernel/src/trap.rs
-use riscv::register::{scause, sepc, sie, sstatus, stvec};
+use riscv::{interrupt::supervisor::{Exception, Interrupt}, register::{scause, sepc, sie, sstatus, stvec::{self, Stvec}}};
 
 pub use scause::Trap;
 
@@ -33,7 +33,7 @@ extern "C" {
 #[inline]
 pub fn init() {
     unsafe {
-        stvec::write(__trap_entry as usize, stvec::TrapMode::Direct);
+        stvec::write(Stvec::from_bits(__trap_entry as usize));
         sstatus::set_sie(); // global S interrupts
         sie::set_stimer(); // Supervisor timer interrupt enable
     }
@@ -41,7 +41,10 @@ pub fn init() {
 
 #[no_mangle]
 extern "C" fn rust_trap(tf: &mut TrapFrame) {
-    match scause::read().cause() {
+    let raw_trap: Trap<usize, usize> = scause::read().cause();
+    let standard_trap: Trap<Interrupt, Exception> = raw_trap.try_into().unwrap();
+
+    match standard_trap {
         Trap::Interrupt(Interrupt::SupervisorTimer) => {
             crate::timer::on_timer();
         }
@@ -95,5 +98,7 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
                 unsafe { core::arch::asm!("wfi") }
             }
         }
+        
     }
+
 }
