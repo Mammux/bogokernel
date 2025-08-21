@@ -11,17 +11,23 @@ KERNEL_LOAD_ADDR = 0x80200000;
 SECTIONS
 {
   .text KERNEL_LOAD_ADDR : ALIGN(4K) {
+    __text_start = .;
     KEEP(*(.text.entry))   /* our _start */
     *(.text .text.*)
+    __text_end = .;
   }
 
   .rodata : ALIGN(4K) {
+    __rodata_start = .;
     *(.rodata .rodata.*)
+    __rodata_end = .;
   }
 
   .data : ALIGN(4K) {
+    __data_start = .;
     *(.sdata .sdata.*)
     *(.data .data.*)
+    __data_end = .;
   }
 
   .bss : ALIGN(4K) {
