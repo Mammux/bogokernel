@@ -25,14 +25,34 @@ use crate::{stack::init_trap_stack};
 // User mode stuff
 static USER_ELF: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/userapp.elf"));
 
-fn enter_user_with(entry: usize, user_sp_top: usize) -> ! {
-    use riscv::register::{sepc, sstatus};
+fn enter_user_with(entry: usize, sp: usize, argc: usize, argv: usize, envp: usize) -> ! {
+    use riscv::register::{sepc};
     unsafe {
         sepc::write(entry);
-        core::arch::asm!("mv sp, {}", in(reg) user_sp_top, options(nostack));
-        sstatus::set_spie();
-        sstatus::set_spp(sstatus::SPP::User);
-        core::arch::asm!("sret", options(noreturn));
+
+        core::arch::asm!(
+            // --- configure sstatus for sret to U-mode ---
+            // Clear SPP (bit 8) -> return to User
+            "li   t0, 0x100",
+            "csrc sstatus, t0",
+            // Set SPIE (bit 5) -> enable interrupts in U after sret
+            "li   t0, 1 << 5",
+            "csrs sstatus, t0",
+
+            // --- load user context (no calls after this!) ---
+            "mv   sp,   {usp}",
+            "mv   a0,   {arg0}",     // argc
+            "mv   a1,   {arg1}",     // argv
+            "mv   a2,   {arg2}",     // envp
+
+            // go!
+            "sret",
+            usp  = in(reg) sp,
+            arg0 = in(reg) argc,
+            arg1 = in(reg) argv,
+            arg2 = in(reg) envp,
+            options(noreturn)
+        );
     }
 }
 
@@ -94,16 +114,34 @@ extern "C" fn rust_start() -> ! {
     loop { riscv::asm::wfi(); }
     */
 
-        // --- Load the user ELF ---
+    // --- Load the user ELF ---
+
+    // Example argv/envp to demonstrate
+    let argv = ["userapp", "hello", "42"];
+    let envp = ["TERM=xterm", "LANG=C"];
+
     let user_stack_top_va: usize = 0x4000_8000;  // choose a low VA for user stack top
     let user_stack_bytes: usize  = 16 * 1024;    // 16 KiB
 
-    match elf::load_user_elf(USER_ELF, user_stack_top_va, user_stack_bytes) {
+    match elf::load_user_elf(USER_ELF, user_stack_top_va, user_stack_bytes, &argv, &envp) {
         Ok(img) => {
-            let _ = writeln!(uart, "Loaded user ELF: entry=0x{:x}, usp=0x{:x}", img.entry_va, img.user_stack_top_va);
-            enter_user_with(img.entry_va, img.user_stack_top_va);
+            use core::fmt::Write;
+            let mut uart = crate::uart::Uart::new();
+            let _ = writeln!(uart, "Loaded user ELF: entry=0x{:x}, sp=0x{:x}, argc={}", img.entry_va, img.user_sp, img.argc);
+
+            let env0 = unsafe { read_user_usize(img.envp_va) };
+            let argv0 = unsafe { read_user_usize(img.argv_va) };
+            let _ = writeln!(uart, "argv_va=0x{:x} envp_va=0x{:x}", img.argv_va, img.envp_va);
+            let _ = writeln!(uart, "argv[0]=0x{:x} envp[0]=0x{:x}", argv0, env0);
+
+            // show first 32 bytes of envp[0] (should look like ASCII)
+            // unsafe { peek_user_bytes(env0, 32); }
+
+            enter_user_with(img.entry_va, img.user_sp, img.argc, img.argv_va, img.envp_va);
         }
         Err(e) => {
+            use core::fmt::Write;
+            let mut uart = crate::uart::Uart::new();
             let _ = writeln!(uart, "*** ELF load error: {}", e);
             loop { riscv::asm::wfi() }
         }
@@ -133,4 +171,28 @@ extern "C" fn after_user() -> ! {
     loop {
         riscv::asm::wfi();
     }
+}
+
+use riscv::register::sstatus;
+unsafe fn read_user_usize(va: usize) -> usize {
+    sstatus::set_sum();
+    let v = core::ptr::read(va as *const usize);
+    sstatus::clear_sum();
+    v
+}
+unsafe fn _peek_user_bytes(va: usize, n: usize) {
+    use core::fmt::Write;
+    let mut uart = crate::uart::Uart::new();
+
+    // cap reads to end of the current 4 KiB page
+    let page_end = (va + 4096) & !4095;
+    let n_safe = core::cmp::min(n, page_end.saturating_sub(va));
+
+    sstatus::set_sum();
+    for i in 0..n_safe {
+        let b = core::ptr::read((va + i) as *const u8);
+        let _ = write!(uart, "{:02x} ", b);
+    }
+    sstatus::clear_sum();
+    let _ = writeln!(uart, "");
 }

@@ -3,6 +3,11 @@ name = "userapp"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "userapp"
+test = false
+bench = false
+
 [profile.release]
 panic = "abort"
 lto = "off"

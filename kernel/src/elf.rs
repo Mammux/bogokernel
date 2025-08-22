@@ -9,6 +9,29 @@ use crate::sv39::{self, PTE_V, PTE_R, PTE_W, PTE_X, PTE_U, PTE_A, PTE_D};
 const PT_LOAD: u32 = 1;
 const EM_RISCV: u16 = 243;
 
+use riscv::register::sstatus;
+
+// allow S-mode writes to user pages while we populate the stack
+#[inline(always)]
+unsafe fn with_sum<F, R>(f: F) -> R
+where F: FnOnce() -> R {
+    sstatus::set_sum();
+    let r = f();
+    sstatus::clear_sum();
+    r
+}
+
+unsafe fn write_user_bytes(va: usize, bytes: &[u8]) {
+    with_sum(|| {
+        core::ptr::copy_nonoverlapping(bytes.as_ptr(), va as *mut u8, bytes.len());
+    });
+}
+
+unsafe fn write_user_usize(va: usize, val: usize) {
+    let bytes = core::slice::from_raw_parts((&val as *const usize) as *const u8, core::mem::size_of::<usize>());
+    write_user_bytes(va, bytes);
+}
+
 // --- ELF headers (packed, unaligned reads) ---
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -73,7 +96,10 @@ fn pte_flags_from_pf(pf: u32) -> u64 {
 
 pub struct Loaded {
     pub entry_va: usize,
-    pub user_stack_top_va: usize,
+    pub user_sp: usize,
+    pub argc: usize,
+    pub argv_va: usize,
+    pub envp_va: usize,
 }
 
 // Map one VA page to a fresh PA page with flags
@@ -93,7 +119,11 @@ unsafe fn memzero_pa(dst_pa: usize, len: usize) {
     core::ptr::write_bytes(dst_pa as *mut u8, 0, len);
 }
 
-pub fn load_user_elf(image: &[u8], user_stack_va: usize, user_stack_bytes: usize) -> Result<Loaded, &'static str> {
+pub fn load_user_elf(    image: &[u8],
+    user_stack_top_va: usize,
+    user_stack_bytes: usize,
+    argv: &[&str],
+    envp: &[&str],) -> Result<Loaded, &'static str> {
     unsafe {
         if image.len() < size_of::<Elf64Ehdr>() { return Err("short ELF"); }
         let eh = read_ehdr(image);
@@ -160,17 +190,77 @@ pub fn load_user_elf(image: &[u8], user_stack_va: usize, user_stack_bytes: usize
             }
         }
 
-        // Map a user stack (RW, U=1)
-        let stack_pages = (user_stack_bytes + 4095) / 4096;
-        let mut va = (user_stack_va - stack_pages*4096) & !(4095);
-        for _ in 0..stack_pages {
-            map_user_page(root, va, PTE_V | PTE_U | PTE_R | PTE_W | PTE_A | PTE_D);
-            va += 4096;
-        }
+        let (sp, envp_va, argv_va, argc) = setup_user_stack(user_stack_top_va, user_stack_bytes, argv, envp, root)?;        
 
         Ok(Loaded {
             entry_va: eh.e_entry as usize,
-            user_stack_top_va: user_stack_va,
+            user_sp: sp,
+            argc,
+            argv_va,
+            envp_va,
         })
     }
+}
+
+unsafe fn setup_user_stack(user_stack_top_va: usize, user_stack_bytes: usize, argv: &[&str], envp: &[&str], root: *mut u64) -> Result<(usize, usize, usize, usize), &'static str> {
+    let stack_pages = (user_stack_bytes + 4095) / 4096;
+    let mut va = (user_stack_top_va - stack_pages*4096) & !(4095);
+    for _ in 0..stack_pages {
+        map_user_page(root, va, PTE_V | PTE_U | PTE_R | PTE_W | PTE_A | PTE_D);
+        va += 4096;
+    }
+
+    // --- Lay out strings at the top, then pointer vectors, then argc ---
+    let mut sp = user_stack_top_va;
+    // keep a tiny guard so debug reads can include the trailing NUL
+    sp -= 16; 
+
+    // 1) Copy env strings
+    let mut env_ptrs: heapless::Vec<usize, 32> = heapless::Vec::new();
+    for &s in envp {
+        let bytes = s.as_bytes();
+        sp -= bytes.len() + 1;
+        write_user_bytes(sp, bytes);
+        write_user_bytes(sp + bytes.len(), &[0]);
+        env_ptrs.push(sp).map_err(|_| "too many env")?;
+    }
+
+    // 2) Copy argv strings (argv[0] first)
+    let mut arg_ptrs: heapless::Vec<usize, 32> = heapless::Vec::new();
+    for &s in argv {
+        let bytes = s.as_bytes();
+        sp -= bytes.len() + 1;
+        write_user_bytes(sp, bytes);
+        write_user_bytes(sp + bytes.len(), &[0]);
+        arg_ptrs.push(sp).map_err(|_| "too many args")?;
+    }
+    
+    // 3) Align sp to 16
+    sp &= !15;
+
+    // 4) Push NULL terminators and pointer arrays (stack grows down)
+    // envp NULL
+    sp -= core::mem::size_of::<usize>();
+    write_user_usize(sp, 0);
+    for &p in env_ptrs.iter().rev() {
+        sp -= core::mem::size_of::<usize>();
+        write_user_usize(sp, p);
+    }
+    let envp_va = sp;
+
+    // argv NULL
+    sp -= core::mem::size_of::<usize>();
+    write_user_usize(sp, 0);
+    for &p in arg_ptrs.iter().rev() {
+        sp -= core::mem::size_of::<usize>();
+        write_user_usize(sp, p);
+    }
+    let argv_va = sp;
+
+    // argc
+    let argc = arg_ptrs.len();
+    sp -= core::mem::size_of::<usize>();
+    write_user_usize(sp, argc);
+    sp &= !15;
+    Ok((sp, envp_va, argv_va, argc))
 }

@@ -27,7 +27,7 @@ impl Uart {
     }
 
     #[inline(always)]
-    fn write_byte(&mut self, byte: u8) {
+    pub fn write_byte(&mut self, byte: u8) {
         // Wait until TX holding register is empty
         while (self.lsr() & LSR_TX_IDLE) == 0 {}
         unsafe { core::ptr::write_volatile(mmio8(UART0_BASE + RBR_THR_DLL), byte) }
