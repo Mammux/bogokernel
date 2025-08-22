@@ -5,6 +5,7 @@ extern crate alloc;
 mod entry;
 mod sbi;
 mod timer;
+mod fs;
 mod trap;
 mod trap_entry;
 mod uart;
@@ -15,6 +16,7 @@ mod kalloc;
 mod stack;
 mod elf;
 
+
 use core::fmt::Write;
 use uart::Uart;
 use alloc::vec::Vec;
@@ -23,7 +25,7 @@ use alloc::boxed::Box;
 use crate::{stack::init_trap_stack};
 
 // User mode stuff
-static USER_ELF: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/userapp.elf"));
+static USER_ELF: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/cat.elf"));
 
 fn enter_user_with(entry: usize, sp: usize, argc: usize, argv: usize, envp: usize) -> ! {
     use riscv::register::{sepc};
@@ -117,7 +119,7 @@ extern "C" fn rust_start() -> ! {
     // --- Load the user ELF ---
 
     // Example argv/envp to demonstrate
-    let argv = ["userapp", "hello", "42"];
+    let argv = ["cat", "etc/motd"];
     let envp = ["TERM=xterm", "LANG=C"];
 
     let user_stack_top_va: usize = 0x4000_8000;  // choose a low VA for user stack top

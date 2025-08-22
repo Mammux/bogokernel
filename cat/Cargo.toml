@@ -1,10 +1,10 @@
 [package]
-name = "userapp"
+name = "cat"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "userapp"
+name = "cat"
 test = false
 bench = false
 
