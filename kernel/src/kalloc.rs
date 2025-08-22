@@ -10,8 +10,8 @@ extern "C" {
 
 pub fn init() {
     let start = unsafe { &__heap_start as *const u8 as usize };
-    let end   = unsafe { &__heap_end   as *const u8 as usize };
-    let size  = end - start;
+    let end = unsafe { &__heap_end as *const u8 as usize };
+    let size = end - start;
     assert!(size > 0, "heap size must be > 0");
     unsafe { ALLOC.lock().init(start as *mut u8, size) };
 }

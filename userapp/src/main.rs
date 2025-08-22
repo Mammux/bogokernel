@@ -32,19 +32,26 @@ unsafe fn sys_exit() -> ! {
 }
 
 /* ---- tiny formatting helpers (no heap) ---- */
-unsafe fn put(s: &str) { let _ = sys_write(s.as_ptr(), s.len()); }
+unsafe fn put(s: &str) {
+    let _ = sys_write(s.as_ptr(), s.len());
+}
 unsafe fn _put_hex_u64(x: u64) {
     const HEX: &[u8; 16] = b"0123456789abcdef";
     let mut buf = [0u8; 18]; // "0x" + 16 nybbles
-    buf[0] = b'0'; buf[1] = b'x';
+    buf[0] = b'0';
+    buf[1] = b'x';
     for i in 0..16 {
         let nyb = (x >> ((15 - i) * 4)) & 0xF;
         buf[2 + i] = HEX[nyb as usize];
     }
     let _ = sys_write(buf.as_ptr(), buf.len());
 }
-unsafe fn _put_usize(x: usize) { _put_hex_u64(x as u64); } // hex is simplest & unambiguous
-unsafe fn put_ln() { let _ = sys_write(b"\n".as_ptr(), 1); }
+unsafe fn _put_usize(x: usize) {
+    _put_hex_u64(x as u64);
+} // hex is simplest & unambiguous
+unsafe fn put_ln() {
+    let _ = sys_write(b"\n".as_ptr(), 1);
+}
 
 /* ---- the entry point ---- */
 #[no_mangle]
@@ -65,7 +72,7 @@ pub extern "C" fn _start(argc: usize, argv: *const *const u8, _envp: *const *con
         */
 
         // Dump first few envp entries until NULL (cap to avoid infinite loops)
-        /* 
+        /*
         let mut j = 0usize;
         put("envp:"); put_ln();
         while j < 16 { // cap at 16 entries for safety
@@ -94,4 +101,6 @@ pub extern "C" fn _start(argc: usize, argv: *const *const u8, _envp: *const *con
 }
 
 #[panic_handler]
-fn panic(_: &core::panic::PanicInfo) -> ! { loop {} }
+fn panic(_: &core::panic::PanicInfo) -> ! {
+    loop {}
+}

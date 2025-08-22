@@ -1,6 +1,7 @@
 use core::arch::global_asm;
 
-global_asm!(r#"
+global_asm!(
+    r#"
     .section .text.trap
     .globl __trap_entry
 __trap_entry:
@@ -77,4 +78,5 @@ __trap_entry:
 
     // Return to the privilege level indicated by saved sstatus.SPP (usually U)
     sret
-"#);
+"#
+);

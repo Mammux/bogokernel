@@ -3,32 +3,31 @@
 extern crate alloc;
 
 mod entry;
-mod sbi;
-mod timer;
 mod fs;
+mod kalloc;
+mod sbi;
+mod sv39;
+mod timer;
 mod trap;
 mod trap_entry;
 mod uart;
 mod user;
-mod sv39;
-mod kalloc;
 // mod user_blob;
-mod stack;
 mod elf;
+mod stack;
 
-
+use alloc::boxed::Box;
+use alloc::vec::Vec;
 use core::fmt::Write;
 use uart::Uart;
-use alloc::vec::Vec;
-use alloc::boxed::Box;
 
-use crate::{stack::init_trap_stack};
+use crate::stack::init_trap_stack;
 
 // User mode stuff
 static USER_ELF: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/cat.elf"));
 
 fn enter_user_with(entry: usize, sp: usize, argc: usize, argv: usize, envp: usize) -> ! {
-    use riscv::register::{sepc};
+    use riscv::register::sepc;
     unsafe {
         sepc::write(entry);
 
@@ -60,7 +59,7 @@ fn enter_user_with(entry: usize, sp: usize, argc: usize, argv: usize, envp: usiz
 
 extern "C" {
     static __user_blob_start: u8;
-    static __user_blob_end:   u8;
+    static __user_blob_end: u8;
 }
 
 // Main entry point for the rust code
@@ -81,7 +80,9 @@ extern "C" fn rust_start() -> ! {
     timer::init(); // arm first tick
     let _ = writeln!(uart, "timers initialized");
 
-    unsafe { sv39::enable_sv39(); }
+    unsafe {
+        sv39::enable_sv39();
+    }
     let _ = writeln!(uart, "SV39 paging enabled (identity map + UART)");
 
     // --- init kernel heap ---
@@ -95,8 +96,10 @@ extern "C" fn rust_start() -> ! {
 
     // 2) Vec
     let mut v: Vec<u32> = Vec::with_capacity(8);
-    for i in 0..8 { v.push(i*i); }
-    let _ = writeln!(uart, "Vec sum = {}", v.iter().sum::<u32>());    
+    for i in 0..8 {
+        v.push(i * i);
+    }
+    let _ = writeln!(uart, "Vec sum = {}", v.iter().sum::<u32>());
 
     // 3) User code
     /*
@@ -122,30 +125,46 @@ extern "C" fn rust_start() -> ! {
     let argv = ["cat", "etc/motd"];
     let envp = ["TERM=xterm", "LANG=C"];
 
-    let user_stack_top_va: usize = 0x4000_8000;  // choose a low VA for user stack top
-    let user_stack_bytes: usize  = 16 * 1024;    // 16 KiB
+    let user_stack_top_va: usize = 0x4000_8000; // choose a low VA for user stack top
+    let user_stack_bytes: usize = 16 * 1024; // 16 KiB
 
     match elf::load_user_elf(USER_ELF, user_stack_top_va, user_stack_bytes, &argv, &envp) {
         Ok(img) => {
             use core::fmt::Write;
             let mut uart = crate::uart::Uart::new();
-            let _ = writeln!(uart, "Loaded user ELF: entry=0x{:x}, sp=0x{:x}, argc={}", img.entry_va, img.user_sp, img.argc);
+            let _ = writeln!(
+                uart,
+                "Loaded user ELF: entry=0x{:x}, sp=0x{:x}, argc={}",
+                img.entry_va, img.user_sp, img.argc
+            );
 
             let env0 = unsafe { read_user_usize(img.envp_va) };
             let argv0 = unsafe { read_user_usize(img.argv_va) };
-            let _ = writeln!(uart, "argv_va=0x{:x} envp_va=0x{:x}", img.argv_va, img.envp_va);
+            let _ = writeln!(
+                uart,
+                "argv_va=0x{:x} envp_va=0x{:x}",
+                img.argv_va, img.envp_va
+            );
             let _ = writeln!(uart, "argv[0]=0x{:x} envp[0]=0x{:x}", argv0, env0);
 
             // show first 32 bytes of envp[0] (should look like ASCII)
             // unsafe { peek_user_bytes(env0, 32); }
 
-            enter_user_with(img.entry_va, img.user_sp, img.argc, img.argv_va, img.envp_va);
+            enter_user_with(
+                img.entry_va,
+                img.user_sp,
+                img.argc,
+                img.argv_va,
+                img.envp_va,
+            );
         }
         Err(e) => {
             use core::fmt::Write;
             let mut uart = crate::uart::Uart::new();
             let _ = writeln!(uart, "*** ELF load error: {}", e);
-            loop { riscv::asm::wfi() }
+            loop {
+                riscv::asm::wfi()
+            }
         }
     }
 }

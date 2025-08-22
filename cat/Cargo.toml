@@ -22,3 +22,5 @@ strip = "none"
 target = "riscv64gc-unknown-none-elf"
 
 [dependencies]
+usys = { path = "../usys" }
+uapi = { path = "../uapi" }

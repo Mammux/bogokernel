@@ -3,7 +3,13 @@ use core::fmt::Write;
 use spin::Mutex;
 
 // kernel/src/trap.rs
-use riscv::{interrupt::supervisor::{Exception, Interrupt}, register::{scause, sepc, sie, sstatus, stval, stvec::{self, Stvec}}};
+use riscv::{
+    interrupt::supervisor::{Exception, Interrupt},
+    register::{
+        scause, sepc, sie, sstatus, stval,
+        stvec::{self, Stvec},
+    },
+};
 pub use scause::Trap;
 
 use crate::fs;
@@ -54,7 +60,6 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
             crate::timer::on_timer();
         }
         Trap::Exception(Exception::UserEnvCall) => {
-
             // DEBUG: see what user passed
             /* {
                 let mut uart = crate::uart::Uart::new();
@@ -63,12 +68,12 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
 
             // Syscall ABI: a7 = nr, a0.. = args; ecall is 4-byte insn
             match tf.a7 {
-                1 => sys_write_ptrlen(tf),      // write(ptr, len)
-                2 => sys_exit_to_kernel(tf),    // exit()
-                3 => sys_write_cstr(tf),        // write_cstr(ptr)
-                4 => sys_open(tf),              // open_cstr(path)
-                5 => sys_read(tf),              // read(fd, buf, len)
-                7 => sys_close(tf),             // close(fd)                
+                1 => sys_write_ptrlen(tf),   // write(ptr, len)
+                2 => sys_exit_to_kernel(tf), // exit()
+                3 => sys_write_cstr(tf),     // write_cstr(ptr)
+                4 => sys_open(tf),           // open_cstr(path)
+                5 => sys_read(tf),           // read(fd, buf, len)
+                7 => sys_close(tf),          // close(fd)
                 nr => {
                     let mut uart = crate::uart::Uart::new();
                     use core::fmt::Write;
@@ -91,15 +96,15 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
                 unsafe { core::arch::asm!("wfi") }
             }
         }
-        
     }
-
 }
 
 // helper: temporarily allow S-mode to load/store user pages
 #[inline(always)]
 unsafe fn with_sum<F, R>(f: F) -> R
-where F: FnOnce() -> R {
+where
+    F: FnOnce() -> R,
+{
     // Set SUM (bit 18) then clear it after
     sstatus::set_sum();
     let r = f();
@@ -108,8 +113,8 @@ where F: FnOnce() -> R {
 }
 
 fn sys_write_ptrlen(tf: &mut super::trap::TrapFrame) {
-    let uptr = tf.a0 as *const u8;     // user VA
-    let len  = tf.a1 as usize;
+    let uptr = tf.a0 as *const u8; // user VA
+    let len = tf.a1 as usize;
     let mut uart = crate::uart::Uart::new();
     unsafe {
         with_sum(|| {
@@ -117,15 +122,18 @@ fn sys_write_ptrlen(tf: &mut super::trap::TrapFrame) {
                 let b = core::ptr::read(uptr.add(i));
                 // raw byte out; keep it simple
                 if b == b'\n' {
-                      let _ = Write::write_str(&mut uart, "\r\n");
+                    let _ = Write::write_str(&mut uart, "\r\n");
                 } else {
                     // single byte write
-                    let _ = Write::write_str(&mut uart, core::str::from_utf8_unchecked(core::slice::from_ref(&b)));
+                    let _ = Write::write_str(
+                        &mut uart,
+                        core::str::from_utf8_unchecked(core::slice::from_ref(&b)),
+                    );
                 }
             }
         });
     }
-    tf.a0 = len;                 // return value (bytes "written")
+    tf.a0 = len; // return value (bytes "written")
     tf.sepc = tf.sepc.wrapping_add(4);
 }
 
@@ -142,8 +150,12 @@ fn sys_write_cstr(tf: &mut super::trap::TrapFrame) {
             let mut p = uptr;
             while p < page_end {
                 let b = core::ptr::read(p);
-                if b == 0 { break; }
-                if b == b'\n' { uart.write_byte(b'\r'); }
+                if b == 0 {
+                    break;
+                }
+                if b == b'\n' {
+                    uart.write_byte(b'\r');
+                }
                 uart.write_byte(b);
                 wrote += 1;
                 p = p.add(1);
@@ -151,12 +163,14 @@ fn sys_write_cstr(tf: &mut super::trap::TrapFrame) {
         });
     }
 
-    tf.a0 = wrote;                         // return value
-    tf.sepc = tf.sepc.wrapping_add(4);     // advance past ecall
+    tf.a0 = wrote; // return value
+    tf.sepc = tf.sepc.wrapping_add(4); // advance past ecall
 }
 
 fn sys_exit_to_kernel(tf: &mut super::trap::TrapFrame) {
-    extern "C" { fn after_user() -> !; }
+    extern "C" {
+        fn after_user() -> !;
+    }
     // Return to S-mode at after_user()
     tf.sepc = after_user as usize;
     const SSTATUS_SPP_BIT: usize = 1 << 8;
@@ -171,12 +185,16 @@ const MAX_FD: usize = 32;
 #[derive(Clone, Copy)]
 struct FdEntry {
     in_use: bool,
-    file_idx: usize,   // index into fs::FILES
+    file_idx: usize, // index into fs::FILES
     offset: usize,
 }
 
 impl FdEntry {
-    const EMPTY: Self = Self { in_use: false, file_idx: 0, offset: 0 };
+    const EMPTY: Self = Self {
+        in_use: false,
+        file_idx: 0,
+        offset: 0,
+    };
 }
 
 static FD_TABLE: Mutex<[FdEntry; MAX_FD]> = Mutex::new([FdEntry::EMPTY; MAX_FD]);
@@ -185,7 +203,11 @@ fn fd_alloc(file_idx: usize) -> Option<usize> {
     let mut tbl = FD_TABLE.lock();
     for fd in 3..MAX_FD {
         if !tbl[fd].in_use {
-            tbl[fd] = FdEntry { in_use: true, file_idx, offset: 0 };
+            tbl[fd] = FdEntry {
+                in_use: true,
+                file_idx,
+                offset: 0,
+            };
             return Some(fd);
         }
     }
@@ -193,22 +215,35 @@ fn fd_alloc(file_idx: usize) -> Option<usize> {
 }
 fn fd_get(fd: usize) -> Option<FdEntry> {
     let tbl = FD_TABLE.lock();
-    if fd < MAX_FD && tbl[fd].in_use { Some(tbl[fd]) } else { None }
+    if fd < MAX_FD && tbl[fd].in_use {
+        Some(tbl[fd])
+    } else {
+        None
+    }
 }
 fn fd_advance(fd: usize, inc: usize) {
     let mut tbl = FD_TABLE.lock();
-    if fd < MAX_FD && tbl[fd].in_use { tbl[fd].offset = tbl[fd].offset.saturating_add(inc); }
+    if fd < MAX_FD && tbl[fd].in_use {
+        tbl[fd].offset = tbl[fd].offset.saturating_add(inc);
+    }
 }
 fn fd_close(fd: usize) -> bool {
     let mut tbl = FD_TABLE.lock();
-    if fd < MAX_FD && tbl[fd].in_use { tbl[fd] = FdEntry::EMPTY; true } else { false }
+    if fd < MAX_FD && tbl[fd].in_use {
+        tbl[fd] = FdEntry::EMPTY;
+        true
+    } else {
+        false
+    }
 }
 
 // ---- safe-ish user memory helpers ----
 
 #[inline(always)]
 unsafe fn with_sum_no_timer<F, R>(f: F) -> R
-where F: FnOnce() -> R {
+where
+    F: FnOnce() -> R,
+{
     // Disable S-timer to avoid re-entry while SUM is set
     sie::clear_stimer();
     sstatus::set_sum();
@@ -225,7 +260,9 @@ fn cap_to_page(va: usize, len: usize) -> usize {
 
 // Read a NUL-terminated user string (up to max bytes) that must fit in one page.
 fn read_user_cstr_in_page(va: usize, max: usize, out: &mut [u8]) -> Result<&str, ()> {
-    if va == 0 { return Err(()); }
+    if va == 0 {
+        return Err(());
+    }
     let max = max.min(out.len());
     unsafe {
         with_sum_no_timer(|| {
@@ -234,10 +271,12 @@ fn read_user_cstr_in_page(va: usize, max: usize, out: &mut [u8]) -> Result<&str,
             let mut n = 0usize;
             while p < page_end && n < max {
                 let b = core::ptr::read(p);
-                if b == 0 { 
+                if b == 0 {
                     return core::str::from_utf8(&out[..n]).map_err(|_| ());
                 }
-                out[n] = b; n += 1; p = p.add(1);
+                out[n] = b;
+                n += 1;
+                p = p.add(1);
             }
             Err(())
         })
@@ -246,7 +285,9 @@ fn read_user_cstr_in_page(va: usize, max: usize, out: &mut [u8]) -> Result<&str,
 
 // Copy bytes from kernel slice to user buffer
 fn copy_to_user(dst_va: usize, src: &[u8]) -> usize {
-    if dst_va == 0 || src.is_empty() { return 0; }
+    if dst_va == 0 || src.is_empty() {
+        return 0;
+    }
     let n = cap_to_page(dst_va, src.len());
     unsafe {
         with_sum_no_timer(|| {
@@ -262,7 +303,11 @@ fn sys_open(tf: &mut TrapFrame) {
     let mut buf = [0u8; 256];
     let path = match read_user_cstr_in_page(path_va, 255, &mut buf) {
         Ok(s) => s,
-        Err(_) => { tf.a0 = usize::MAX; tf.sepc = tf.sepc.wrapping_add(4); return; }
+        Err(_) => {
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
+        }
     };
 
     let _ = write!(crate::uart::Uart::new(), "sys_open: path='{}'\n", path);
@@ -277,7 +322,7 @@ fn sys_open(tf: &mut TrapFrame) {
         }
     } else {
         let _ = write!(crate::uart::Uart::new(), "sys_open: file not found\n");
-        tf.a0 = usize::MAX;     // not found
+        tf.a0 = usize::MAX; // not found
     }
     tf.sepc = tf.sepc.wrapping_add(4);
 }
@@ -289,17 +334,25 @@ fn sys_read(tf: &mut TrapFrame) {
     let mut len = tf.a2;
 
     if buf == 0 || len == 0 {
-        tf.a0 = 0; tf.sepc = tf.sepc.wrapping_add(4); return;
+        tf.a0 = 0;
+        tf.sepc = tf.sepc.wrapping_add(4);
+        return;
     }
     len = cap_to_page(buf, len);
 
     let entry = match fd_get(fd) {
         Some(e) => e,
-        None => { tf.a0 = usize::MAX; tf.sepc = tf.sepc.wrapping_add(4); return; }
+        None => {
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
+        }
     };
     let file = &crate::fs::FILES[entry.file_idx];
     if entry.offset >= file.data.len() {
-        tf.a0 = 0; tf.sepc = tf.sepc.wrapping_add(4); return;
+        tf.a0 = 0;
+        tf.sepc = tf.sepc.wrapping_add(4);
+        return;
     }
     let remain = &file.data[entry.offset..];
     let chunk = &remain[..core::cmp::min(len, remain.len())];

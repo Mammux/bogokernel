@@ -3,8 +3,8 @@
 //! - Copies file bytes and zeros BSS
 //! - Returns entry VA and a ready user stack VA
 
-use core::mem::{size_of};
-use crate::sv39::{self, PTE_V, PTE_R, PTE_W, PTE_X, PTE_U, PTE_A, PTE_D};
+use crate::sv39::{self, PTE_A, PTE_D, PTE_R, PTE_U, PTE_V, PTE_W, PTE_X};
+use core::mem::size_of;
 
 const PT_LOAD: u32 = 1;
 const EM_RISCV: u16 = 243;
@@ -14,7 +14,9 @@ use riscv::register::sstatus;
 // allow S-mode writes to user pages while we populate the stack
 #[inline(always)]
 unsafe fn with_sum<F, R>(f: F) -> R
-where F: FnOnce() -> R {
+where
+    F: FnOnce() -> R,
+{
     sstatus::set_sum();
     let r = f();
     sstatus::clear_sum();
@@ -28,7 +30,10 @@ unsafe fn write_user_bytes(va: usize, bytes: &[u8]) {
 }
 
 unsafe fn write_user_usize(va: usize, val: usize) {
-    let bytes = core::slice::from_raw_parts((&val as *const usize) as *const u8, core::mem::size_of::<usize>());
+    let bytes = core::slice::from_raw_parts(
+        (&val as *const usize) as *const u8,
+        core::mem::size_of::<usize>(),
+    );
     write_user_bytes(va, bytes);
 }
 
@@ -37,32 +42,32 @@ unsafe fn write_user_usize(va: usize, val: usize) {
 #[derive(Copy, Clone)]
 struct Elf64Ehdr {
     e_ident: [u8; 16],
-    e_type:  u16,
+    e_type: u16,
     e_machine: u16,
     e_version: u32,
-    e_entry:  u64,
-    e_phoff:  u64,
-    e_shoff:  u64,
-    e_flags:  u32,
+    e_entry: u64,
+    e_phoff: u64,
+    e_shoff: u64,
+    e_flags: u32,
     e_ehsize: u16,
     e_phentsize: u16,
-    e_phnum:  u16,
+    e_phnum: u16,
     e_shentsize: u16,
-    e_shnum:  u16,
+    e_shnum: u16,
     e_shstrndx: u16,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone)]
 struct Elf64Phdr {
-    p_type:   u32,
-    p_flags:  u32, // PF_X=1, PF_W=2, PF_R=4
+    p_type: u32,
+    p_flags: u32, // PF_X=1, PF_W=2, PF_R=4
     p_offset: u64,
-    p_vaddr:  u64,
-    p_paddr:  u64,
+    p_vaddr: u64,
+    p_paddr: u64,
     p_filesz: u64,
-    p_memsz:  u64,
-    p_align:  u64,
+    p_memsz: u64,
+    p_align: u64,
 }
 
 // Unaligned reads (ELF is little-endian; we are little-endian too on rv64)
@@ -88,9 +93,15 @@ unsafe fn read_phdr(buf: &[u8], off: usize) -> Elf64Phdr {
 // Map PF flags to PTE flags (always U=1, V=1, set A/D for W)
 fn pte_flags_from_pf(pf: u32) -> u64 {
     let mut f = PTE_V | PTE_U | PTE_A;
-    if (pf & 0x4) != 0 { f |= PTE_R; }
-    if (pf & 0x2) != 0 { f |= PTE_W | PTE_D; }
-    if (pf & 0x1) != 0 { f |= PTE_X; }
+    if (pf & 0x4) != 0 {
+        f |= PTE_R;
+    }
+    if (pf & 0x2) != 0 {
+        f |= PTE_W | PTE_D;
+    }
+    if (pf & 0x1) != 0 {
+        f |= PTE_X;
+    }
     f
 }
 
@@ -119,40 +130,58 @@ unsafe fn memzero_pa(dst_pa: usize, len: usize) {
     core::ptr::write_bytes(dst_pa as *mut u8, 0, len);
 }
 
-pub fn load_user_elf(    image: &[u8],
+pub fn load_user_elf(
+    image: &[u8],
     user_stack_top_va: usize,
     user_stack_bytes: usize,
     argv: &[&str],
-    envp: &[&str],) -> Result<Loaded, &'static str> {
+    envp: &[&str],
+) -> Result<Loaded, &'static str> {
     unsafe {
-        if image.len() < size_of::<Elf64Ehdr>() { return Err("short ELF"); }
+        if image.len() < size_of::<Elf64Ehdr>() {
+            return Err("short ELF");
+        }
         let eh = read_ehdr(image);
-        if &eh.e_ident[0..4] != b"\x7FELF" { return Err("bad magic"); }
-        if eh.e_ident[4] != 2 { return Err("not ELF64"); }
-        if eh.e_machine != EM_RISCV { return Err("not RISCV"); }
-        if eh.e_phentsize as usize != size_of::<Elf64Phdr>() { return Err("phentsize"); }
+        if &eh.e_ident[0..4] != b"\x7FELF" {
+            return Err("bad magic");
+        }
+        if eh.e_ident[4] != 2 {
+            return Err("not ELF64");
+        }
+        if eh.e_machine != EM_RISCV {
+            return Err("not RISCV");
+        }
+        if eh.e_phentsize as usize != size_of::<Elf64Phdr>() {
+            return Err("phentsize");
+        }
 
         let root = sv39::root_pt();
-        if root.is_null() { return Err("satp not set"); }
+        if root.is_null() {
+            return Err("satp not set");
+        }
 
         // Map each PT_LOAD
         for i in 0..eh.e_phnum {
             let off = eh.e_phoff as usize + (i as usize) * size_of::<Elf64Phdr>();
-            if off + size_of::<Elf64Phdr>() > image.len() { return Err("phdr oob"); }
+            if off + size_of::<Elf64Phdr>() > image.len() {
+                return Err("phdr oob");
+            }
             let ph = read_phdr(image, off);
-            if ph.p_type != PT_LOAD { continue; }
+            if ph.p_type != PT_LOAD {
+                continue;
+            }
 
             let va_start = ph.p_vaddr as usize;
-            let filesz   = ph.p_filesz as usize;
-            let memsz    = ph.p_memsz as usize;
-            let fileoff  = ph.p_offset as usize;
-            let flags    = pte_flags_from_pf(ph.p_flags);
+            let filesz = ph.p_filesz as usize;
+            let memsz = ph.p_memsz as usize;
+            let fileoff = ph.p_offset as usize;
+            let flags = pte_flags_from_pf(ph.p_flags);
 
             // Page-align
             let page = 4096usize;
-            let va0  = va_start & !(page-1);
+            let va0 = va_start & !(page - 1);
             let head = va_start - va0;
-            let va_end = (va_start + memsz + page-1) & !(page-1);
+            let va_end = (va_start + memsz + page - 1) & !(page - 1);
 
             // For each page in the segment:
             let mut cur_va = va0;
@@ -171,7 +200,9 @@ pub fn load_user_elf(    image: &[u8],
 
                 // Copy file bytes (if any)
                 if file_chunk > 0 {
-                    if fileoff + copied + file_chunk > image.len() { return Err("file oob"); }
+                    if fileoff + copied + file_chunk > image.len() {
+                        return Err("file oob");
+                    }
                     let src = image.as_ptr().add(fileoff + copied);
                     memcpy_pa(pa + page_off, src, file_chunk);
                     copied += file_chunk;
@@ -180,7 +211,9 @@ pub fn load_user_elf(    image: &[u8],
                 // Zero the rest of the page that belongs to memsz
                 let mem_covered = if cur_va + page > (va_start + memsz) {
                     (va_start + memsz).saturating_sub(cur_va)
-                } else { page };
+                } else {
+                    page
+                };
                 if mem_covered > page_off + file_chunk {
                     let zero_len = mem_covered - (page_off + file_chunk);
                     memzero_pa(pa + page_off + file_chunk, zero_len);
@@ -190,7 +223,8 @@ pub fn load_user_elf(    image: &[u8],
             }
         }
 
-        let (sp, envp_va, argv_va, argc) = setup_user_stack(user_stack_top_va, user_stack_bytes, argv, envp, root)?;        
+        let (sp, envp_va, argv_va, argc) =
+            setup_user_stack(user_stack_top_va, user_stack_bytes, argv, envp, root)?;
 
         Ok(Loaded {
             entry_va: eh.e_entry as usize,
@@ -202,9 +236,15 @@ pub fn load_user_elf(    image: &[u8],
     }
 }
 
-unsafe fn setup_user_stack(user_stack_top_va: usize, user_stack_bytes: usize, argv: &[&str], envp: &[&str], root: *mut u64) -> Result<(usize, usize, usize, usize), &'static str> {
+unsafe fn setup_user_stack(
+    user_stack_top_va: usize,
+    user_stack_bytes: usize,
+    argv: &[&str],
+    envp: &[&str],
+    root: *mut u64,
+) -> Result<(usize, usize, usize, usize), &'static str> {
     let stack_pages = (user_stack_bytes + 4095) / 4096;
-    let mut va = (user_stack_top_va - stack_pages*4096) & !(4095);
+    let mut va = (user_stack_top_va - stack_pages * 4096) & !(4095);
     for _ in 0..stack_pages {
         map_user_page(root, va, PTE_V | PTE_U | PTE_R | PTE_W | PTE_A | PTE_D);
         va += 4096;
@@ -213,7 +253,7 @@ unsafe fn setup_user_stack(user_stack_top_va: usize, user_stack_bytes: usize, ar
     // --- Lay out strings at the top, then pointer vectors, then argc ---
     let mut sp = user_stack_top_va;
     // keep a tiny guard so debug reads can include the trailing NUL
-    sp -= 16; 
+    sp -= 16;
 
     // 1) Copy env strings
     let mut env_ptrs: heapless::Vec<usize, 32> = heapless::Vec::new();
@@ -234,7 +274,7 @@ unsafe fn setup_user_stack(user_stack_top_va: usize, user_stack_bytes: usize, ar
         write_user_bytes(sp + bytes.len(), &[0]);
         arg_ptrs.push(sp).map_err(|_| "too many args")?;
     }
-    
+
     // 3) Align sp to 16
     sp &= !15;
 

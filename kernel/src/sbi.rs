@@ -18,7 +18,6 @@ fn sbi_call(ext: usize, fid: usize, a0: usize, a1: usize, a2: usize) -> isize {
     error
 }
 
-
 /* SBI v0.2 TIME extension: EID = 0x54494D45 ('TIME') fid=0 -> set_timer */
 const SBI_EID_TIME: usize = 0x54494D45;
 pub fn set_timer(stime_value: u64) {

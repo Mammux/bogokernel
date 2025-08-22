@@ -1,7 +1,7 @@
 const KTRAP_STACK_SIZE: usize = 4096;
 
 #[repr(align(16))]
-struct Trapstack ([u8; KTRAP_STACK_SIZE]);
+struct Trapstack([u8; KTRAP_STACK_SIZE]);
 static mut KTRAP_STACK: Trapstack = Trapstack([0; KTRAP_STACK_SIZE]);
 
 pub fn init_trap_stack() {

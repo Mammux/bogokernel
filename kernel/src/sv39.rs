@@ -24,8 +24,8 @@ static mut PT_ROOT: *mut u64 = core::ptr::null_mut();
 // Convenience sets
 const RWX: u64 = PTE_R | PTE_W | PTE_X | PTE_V | PTE_A | PTE_D;
 const RWX_U: u64 = PTE_R | PTE_W | PTE_X | PTE_V | PTE_A | PTE_D | PTE_U;
-const RW:  u64 = PTE_R | PTE_W | PTE_V | PTE_A | PTE_D;
-const RX:  u64 = PTE_R | PTE_X | PTE_V | PTE_A; // no D (won’t be written)
+const RW: u64 = PTE_R | PTE_W | PTE_V | PTE_A | PTE_D;
+const RX: u64 = PTE_R | PTE_X | PTE_V | PTE_A; // no D (won’t be written)
 const URX: u64 = PTE_R | PTE_X | PTE_V | PTE_A | PTE_U; // no D (won’t be written)
 const URW: u64 = PTE_R | PTE_W | PTE_V | PTE_A | PTE_U | PTE_D;
 
@@ -44,7 +44,7 @@ const UART0: usize = 0x1000_0000;
 // User space
 pub const USER_CODE_PA: usize = DRAM_BASE + 0x0040_0000;
 pub const USER_STACK_PA: usize = DRAM_BASE + 0x0040_1000;
-pub const USER_CODE_VA: usize =  USER_VA_BASE + 0x0000_0000;
+pub const USER_CODE_VA: usize = USER_VA_BASE + 0x0000_0000;
 pub const USER_STACK_VA: usize = USER_VA_BASE + 0x0000_1000;
 
 // ----- Simple PT “allocator”: a tiny pool of zeroed page-table pages -----
@@ -68,14 +68,18 @@ unsafe fn alloc_pt_page() -> *mut u64 {
 }
 
 #[inline]
-pub fn ppn(pa: usize) -> u64 { (pa as u64) >> 12 }
+pub fn ppn(pa: usize) -> u64 {
+    (pa as u64) >> 12
+}
 
-pub unsafe fn root_pt() -> *mut u64 { PT_ROOT }
+pub unsafe fn root_pt() -> *mut u64 {
+    PT_ROOT
+}
 
 #[inline]
 fn vpn_indices(va: usize) -> [usize; 3] {
     // Sv39: VPN[2]=bits 38..30, VPN[1]=29..21, VPN[0]=20..12
-    [ (va >> 12) & 0x1ff, (va >> 21) & 0x1ff, (va >> 30) & 0x1ff ]
+    [(va >> 12) & 0x1ff, (va >> 21) & 0x1ff, (va >> 30) & 0x1ff]
 }
 
 // ---- very simple user-phys page bump allocator ----
@@ -178,7 +182,7 @@ pub unsafe fn enable_sv39() {
     map_4k(root, USER_STACK_VA, USER_STACK_PA, URW);
 
     // Flip SATP: MODE=Sv39 (8), ASID=0, PPN = root >> 12
-    use riscv::register::satp::{self, Satp, Mode};
+    use riscv::register::satp::{self, Mode, Satp};
     let root_ppn = (root as usize) >> 12;
 
     // satp layout on RV64 (Sv39):
@@ -187,9 +191,7 @@ pub unsafe fn enable_sv39() {
     // [43:0]  PPN  (44 bits)
     let asid: usize = 0;
     let bits: usize =
-        ((Mode::Sv39 as usize) << 60) |
-        ((asid & 0xffff) << 44) |
-        (root_ppn & ((1usize << 44) - 1));
+        ((Mode::Sv39 as usize) << 60) | ((asid & 0xffff) << 44) | (root_ppn & ((1usize << 44) - 1));
 
     let new = Satp::from_bits(bits);
     unsafe { satp::write(new) };

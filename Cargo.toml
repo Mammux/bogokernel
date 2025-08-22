@@ -1,5 +1,5 @@
 [workspace]
-members = ["kernel", "userapp", "cat"]
+members = ["kernel", "userapp", "cat", "uapi", "usys"]
 resolver = "2"
 
 [profile.dev]
