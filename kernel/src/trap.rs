@@ -1,5 +1,5 @@
 use core::fmt::Write;
-
+use uapi::nr;
 use spin::Mutex;
 
 // kernel/src/trap.rs
@@ -68,12 +68,12 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
 
             // Syscall ABI: a7 = nr, a0.. = args; ecall is 4-byte insn
             match tf.a7 {
-                1 => sys_write_ptrlen(tf),   // write(ptr, len)
-                2 => sys_exit_to_kernel(tf), // exit()
-                3 => sys_write_cstr(tf),     // write_cstr(ptr)
-                4 => sys_open(tf),           // open_cstr(path)
-                5 => sys_read(tf),           // read(fd, buf, len)
-                7 => sys_close(tf),          // close(fd)
+                nr::WRITE => sys_write_ptrlen(tf),   // write(ptr, len)
+                nr::EXIT => sys_exit_to_kernel(tf), // exit()
+                nr::WRITE_CSTR => sys_write_cstr(tf),     // write_cstr(ptr)
+                nr::OPEN => sys_open(tf),           // open_cstr(path)
+                nr::READ => sys_read(tf),           // read(fd, buf, len)
+                nr::CLOSE => sys_close(tf),          // close(fd)
                 nr => {
                     let mut uart = crate::uart::Uart::new();
                     use core::fmt::Write;
