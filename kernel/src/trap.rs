@@ -61,10 +61,12 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
         }
         Trap::Exception(Exception::UserEnvCall) => {
             // DEBUG: see what user passed
-            /* {
+            /*
+            {
                 let mut uart = crate::uart::Uart::new();
                 let _ = writeln!(uart, "[syscall a7={} a0=0x{:x} a1=0x{:x}]", tf.a7, tf.a0, tf.a1);
-            } */
+            }
+            */
 
             // Syscall ABI: a7 = nr, a0.. = args; ecall is 4-byte insn
             match tf.a7 {
@@ -73,6 +75,7 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
                 nr::WRITE_CSTR => sys_write_cstr(tf),     // write_cstr(ptr)
                 nr::OPEN => sys_open(tf),           // open_cstr(path)
                 nr::READ => sys_read(tf),           // read(fd, buf, len)
+                nr::WRITE_FD => sys_write_fd(tf),   // write(fd, buf, len)
                 nr::CLOSE => sys_close(tf),          // close(fd)
                 nr => {
                     let mut uart = crate::uart::Uart::new();
@@ -328,37 +331,70 @@ fn sys_open(tf: &mut TrapFrame) {
 }
 
 fn sys_read(tf: &mut TrapFrame) {
-    // a0 = fd, a1 = buf, a2 = len
-    let fd = tf.a0;
+    // a0 = fd, a1 = buf (user VA), a2 = len
+    let fd  = tf.a0 as isize;
     let buf = tf.a1;
     let mut len = tf.a2;
 
     if buf == 0 || len == 0 {
-        tf.a0 = 0;
-        tf.sepc = tf.sepc.wrapping_add(4);
-        return;
+        tf.a0 = 0; tf.sepc = tf.sepc.wrapping_add(4); return;
     }
     len = cap_to_page(buf, len);
 
-    let entry = match fd_get(fd) {
-        Some(e) => e,
-        None => {
-            tf.a0 = usize::MAX;
-            tf.sepc = tf.sepc.wrapping_add(4);
-            return;
+    // --- STDIN (UART RX) ---
+    if fd == 0 {
+        let mut uart = crate::uart::Uart::new();
+        let mut n = 0usize;
+
+        // Block for the first byte so read() is not spurious
+        let first = uart.read_byte();
+        unsafe {
+            with_sum_no_timer(|| {
+                core::ptr::write((buf as *mut u8).add(n), first);
+            });
         }
+        n += 1;
+
+        // Drain any immediately available bytes without blocking further
+        while n < len {
+            if let Some(b) = uart.try_read_byte() {
+                unsafe {
+                    with_sum_no_timer(|| {
+                        core::ptr::write((buf as *mut u8).add(n), b);
+                    });
+                }
+                n += 1;
+            } else {
+                break;
+            }
+        }
+
+        tf.a0 = n;
+        tf.sepc = tf.sepc.wrapping_add(4);
+        return;
+    }
+
+    // --- Not readable: stdout/stderr ---
+    if fd == 1 || fd == 2 {
+        tf.a0 = usize::MAX; // error
+        tf.sepc = tf.sepc.wrapping_add(4);
+        return;
+    }
+
+    // --- Regular files via RAMFS (existing code path) ---
+    let entry = match fd_get(fd as usize) {
+        Some(e) => e,
+        None => { tf.a0 = usize::MAX; tf.sepc = tf.sepc.wrapping_add(4); return; }
     };
     let file = &crate::fs::FILES[entry.file_idx];
     if entry.offset >= file.data.len() {
-        tf.a0 = 0;
-        tf.sepc = tf.sepc.wrapping_add(4);
-        return;
+        tf.a0 = 0; tf.sepc = tf.sepc.wrapping_add(4); return;
     }
     let remain = &file.data[entry.offset..];
     let chunk = &remain[..core::cmp::min(len, remain.len())];
 
     let n = copy_to_user(buf, chunk);
-    fd_advance(fd, n);
+    fd_advance(fd as usize, n);
     tf.a0 = n;
     tf.sepc = tf.sepc.wrapping_add(4);
 }
@@ -366,5 +402,30 @@ fn sys_read(tf: &mut TrapFrame) {
 fn sys_close(tf: &mut TrapFrame) {
     let fd = tf.a0;
     tf.a0 = if fd_close(fd) { 0 } else { usize::MAX };
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_write_fd(tf: &mut TrapFrame) {
+    // a0 = fd, a1 = buf, a2 = len
+    let _fd = tf.a0 as isize; // currently we only have UART; treat 1/2 the same
+    let buf = tf.a1;
+    let mut len = tf.a2;
+
+    if buf == 0 || len == 0 {
+        tf.a0 = 0; tf.sepc = tf.sepc.wrapping_add(4); return;
+    }
+    len = cap_to_page(buf, len);
+
+    let mut uart = crate::uart::Uart::new();
+    unsafe {
+        with_sum_no_timer(|| {
+            for i in 0..len {
+                let b = core::ptr::read((buf + i) as *const u8);
+                if b == b'\n' { uart.write_byte(b'\r'); }
+                uart.write_byte(b);
+            }
+        });
+    }
+    tf.a0 = len;
     tf.sepc = tf.sepc.wrapping_add(4);
 }

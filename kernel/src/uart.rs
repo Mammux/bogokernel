@@ -32,6 +32,29 @@ impl Uart {
         while (self.lsr() & LSR_TX_IDLE) == 0 {}
         unsafe { core::ptr::write_volatile(mmio8(UART0_BASE + RBR_THR_DLL), byte) }
     }
+
+        /// Is there a byte waiting in the RX FIFO? (LSR bit 0 = DR)
+    pub fn can_read(&self) -> bool {
+        self.lsr() & 0x01 != 0
+    }
+
+    /// Non-blocking read: returns Some(byte) if available.
+    pub fn try_read_byte(&mut self) -> Option<u8> {
+        if self.can_read() {
+            // RBR at offset 0
+            let b = unsafe { core::ptr::read_volatile(UART0_BASE as *const u8) };
+            Some(b)
+        } else {
+            None
+        }
+    }
+
+    /// Blocking read: waits until a byte arrives.
+    pub fn read_byte(&mut self) -> u8 {
+        loop {
+            if let Some(b) = self.try_read_byte() { return b; }
+        }
+    }
 }
 
 impl fmt::Write for Uart {
@@ -48,3 +71,4 @@ impl fmt::Write for Uart {
         Ok(())
     }
 }
+
