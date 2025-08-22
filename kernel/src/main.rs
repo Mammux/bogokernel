@@ -11,25 +11,34 @@ mod uart;
 mod user;
 mod sv39;
 mod kalloc;
+mod user_blob;
+mod stack;
 
 use core::fmt::Write;
 use uart::Uart;
 use alloc::vec::Vec;
 use alloc::boxed::Box;
 
+use crate::{stack::init_trap_stack, sv39::{USER_CODE_PA, USER_CODE_VA, USER_STACK_VA}};
 
-#[allow(dead_code)]
+// User mode stuff
+
 #[repr(align(16))]
 struct Stack([u8; 4096]);
 #[no_mangle]
 static mut USER_STACK: Stack = Stack([0; 4096]);
 
 #[inline(always)]
-fn _user_stack_top() -> usize {
+fn user_stack_top() -> usize {
     unsafe { (&raw const USER_STACK.0 as *const u8 as usize) + core::mem::size_of::<Stack>() }
 }
 
+extern "C" {
+    static __user_blob_start: u8;
+    static __user_blob_end:   u8;
+}
 
+// Main entry point for the rust code
 
 #[no_mangle]
 extern "C" fn rust_start() -> ! {
@@ -38,8 +47,14 @@ extern "C" fn rust_start() -> ! {
     // Hello banner
     let _ = writeln!(uart, "\r\nriscv-os: hello from S-mode at 0x8020_0000!");
 
+    init_trap_stack(); // init trap stack
+    let _ = writeln!(uart, "trap stack initialized");
+
     trap::init(); // set stvec + enable SIE/STIE
+    let _ = writeln!(uart, "traps enabled");
+
     timer::init(); // arm first tick
+    let _ = writeln!(uart, "timers initialized");
 
     unsafe { sv39::enable_sv39(); }
     let _ = writeln!(uart, "SV39 paging enabled (identity map + UART)");
@@ -58,7 +73,19 @@ extern "C" fn rust_start() -> ! {
     for i in 0..8 { v.push(i*i); }
     let _ = writeln!(uart, "Vec sum = {}", v.iter().sum::<u32>());    
 
-    // enter_user(); // switch to user mode and run user_main
+    // 3) User code
+    unsafe {
+        let src = &__user_blob_start as *const u8 as usize;
+        let end = &__user_blob_end   as *const u8 as usize;
+        let len = end - src;
+        core::ptr::copy_nonoverlapping(src as *const u8,
+                                    USER_CODE_PA as *mut u8,
+                                    len);
+    }
+
+    let _ = writeln!(uart, "User blob copied");
+
+    enter_user(); // switch to user mode and run user_main
 
     loop { riscv::asm::wfi(); }
 }
@@ -78,19 +105,15 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     }
 }
 
-fn _enter_user() -> ! {
+fn enter_user() -> ! {
     use riscv::register::{sepc, sstatus};
-
-    extern "C" {
-        fn _user_main() -> !;
-    }
 
     unsafe {
         // Set the user entry point
-        sepc::write(_user_main as usize);
+        sepc::write(USER_CODE_VA);
 
         // Give user a stack (we’re switching the current sp right before sret)
-        let usp = _user_stack_top();
+        let usp = USER_STACK_VA + 4096;
         core::arch::asm!("mv sp, {}", in(reg) usp, options(nostack, preserves_flags));
 
         // Configure sstatus so sret drops to U
@@ -107,7 +130,7 @@ fn _enter_user() -> ! {
 extern "C" fn after_user() -> ! {
     use core::fmt::Write;
     let mut uart = uart::Uart::new();
-    let _ = writeln!(uart, "user program exited; back in S-mode.");
+    let _ = writeln!(uart, "\r\nuser program exited; back in S-mode.");
     loop {
         riscv::asm::wfi();
     }

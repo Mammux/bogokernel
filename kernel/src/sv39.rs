@@ -21,8 +21,11 @@ const PTE_D: u64 = 1 << 7;
 
 // Convenience sets
 const RWX: u64 = PTE_R | PTE_W | PTE_X | PTE_V | PTE_A | PTE_D;
+const RWX_U: u64 = PTE_R | PTE_W | PTE_X | PTE_V | PTE_A | PTE_D | PTE_U;
 const RW:  u64 = PTE_R | PTE_W | PTE_V | PTE_A | PTE_D;
 const RX:  u64 = PTE_R | PTE_X | PTE_V | PTE_A; // no D (won’t be written)
+const URX: u64 = PTE_R | PTE_X | PTE_V | PTE_A | PTE_U; // no D (won’t be written)
+const URW: u64 = PTE_R | PTE_W | PTE_V | PTE_A | PTE_U | PTE_D;
 
 // Page sizes (Sv39 levels): L0=4K, L1=2M, L2=1G
 const SIZE_4K: usize = 1 << 12;
@@ -32,8 +35,15 @@ const SIZE_1G: usize = 1 << 30;
 // QEMU virt memory we’ll map
 const DRAM_BASE: usize = 0x8000_0000;
 const DRAM_SIZE: usize = 128 * 1024 * 1024; // 128 MiB
+const USER_VA_BASE: usize = 0x4000_0000;
 
 const UART0: usize = 0x1000_0000;
+
+// User space
+pub const USER_CODE_PA: usize = DRAM_BASE + 0x0040_0000;
+pub const USER_STACK_PA: usize = DRAM_BASE + 0x0040_1000;
+pub const USER_CODE_VA: usize =  USER_VA_BASE + 0x0000_0000;
+pub const USER_STACK_VA: usize = USER_VA_BASE + 0x0000_1000;
 
 // ----- Simple PT “allocator”: a tiny pool of zeroed page-table pages -----
 
@@ -147,6 +157,9 @@ pub unsafe fn enable_sv39() {
 
     // Map UART MMIO as RW (no exec). One 4K page is enough.
     map_4k(root, UART0, UART0, RW);
+
+    map_4k(root, USER_CODE_VA, USER_CODE_PA, URX);
+    map_4k(root, USER_STACK_VA, USER_STACK_PA, URW);
 
     // Flip SATP: MODE=Sv39 (8), ASID=0, PPN = root >> 12
     use riscv::register::satp::{self, Satp, Mode};
