@@ -10,14 +10,16 @@ const PAGE_SIZE: usize = 4096;
 const ENTRIES: usize = 512;
 
 // PTE flag bits
-const PTE_V: u64 = 1 << 0;
-const PTE_R: u64 = 1 << 1;
-const PTE_W: u64 = 1 << 2;
-const PTE_X: u64 = 1 << 3;
-const PTE_U: u64 = 1 << 4;
-const PTE_G: u64 = 1 << 5;
-const PTE_A: u64 = 1 << 6;
-const PTE_D: u64 = 1 << 7;
+pub const PTE_V: u64 = 1 << 0;
+pub const PTE_R: u64 = 1 << 1;
+pub const PTE_W: u64 = 1 << 2;
+pub const PTE_X: u64 = 1 << 3;
+pub const PTE_U: u64 = 1 << 4;
+pub const PTE_G: u64 = 1 << 5;
+pub const PTE_A: u64 = 1 << 6;
+pub const PTE_D: u64 = 1 << 7;
+
+static mut PT_ROOT: *mut u64 = core::ptr::null_mut();
 
 // Convenience sets
 const RWX: u64 = PTE_R | PTE_W | PTE_X | PTE_V | PTE_A | PTE_D;
@@ -66,7 +68,9 @@ unsafe fn alloc_pt_page() -> *mut u64 {
 }
 
 #[inline]
-fn ppn(pa: usize) -> u64 { (pa as u64) >> 12 }
+pub fn ppn(pa: usize) -> u64 { (pa as u64) >> 12 }
+
+pub unsafe fn root_pt() -> *mut u64 { PT_ROOT }
 
 #[inline]
 fn vpn_indices(va: usize) -> [usize; 3] {
@@ -74,9 +78,20 @@ fn vpn_indices(va: usize) -> [usize; 3] {
     [ (va >> 12) & 0x1ff, (va >> 21) & 0x1ff, (va >> 30) & 0x1ff ]
 }
 
+// ---- very simple user-phys page bump allocator ----
+// Reserve a small chunk near the *top* of DRAM for user pages so we don't race the kernel heap.
+// Top of DRAM is 0x8000_0000 + 128 MiB = 0x8800_0000. Keep 64 KiB for the kernel stack headroom.
+static mut USER_NEXT_PA: usize = 0x8800_0000 - 0x0100_000 - 0x10000; // start 1 MiB below top - 64 KiB
+
+pub unsafe fn alloc_user_page() -> usize {
+    let pa = USER_NEXT_PA;
+    USER_NEXT_PA += 4096;
+    pa
+}
+
 // ----- Mapping helpers -----
 
-unsafe fn map_4k(root: *mut u64, va: usize, pa: usize, flags: u64) {
+pub(crate) unsafe fn map_4k(root: *mut u64, va: usize, pa: usize, flags: u64) {
     let [i0, i1, i2] = vpn_indices(va);
     // Walk/create L2 -> L1
     let l2 = root;
@@ -151,6 +166,7 @@ unsafe fn id_map_region(root: *mut u64, base: usize, len: usize, flags_2m: u64, 
 pub unsafe fn enable_sv39() {
     // Root PT page
     let root = alloc_pt_page();
+    PT_ROOT = root;
 
     // Identity-map 128 MiB DRAM (RWX for now to keep life simple)
     id_map_region(root, DRAM_BASE, DRAM_SIZE, RWX, RWX);

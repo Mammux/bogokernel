@@ -11,26 +11,29 @@ mod uart;
 mod user;
 mod sv39;
 mod kalloc;
-mod user_blob;
+// mod user_blob;
 mod stack;
+mod elf;
 
 use core::fmt::Write;
 use uart::Uart;
 use alloc::vec::Vec;
 use alloc::boxed::Box;
 
-use crate::{stack::init_trap_stack, sv39::{USER_CODE_PA, USER_CODE_VA, USER_STACK_VA}};
+use crate::{stack::init_trap_stack};
 
 // User mode stuff
+static USER_ELF: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/userapp.elf"));
 
-#[repr(align(16))]
-struct Stack([u8; 4096]);
-#[no_mangle]
-static mut USER_STACK: Stack = Stack([0; 4096]);
-
-#[inline(always)]
-fn user_stack_top() -> usize {
-    unsafe { (&raw const USER_STACK.0 as *const u8 as usize) + core::mem::size_of::<Stack>() }
+fn enter_user_with(entry: usize, user_sp_top: usize) -> ! {
+    use riscv::register::{sepc, sstatus};
+    unsafe {
+        sepc::write(entry);
+        core::arch::asm!("mv sp, {}", in(reg) user_sp_top, options(nostack));
+        sstatus::set_spie();
+        sstatus::set_spp(sstatus::SPP::User);
+        core::arch::asm!("sret", options(noreturn));
+    }
 }
 
 extern "C" {
@@ -74,6 +77,7 @@ extern "C" fn rust_start() -> ! {
     let _ = writeln!(uart, "Vec sum = {}", v.iter().sum::<u32>());    
 
     // 3) User code
+    /*
     unsafe {
         let src = &__user_blob_start as *const u8 as usize;
         let end = &__user_blob_end   as *const u8 as usize;
@@ -88,6 +92,22 @@ extern "C" fn rust_start() -> ! {
     enter_user(); // switch to user mode and run user_main
 
     loop { riscv::asm::wfi(); }
+    */
+
+        // --- Load the user ELF ---
+    let user_stack_top_va: usize = 0x4000_8000;  // choose a low VA for user stack top
+    let user_stack_bytes: usize  = 16 * 1024;    // 16 KiB
+
+    match elf::load_user_elf(USER_ELF, user_stack_top_va, user_stack_bytes) {
+        Ok(img) => {
+            let _ = writeln!(uart, "Loaded user ELF: entry=0x{:x}, usp=0x{:x}", img.entry_va, img.user_stack_top_va);
+            enter_user_with(img.entry_va, img.user_stack_top_va);
+        }
+        Err(e) => {
+            let _ = writeln!(uart, "*** ELF load error: {}", e);
+            loop { riscv::asm::wfi() }
+        }
+    }
 }
 
 #[panic_handler]
@@ -102,27 +122,6 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
 
     loop {
         riscv::asm::wfi();
-    }
-}
-
-fn enter_user() -> ! {
-    use riscv::register::{sepc, sstatus};
-
-    unsafe {
-        // Set the user entry point
-        sepc::write(USER_CODE_VA);
-
-        // Give user a stack (we’re switching the current sp right before sret)
-        let usp = USER_STACK_VA + 4096;
-        core::arch::asm!("mv sp, {}", in(reg) usp, options(nostack, preserves_flags));
-
-        // Configure sstatus so sret drops to U
-        // SPP = 0 (User), SPIE = 1 (enable interrupts in user after sret)
-        sstatus::set_spie();
-        sstatus::set_spp(sstatus::SPP::User);
-
-        // Return to user_main at sepc with user privileges
-        core::arch::asm!("sret", options(noreturn));
     }
 }
 
