@@ -518,3 +518,130 @@ int flash(void) {
     /* Visual bell - just beep for now */
     return beep();
 }
+
+/* Box and border drawing functions */
+int wborder(WINDOW *win, chtype ls, chtype rs, chtype ts, chtype bs,
+            chtype tl, chtype tr, chtype bl, chtype br) {
+    if (!win) {
+        return -1;
+    }
+    
+    int y, x;
+    int maxy = win->_maxy;
+    int maxx = win->_maxx;
+    
+    /* Draw corners */
+    if (tl) mvwaddch(win, 0, 0, tl);
+    if (tr) mvwaddch(win, 0, maxx - 1, tr);
+    if (bl) mvwaddch(win, maxy - 1, 0, bl);
+    if (br) mvwaddch(win, maxy - 1, maxx - 1, br);
+    
+    /* Draw top and bottom borders */
+    if (ts) {
+        for (x = 1; x < maxx - 1; x++) {
+            mvwaddch(win, 0, x, ts);
+        }
+    }
+    if (bs) {
+        for (x = 1; x < maxx - 1; x++) {
+            mvwaddch(win, maxy - 1, x, bs);
+        }
+    }
+    
+    /* Draw left and right borders */
+    if (ls) {
+        for (y = 1; y < maxy - 1; y++) {
+            mvwaddch(win, y, 0, ls);
+        }
+    }
+    if (rs) {
+        for (y = 1; y < maxy - 1; y++) {
+            mvwaddch(win, y, maxx - 1, rs);
+        }
+    }
+    
+    return 0;
+}
+
+int border(chtype ls, chtype rs, chtype ts, chtype bs,
+           chtype tl, chtype tr, chtype bl, chtype br) {
+    return wborder(stdscr, ls, rs, ts, bs, tl, tr, bl, br);
+}
+
+int box(WINDOW *win, chtype verch, chtype horch) {
+    if (!verch) verch = ACS_VLINE;
+    if (!horch) horch = ACS_HLINE;
+    return wborder(win, verch, verch, horch, horch,
+                   ACS_ULCORNER, ACS_URCORNER,
+                   ACS_LLCORNER, ACS_LRCORNER);
+}
+
+int whline(WINDOW *win, chtype ch, int n) {
+    if (!win || n < 0) {
+        return -1;
+    }
+    
+    if (!ch) ch = ACS_HLINE;
+    
+    int x = win->_curx;
+    int y = win->_cury;
+    
+    for (int i = 0; i < n && x + i < win->_maxx; i++) {
+        mvwaddch(win, y, x + i, ch);
+    }
+    
+    return 0;
+}
+
+int hline(chtype ch, int n) {
+    return whline(stdscr, ch, n);
+}
+
+int wvline(WINDOW *win, chtype ch, int n) {
+    if (!win || n < 0) {
+        return -1;
+    }
+    
+    if (!ch) ch = ACS_VLINE;
+    
+    int x = win->_curx;
+    int y = win->_cury;
+    
+    for (int i = 0; i < n && y + i < win->_maxy; i++) {
+        mvwaddch(win, y + i, x, ch);
+    }
+    
+    return 0;
+}
+
+int vline(chtype ch, int n) {
+    return wvline(stdscr, ch, n);
+}
+
+int mvhline(int y, int x, chtype ch, int n) {
+    if (move(y, x) == -1) {
+        return -1;
+    }
+    return hline(ch, n);
+}
+
+int mvvline(int y, int x, chtype ch, int n) {
+    if (move(y, x) == -1) {
+        return -1;
+    }
+    return vline(ch, n);
+}
+
+int mvwhline(WINDOW *win, int y, int x, chtype ch, int n) {
+    if (wmove(win, y, x) == -1) {
+        return -1;
+    }
+    return whline(win, ch, n);
+}
+
+int mvwvline(WINDOW *win, int y, int x, chtype ch, int n) {
+    if (wmove(win, y, x) == -1) {
+        return -1;
+    }
+    return wvline(win, ch, n);
+}

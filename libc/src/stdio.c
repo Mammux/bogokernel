@@ -3,6 +3,10 @@
 #include <unistd.h>
 #include <string.h>
 
+/* Fake FILE for stdout */
+static FILE _stdout = { .fd = STDOUT_FILENO };
+FILE *stdout = &_stdout;
+
 int putchar(int c) {
     char ch = (char)c;
     write(STDOUT_FILENO, &ch, 1);
@@ -130,9 +134,93 @@ int sprintf(char *str, const char *format, ...) {
 }
 
 int snprintf(char *str, size_t size, const char *format, ...) {
-    /* TODO: Implement snprintf */
-    (void)str;
-    (void)size;
-    (void)format;
+    va_list args;
+    va_start(args, format);
+    int ret = vsnprintf(str, size, format, args);
+    va_end(args);
+    return ret;
+}
+
+int vsnprintf(char *str, size_t size, const char *format, va_list args) {
+    if (!str || size == 0) return 0;
+    
+    int count = 0;
+    char buf[32];
+    size_t remaining = size - 1;  /* Leave room for null terminator */
+    
+    while (*format && count < (int)remaining) {
+        if (*format == '%') {
+            format++;
+            switch (*format) {
+                case 'd':
+                case 'i': {
+                    int val = va_arg(args, int);
+                    int len = num_to_str(val, buf, 10, 1);
+                    int copy_len = (len < (int)remaining - count) ? len : (int)remaining - count;
+                    memcpy(str + count, buf, copy_len);
+                    count += copy_len;
+                    break;
+                }
+                case 'u': {
+                    unsigned int val = va_arg(args, unsigned int);
+                    int len = num_to_str(val, buf, 10, 0);
+                    int copy_len = (len < (int)remaining - count) ? len : (int)remaining - count;
+                    memcpy(str + count, buf, copy_len);
+                    count += copy_len;
+                    break;
+                }
+                case 'x':
+                case 'X': {
+                    unsigned int val = va_arg(args, unsigned int);
+                    int len = num_to_str(val, buf, 16, 0);
+                    int copy_len = (len < (int)remaining - count) ? len : (int)remaining - count;
+                    memcpy(str + count, buf, copy_len);
+                    count += copy_len;
+                    break;
+                }
+                case 's': {
+                    const char *s = va_arg(args, const char *);
+                    if (!s) s = "(null)";
+                    while (*s && count < (int)remaining) {
+                        str[count++] = *s++;
+                    }
+                    break;
+                }
+                case 'c': {
+                    char c = (char)va_arg(args, int);
+                    if (count < (int)remaining) {
+                        str[count++] = c;
+                    }
+                    break;
+                }
+                case '%': {
+                    if (count < (int)remaining) {
+                        str[count++] = '%';
+                    }
+                    break;
+                }
+                default:
+                    if (count < (int)remaining) {
+                        str[count++] = '%';
+                    }
+                    if (count < (int)remaining && *format) {
+                        str[count++] = *format;
+                    }
+                    break;
+            }
+            format++;
+        } else {
+            str[count++] = *format++;
+        }
+    }
+    
+    str[count] = '\0';
+    return count;
+}
+
+int fflush(FILE *stream) {
+    /* In our simple implementation, all writes are unbuffered */
+    /* so fflush is a no-op */
+    (void)stream;
     return 0;
 }
