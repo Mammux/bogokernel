@@ -30,12 +30,10 @@ pub fn set_timer(stime_value: u64) {
     );
 }
 
-/*
-/// Optional: legacy shutdown (works on QEMU OpenSBI)
+/// Legacy shutdown (works on QEMU OpenSBI)
 pub fn shutdown() -> ! {
     let _ = sbi_call(0x08, 0, 0, 0, 0);
     loop {
         unsafe { core::arch::asm!("wfi") }
     }
 }
-*/

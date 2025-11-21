@@ -24,7 +24,8 @@ use uart::Uart;
 use crate::stack::init_trap_stack;
 
 // User mode stuff
-static USER_ELF: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/cat.elf"));
+// User mode stuff
+// static USER_ELF: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/userapp.elf"));
 
 fn enter_user_with(entry: usize, sp: usize, argc: usize, argv: usize, envp: usize) -> ! {
     use riscv::register::sepc;
@@ -121,34 +122,27 @@ extern "C" fn rust_start() -> ! {
 
     // --- Load the user ELF ---
 
-    // Example argv/envp to demonstrate
-    let argv = ["cat", "etc/motd"];
-    let envp = ["TERM=xterm", "LANG=C"];
+    // --- Load the shell ---
+    let shell_file = fs::FILES.iter().find(|f| f.name == "shell.elf").expect("shell.elf not found");
+    
+    // Example argv/envp
+    let argv = ["shell"];
+    let envp = ["PATH=/"];
 
-    let user_stack_top_va: usize = 0x4000_8000; // choose a low VA for user stack top
-    let user_stack_bytes: usize = 16 * 1024; // 16 KiB
+    let user_stack_top_va: usize = 0x4000_8000;
+    let user_stack_bytes: usize = 16 * 1024;
 
-    match elf::load_user_elf(USER_ELF, user_stack_top_va, user_stack_bytes, &argv, &envp) {
+    match elf::load_user_elf(shell_file.data, user_stack_top_va, user_stack_bytes, &argv, &envp) {
         Ok(img) => {
             use core::fmt::Write;
             let mut uart = crate::uart::Uart::new();
             let _ = writeln!(
                 uart,
-                "Loaded user ELF: entry=0x{:x}, sp=0x{:x}, argc={}",
-                img.entry_va, img.user_sp, img.argc
+                "Loaded shell: entry=0x{:x}, sp=0x{:x}",
+                img.entry_va, img.user_sp
             );
 
-            let env0 = unsafe { read_user_usize(img.envp_va) };
-            let argv0 = unsafe { read_user_usize(img.argv_va) };
-            let _ = writeln!(
-                uart,
-                "argv_va=0x{:x} envp_va=0x{:x}",
-                img.argv_va, img.envp_va
-            );
-            let _ = writeln!(uart, "argv[0]=0x{:x} envp[0]=0x{:x}", argv0, env0);
-
-            // show first 32 bytes of envp[0] (should look like ASCII)
-            // unsafe { peek_user_bytes(env0, 32); }
+            unsafe { crate::trap::USER_BRK = img.brk; }
 
             enter_user_with(
                 img.entry_va,
@@ -161,7 +155,7 @@ extern "C" fn rust_start() -> ! {
         Err(e) => {
             use core::fmt::Write;
             let mut uart = crate::uart::Uart::new();
-            let _ = writeln!(uart, "*** ELF load error: {}", e);
+            let _ = writeln!(uart, "*** Shell load error: {:?}", e);
             loop {
                 riscv::asm::wfi()
             }

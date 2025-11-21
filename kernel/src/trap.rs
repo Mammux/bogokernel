@@ -44,7 +44,7 @@ extern "C" {
 #[inline]
 pub fn init() {
     unsafe {
-        stvec::write(Stvec::from_bits(__trap_entry as usize));
+        stvec::write(Stvec::from_bits(__trap_entry as *const () as usize));
         sstatus::set_sie(); // global S interrupts
         sie::set_stimer(); // Supervisor timer interrupt enable
     }
@@ -71,16 +71,21 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
             // Syscall ABI: a7 = nr, a0.. = args; ecall is 4-byte insn
             match tf.a7 {
                 nr::WRITE => sys_write_ptrlen(tf),   // write(ptr, len)
-                nr::EXIT => sys_exit_to_kernel(tf), // exit()
+                nr::EXIT => sys_exit(tf), // exit()
                 nr::WRITE_CSTR => sys_write_cstr(tf),     // write_cstr(ptr)
                 nr::OPEN => sys_open(tf),           // open_cstr(path)
                 nr::READ => sys_read(tf),           // read(fd, buf, len)
                 nr::WRITE_FD => sys_write_fd(tf),   // write(fd, buf, len)
                 nr::CLOSE => sys_close(tf),          // close(fd)
+                nr::LSEEK => sys_lseek(tf),         // lseek(fd, offset, whence)
+                nr::BRK => sys_brk(tf),             // brk(addr)
+                nr::GETTIME => sys_gettime(tf),     // gettime(ts_ptr)
+                nr::POWEROFF => sys_poweroff(tf),   // poweroff()
+                nr::EXEC => sys_exec(tf),           // exec(path)
                 nr => {
                     let mut uart = crate::uart::Uart::new();
-                    use core::fmt::Write;
                     let _ = writeln!(uart, "\r\nunknown syscall: {}", nr);
+                    tf.a0 = usize::MAX;
                     tf.sepc = tf.sepc.wrapping_add(4);
                 }
             }
@@ -170,15 +175,10 @@ fn sys_write_cstr(tf: &mut super::trap::TrapFrame) {
     tf.sepc = tf.sepc.wrapping_add(4); // advance past ecall
 }
 
-fn sys_exit_to_kernel(tf: &mut super::trap::TrapFrame) {
-    extern "C" {
-        fn after_user() -> !;
-    }
-    // Return to S-mode at after_user()
-    tf.sepc = after_user as usize;
-    const SSTATUS_SPP_BIT: usize = 1 << 8;
-    const SSTATUS_SPIE_BIT: usize = 1 << 5;
-    tf.sstatus_bits |= SSTATUS_SPP_BIT | SSTATUS_SPIE_BIT;
+fn sys_exit(tf: &mut TrapFrame) {
+    let _ = writeln!(crate::uart::Uart::new(), "sys_exit: reloading shell");
+    // Load shell.elf
+    load_program(tf, "shell.elf");
 }
 
 // File system stuff
@@ -228,6 +228,12 @@ fn fd_advance(fd: usize, inc: usize) {
     let mut tbl = FD_TABLE.lock();
     if fd < MAX_FD && tbl[fd].in_use {
         tbl[fd].offset = tbl[fd].offset.saturating_add(inc);
+    }
+}
+fn fd_seek(fd: usize, offset: usize) {
+    let mut tbl = FD_TABLE.lock();
+    if fd < MAX_FD && tbl[fd].in_use {
+        tbl[fd].offset = offset;
     }
 }
 fn fd_close(fd: usize) -> bool {
@@ -313,21 +319,79 @@ fn sys_open(tf: &mut TrapFrame) {
         }
     };
 
-    let _ = write!(crate::uart::Uart::new(), "sys_open: path='{}'\n", path);
+    let _ = write!(crate::uart::Uart::new(), "sys_open: path='{}'\r\n", path);
 
     if let Some((idx, _f)) = fs::FILES.iter().enumerate().find(|(_, f)| f.name == path) {
+        let _ = write!(crate::uart::Uart::new(), "sys_open: file found at idx={}\r\n", idx);
         if let Some(fd) = fd_alloc(idx) {
-            let _ = write!(crate::uart::Uart::new(), "sys_open: found fd\n");
+            let _ = write!(crate::uart::Uart::new(), "sys_open: allocated fd={}\r\n", fd);
             tf.a0 = fd;
         } else {
-            let _ = write!(crate::uart::Uart::new(), "sys_open: unable to alloc fd \n");
+            let _ = write!(crate::uart::Uart::new(), "sys_open: unable to alloc fd\r\n");
             tf.a0 = usize::MAX; // no fds
         }
     } else {
-        let _ = write!(crate::uart::Uart::new(), "sys_open: file not found\n");
+        let _ = write!(crate::uart::Uart::new(), "sys_open: file not found\r\n");
         tf.a0 = usize::MAX; // not found
     }
     tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_poweroff(_tf: &mut TrapFrame) {
+    crate::sbi::shutdown();
+}
+
+fn sys_exec(tf: &mut TrapFrame) {
+    // a0 = path
+    let path_va = tf.a0;
+    let mut buf = [0u8; 256];
+    let path = match read_user_cstr_in_page(path_va, 255, &mut buf) {
+        Ok(s) => s,
+        Err(_) => {
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
+        }
+    };
+    
+    load_program(tf, path);
+}
+
+fn load_program(tf: &mut TrapFrame, name: &str) {
+    // Find file
+    let file = fs::FILES.iter().find(|f| f.name == name);
+    if let Some(f) = file {
+        let argv = [name]; // argv[0] = name
+        let envp = ["PATH=/"];
+        
+        // Reuse stack constants from main.rs (should be shared)
+        let user_stack_top_va: usize = 0x4000_8000;
+        let user_stack_bytes: usize = 16 * 1024;
+
+        match crate::elf::load_user_elf(f.data, user_stack_top_va, user_stack_bytes, &argv, &envp) {
+            Ok(img) => {
+                // Update TrapFrame to start new program
+                tf.sepc = img.entry_va;
+                tf.sp = img.user_sp;
+                tf.a0 = img.argc;
+                tf.a1 = img.argv_va;
+                tf.a2 = img.envp_va;
+                
+                unsafe { USER_BRK = img.brk; }
+                
+                // Success: do NOT increment sepc, just return to new entry
+            }
+            Err(e) => {
+                let _ = writeln!(crate::uart::Uart::new(), "exec failed: {:?}", e);
+                tf.a0 = usize::MAX;
+                tf.sepc = tf.sepc.wrapping_add(4);
+            }
+        }
+    } else {
+        let _ = writeln!(crate::uart::Uart::new(), "exec: file not found '{}'", name);
+        tf.a0 = usize::MAX;
+        tf.sepc = tf.sepc.wrapping_add(4);
+    }
 }
 
 fn sys_read(tf: &mut TrapFrame) {
@@ -427,5 +491,80 @@ fn sys_write_fd(tf: &mut TrapFrame) {
         });
     }
     tf.a0 = len;
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_lseek(tf: &mut TrapFrame) {
+    // a0 = fd, a1 = offset, a2 = whence
+    let fd = tf.a0;
+    let offset = tf.a1 as isize;
+    let whence = tf.a2;
+
+    let entry = match fd_get(fd) {
+        Some(e) => e,
+        None => {
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
+        }
+    };
+    let file_len = crate::fs::FILES[entry.file_idx].data.len();
+    let new_off = match whence {
+        0 => offset, // SEEK_SET
+        1 => entry.offset as isize + offset, // SEEK_CUR
+        2 => file_len as isize + offset, // SEEK_END
+        _ => -1,
+    };
+
+    if new_off < 0 {
+        tf.a0 = usize::MAX;
+    } else {
+        let new_off = new_off as usize;
+        fd_seek(fd, new_off);
+        tf.a0 = new_off;
+    }
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+pub static mut USER_BRK: usize = 0;
+
+fn sys_brk(tf: &mut TrapFrame) {
+    // a0 = new_brk
+    let req_brk = tf.a0;
+    let cur_brk = unsafe { USER_BRK };
+
+    if req_brk == 0 {
+        tf.a0 = cur_brk;
+    } else if req_brk > cur_brk {
+        // Allocate pages
+        let page_mask = 4095;
+        let old_page_end = (cur_brk + page_mask) & !page_mask;
+        let new_page_end = (req_brk + page_mask) & !page_mask;
+
+        if new_page_end > old_page_end {
+            let pages_needed = (new_page_end - old_page_end) / 4096;
+            let root = unsafe { crate::sv39::root_pt() };
+            for i in 0..pages_needed {
+                let va = old_page_end + i * 4096;
+                unsafe {
+                    let pa = crate::sv39::alloc_user_page();
+                    crate::sv39::map_4k(root, va, pa, crate::sv39::PTE_V | crate::sv39::PTE_U | crate::sv39::PTE_R | crate::sv39::PTE_W | crate::sv39::PTE_A | crate::sv39::PTE_D);
+                }
+            }
+        }
+        unsafe { USER_BRK = req_brk };
+        tf.a0 = req_brk;
+    } else {
+        // Shrink? Not implemented, just accept
+        unsafe { USER_BRK = req_brk };
+        tf.a0 = req_brk;
+    }
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_gettime(tf: &mut TrapFrame) {
+    // a0 = ptr to timeval/timespec (ignored for now, just return ticks)
+    // Return ticks in a0
+    tf.a0 = crate::timer::TICKS.load(core::sync::atomic::Ordering::Relaxed) as usize;
     tf.sepc = tf.sepc.wrapping_add(4);
 }

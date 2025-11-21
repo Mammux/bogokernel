@@ -8,6 +8,11 @@ pub mod nr {
     pub const READ: usize = 5; // read(fd, buf, len) -> n or usize::MAX
     pub const WRITE_FD: usize = 6; // write(fd, buf, len) -> n or usize::MAX
     pub const CLOSE: usize = 7; // close(fd) -> 0 or usize::MAX
+    pub const LSEEK: usize = 8; // lseek(fd, offset, whence) -> new_offset
+    pub const BRK: usize = 9; // brk(addr) -> new_brk
+    pub const GETTIME: usize = 10; // gettime(ts_ptr) -> 0
+    pub const POWEROFF: usize = 11; // poweroff() -> !
+    pub const EXEC: usize = 12; // exec(path) -> !
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

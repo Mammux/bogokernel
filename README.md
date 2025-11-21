@@ -16,6 +16,7 @@ This project is educational — it shows how to bring up a kernel in S-mode, set
 - **System calls**:  
   - `write(ptr,len)` → fd 1 (UART output)  
   - `write_cstr(ptr)` → print a NUL-terminated string  
+  - `read()` → read from a file or stdin
   - `exit()` → return to kernel shell loop  
 - Works under **QEMU virt machine** with `-bios default` (OpenSBI).
 

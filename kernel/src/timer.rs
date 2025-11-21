@@ -4,7 +4,7 @@ use riscv::register::time;
 
 use crate::sbi;
 
-static TICKS: AtomicU64 = AtomicU64::new(0);
+pub static TICKS: AtomicU64 = AtomicU64::new(0);
 
 // 10ms at ~10_000_000 Hz?  NOTE: On QEMU/OpenSBI, the timebase is usually
 // 10 MHz. We use 100_000 cycles ≈ 10ms. Adjust if you want faster/slower.
@@ -12,8 +12,8 @@ const TICK_INTERVAL: u64 = 100_000;
 
 pub fn init() {
     // Arm first tick
-    let now: u64 = time::read().try_into().unwrap(); // allowed in S-mode on QEMU virt (OpenSBI delegates time)
-    sbi::set_timer(now + TICK_INTERVAL); // program next interrupt
+    // let now: u64 = time::read().try_into().unwrap(); // allowed in S-mode on QEMU virt (OpenSBI delegates time)
+    // sbi::set_timer(now + TICK_INTERVAL); // program next interrupt
 }
 
 pub fn on_timer() {

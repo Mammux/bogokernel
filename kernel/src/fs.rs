@@ -12,14 +12,27 @@ static ETC_MOTD: &[u8] = b"Welcome to BogoKernel.\n";
 
 pub static FILES: &[File] = &[
     File {
-        name: "hello.txt",
-        data: HELLO_TXT,
+        name: "dungeon.map",
+        data: include_bytes!("dungeon.map"),
+    },
+    File {
+        name: "shell.elf",
+        data: include_bytes!("../shell.elf"),
+    },
+    File {
+        name: "rogue.elf",
+        data: include_bytes!("../rogue.elf"),
+    },
+    File {
+        name: "hello.elf",
+        data: include_bytes!("../hello.elf"),
     },
     File {
         name: "etc/motd",
         data: ETC_MOTD,
     },
 ];
+
 
 pub fn lookup(name: &str) -> Option<&'static File> {
     for f in FILES {

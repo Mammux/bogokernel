@@ -1,108 +1,37 @@
-//! Minimal ELF64 (RISC-V) loader for user programs.
-//! - Maps PT_LOAD segments at their p_vaddr with U=1 pages
-//! - Copies file bytes and zeros BSS
-//! - Returns entry VA and a ready user stack VA
+//! Minimal ELF64 (RISC-V) loader for user programs, using `goblin`.
+//!
+//! Responsibilities:
+//! - Parse ELF headers and PT_LOAD segments
+//! - Map segments at their `p_vaddr` with Sv39 (U=1; R/W/X from ELF flags)
+//! - Copy file bytes; zero BSS tail
+//! - Build a user stack (argc/argv/envp) and return entry & SP
+//!
+//! Safety:
+//! - All writes to user VAs happen with SSTATUS.SUM set via `with_sum`
+//! - Page mapping/copying uses the kernel’s identity mapping to touch PAs
 
-use crate::sv39::{self, PTE_A, PTE_D, PTE_R, PTE_U, PTE_V, PTE_W, PTE_X};
+#![allow(clippy::too_many_arguments)]
+#![deny(unsafe_op_in_unsafe_fn)]
+#![warn(missing_docs, rust_2018_idioms, clippy::pedantic)]
+#![allow(clippy::module_name_repetitions, clippy::missing_panics_doc, clippy::missing_errors_doc)]
+
 use core::mem::size_of;
 
-const PT_LOAD: u32 = 1;
-const EM_RISCV: u16 = 243;
-
+use goblin::elf::{header, program_header, Elf};
 use riscv::register::sstatus;
 
-// allow S-mode writes to user pages while we populate the stack
-#[inline(always)]
-unsafe fn with_sum<F, R>(f: F) -> R
-where
-    F: FnOnce() -> R,
-{
-    sstatus::set_sum();
-    let r = f();
-    sstatus::clear_sum();
-    r
-}
+use crate::sv39::{self, PTE_A, PTE_D, PTE_R, PTE_U, PTE_V, PTE_W, PTE_X};
 
-unsafe fn write_user_bytes(va: usize, bytes: &[u8]) {
-    with_sum(|| {
-        core::ptr::copy_nonoverlapping(bytes.as_ptr(), va as *mut u8, bytes.len());
-    });
-}
-
-unsafe fn write_user_usize(va: usize, val: usize) {
-    let bytes = core::slice::from_raw_parts(
-        (&val as *const usize) as *const u8,
-        core::mem::size_of::<usize>(),
-    );
-    write_user_bytes(va, bytes);
-}
-
-// --- ELF headers (packed, unaligned reads) ---
-#[repr(C)]
-#[derive(Copy, Clone)]
-struct Elf64Ehdr {
-    e_ident: [u8; 16],
-    e_type: u16,
-    e_machine: u16,
-    e_version: u32,
-    e_entry: u64,
-    e_phoff: u64,
-    e_shoff: u64,
-    e_flags: u32,
-    e_ehsize: u16,
-    e_phentsize: u16,
-    e_phnum: u16,
-    e_shentsize: u16,
-    e_shnum: u16,
-    e_shstrndx: u16,
-}
-
-#[repr(C)]
-#[derive(Copy, Clone)]
-struct Elf64Phdr {
-    p_type: u32,
-    p_flags: u32, // PF_X=1, PF_W=2, PF_R=4
-    p_offset: u64,
-    p_vaddr: u64,
-    p_paddr: u64,
-    p_filesz: u64,
-    p_memsz: u64,
-    p_align: u64,
-}
-
-// Unaligned reads (ELF is little-endian; we are little-endian too on rv64)
-unsafe fn read_ehdr(buf: &[u8]) -> Elf64Ehdr {
-    let mut out = core::mem::MaybeUninit::<Elf64Ehdr>::uninit();
-    core::ptr::copy_nonoverlapping(
-        buf.as_ptr(),
-        out.as_mut_ptr() as *mut u8,
-        size_of::<Elf64Ehdr>(),
-    );
-    out.assume_init()
-}
-unsafe fn read_phdr(buf: &[u8], off: usize) -> Elf64Phdr {
-    let mut out = core::mem::MaybeUninit::<Elf64Phdr>::uninit();
-    core::ptr::copy_nonoverlapping(
-        buf.as_ptr().add(off),
-        out.as_mut_ptr() as *mut u8,
-        size_of::<Elf64Phdr>(),
-    );
-    out.assume_init()
-}
-
-// Map PF flags to PTE flags (always U=1, V=1, set A/D for W)
-fn pte_flags_from_pf(pf: u32) -> u64 {
-    let mut f = PTE_V | PTE_U | PTE_A;
-    if (pf & 0x4) != 0 {
-        f |= PTE_R;
-    }
-    if (pf & 0x2) != 0 {
-        f |= PTE_W | PTE_D;
-    }
-    if (pf & 0x1) != 0 {
-        f |= PTE_X;
-    }
-    f
+/// Loader errors (compact, no strings in the happy path)
+#[derive(Debug, Copy, Clone)]
+pub enum ElfLoadError {
+    Short,
+    BadMagic,
+    Not64LE,
+    NotRiscv,
+    PhOutOfBounds,
+    SatpNotSet,
+    SegmentOverflow,
 }
 
 pub struct Loaded {
@@ -111,24 +40,66 @@ pub struct Loaded {
     pub argc: usize,
     pub argv_va: usize,
     pub envp_va: usize,
+    pub brk: usize,
 }
 
-// Map one VA page to a fresh PA page with flags
+/* ---------- SUM-guarded user writes ---------- */
+
+#[inline(always)]
+unsafe fn with_sum<F, R>(f: F) -> R
+where
+    F: FnOnce() -> R,
+{
+    unsafe { sstatus::set_sum(); }
+    let r = f();
+    unsafe { sstatus::clear_sum(); }
+    r
+}
+
+unsafe fn write_user_bytes(va: usize, bytes: &[u8]) {
+    unsafe { with_sum(|| {
+        core::ptr::copy_nonoverlapping(bytes.as_ptr(), va as *mut u8, bytes.len());
+    }) };
+}
+
+unsafe fn write_user_usize(va: usize, val: usize) {
+    let bytes = unsafe { core::slice::from_raw_parts(
+        (&val as *const usize) as *const u8,
+        core::mem::size_of::<usize>(),
+    ) };
+    unsafe { write_user_bytes(va, bytes) };
+}
+
+/* ---------- mapping & copying helpers ---------- */
+
+/// Map one VA page to a fresh PA page with flags, return PA.
 unsafe fn map_user_page(root: *mut u64, va_page: usize, flags: u64) -> usize {
-    let pa = sv39::alloc_user_page();
-    sv39::map_4k(root, va_page, pa, flags);
+    let pa = unsafe { sv39::alloc_user_page() };
+    unsafe { sv39::map_4k(root, va_page, pa, flags) };
     pa
 }
 
-// Copy bytes into PA (visible through the kernel's identity map)
+/// Copy `len` bytes into a **physical** address (visible via kernel identity map).
 unsafe fn memcpy_pa(dst_pa: usize, src: *const u8, len: usize) {
-    core::ptr::copy_nonoverlapping(src, dst_pa as *mut u8, len);
+    unsafe { core::ptr::copy_nonoverlapping(src, dst_pa as *mut u8, len) };
 }
 
-// Zero bytes into PA
+/// Zero `len` bytes at a **physical** address.
 unsafe fn memzero_pa(dst_pa: usize, len: usize) {
-    core::ptr::write_bytes(dst_pa as *mut u8, 0, len);
+    unsafe { core::ptr::write_bytes(dst_pa as *mut u8, 0, len) };
 }
+
+/// Map ELF p_flags to PTE flags (always V|U|A; add D if W).
+#[inline(always)]
+fn pte_flags_from_pf(pf: u32) -> u64 {
+    let mut f = PTE_V | PTE_U | PTE_A;
+    if (pf & 0x4) != 0 { f |= PTE_R; }           // PF_R
+    if (pf & 0x2) != 0 { f |= PTE_W | PTE_D; }   // PF_W
+    if (pf & 0x1) != 0 { f |= PTE_X; }           // PF_X
+    f
+}
+
+/* ---------- public API ---------- */
 
 pub fn load_user_elf(
     image: &[u8],
@@ -136,84 +107,99 @@ pub fn load_user_elf(
     user_stack_bytes: usize,
     argv: &[&str],
     envp: &[&str],
-) -> Result<Loaded, &'static str> {
+) -> Result<Loaded, ElfLoadError> {
     unsafe {
-        if image.len() < size_of::<Elf64Ehdr>() {
-            return Err("short ELF");
+        if image.len() < size_of::<goblin::elf::header::Header>() {
+            return Err(ElfLoadError::Short);
         }
-        let eh = read_ehdr(image);
-        if &eh.e_ident[0..4] != b"\x7FELF" {
-            return Err("bad magic");
+
+        // Parse ELF
+        let elf = Elf::parse(image).map_err(|_| ElfLoadError::BadMagic)?;
+
+        // Basic validation (class + endianness)
+        let ident = &elf.header.e_ident;
+        if &ident[..4] != b"\x7FELF" {
+            return Err(ElfLoadError::BadMagic);
         }
-        if eh.e_ident[4] != 2 {
-            return Err("not ELF64");
+        if ident[header::EI_CLASS] != header::ELFCLASS64
+            || ident[header::EI_DATA] != header::ELFDATA2LSB
+        {
+            return Err(ElfLoadError::Not64LE);
         }
-        if eh.e_machine != EM_RISCV {
-            return Err("not RISCV");
-        }
-        if eh.e_phentsize as usize != size_of::<Elf64Phdr>() {
-            return Err("phentsize");
+        if elf.header.e_machine != header::EM_RISCV {
+            return Err(ElfLoadError::NotRiscv);
         }
 
         let root = sv39::root_pt();
         if root.is_null() {
-            return Err("satp not set");
+            return Err(ElfLoadError::SatpNotSet);
         }
 
-        // Map each PT_LOAD
-        for i in 0..eh.e_phnum {
-            let off = eh.e_phoff as usize + (i as usize) * size_of::<Elf64Phdr>();
-            if off + size_of::<Elf64Phdr>() > image.len() {
-                return Err("phdr oob");
-            }
-            let ph = read_phdr(image, off);
-            if ph.p_type != PT_LOAD {
+        // Map PT_LOAD segments
+        let page = 4096usize;
+        let mut max_brk = 0usize;
+
+        for ph in &elf.program_headers {
+            if ph.p_type != program_header::PT_LOAD {
                 continue;
             }
 
-            let va_start = ph.p_vaddr as usize;
-            let filesz = ph.p_filesz as usize;
-            let memsz = ph.p_memsz as usize;
-            let fileoff = ph.p_offset as usize;
-            let flags = pte_flags_from_pf(ph.p_flags);
+            let p_vaddr  = ph.p_vaddr as usize;
+            let p_offset = ph.p_offset as usize;
+            let p_filesz = ph.p_filesz as usize;
+            let p_memsz  = ph.p_memsz as usize;
+            let p_flags  = ph.p_flags as u32;
 
-            // Page-align
-            let page = 4096usize;
-            let va0 = va_start & !(page - 1);
-            let head = va_start - va0;
-            let va_end = (va_start + memsz + page - 1) & !(page - 1);
+            // Safety bounds: file bytes must lie within the ELF image
+            if p_offset
+                .checked_add(p_filesz)
+                .map(|end| end <= image.len())
+                .unwrap_or(false) == false
+            {
+                return Err(ElfLoadError::PhOutOfBounds);
+            }
 
-            // For each page in the segment:
+            if p_memsz == 0 {
+                continue; // nothing to map
+            }
+
+            // Update max_brk
+            let seg_end = p_vaddr + p_memsz;
+            if seg_end > max_brk {
+                max_brk = seg_end;
+            }
+
+            // Page-aligned mapping range
+            let va0   = p_vaddr & !(page - 1);
+            let head  = p_vaddr - va0;
+            let vaend = (p_vaddr + p_memsz + page - 1) & !(page - 1);
+
+            let flags = pte_flags_from_pf(p_flags);
+
             let mut cur_va = va0;
             let mut copied = 0usize;
 
-            while cur_va < va_end {
+            while cur_va < vaend {
                 let pa = map_user_page(root, cur_va, flags);
 
-                // Determine how many bytes of FILE go into this page
-                let page_off = if cur_va == va0 { head } else { 0 };
+                // Content for this VA page
+                let page_off   = if cur_va == va0 { head } else { 0 };
                 let page_space = page - page_off;
 
-                // File bytes remaining for this page
-                let file_left = filesz.saturating_sub(copied);
+                let file_left  = p_filesz.saturating_sub(copied);
                 let file_chunk = core::cmp::min(file_left, page_space);
 
-                // Copy file bytes (if any)
+                // Copy file bytes
                 if file_chunk > 0 {
-                    if fileoff + copied + file_chunk > image.len() {
-                        return Err("file oob");
-                    }
-                    let src = image.as_ptr().add(fileoff + copied);
+                    let src = image.as_ptr().wrapping_add(p_offset + copied);
                     memcpy_pa(pa + page_off, src, file_chunk);
                     copied += file_chunk;
                 }
 
-                // Zero the rest of the page that belongs to memsz
-                let mem_covered = if cur_va + page > (va_start + memsz) {
-                    (va_start + memsz).saturating_sub(cur_va)
-                } else {
-                    page
-                };
+                // Zero the remaining BSS in this page
+                let seg_end   = p_vaddr + p_memsz;
+                let page_end  = cur_va + page;
+                let mem_covered = if page_end > seg_end { seg_end.saturating_sub(cur_va) } else { page };
                 if mem_covered > page_off + file_chunk {
                     let zero_len = mem_covered - (page_off + file_chunk);
                     memzero_pa(pa + page_off + file_chunk, zero_len);
@@ -223,18 +209,26 @@ pub fn load_user_elf(
             }
         }
 
+        // Build user stack
         let (sp, envp_va, argv_va, argc) =
             setup_user_stack(user_stack_top_va, user_stack_bytes, argv, envp, root)?;
 
+        // Align brk to page boundary for safety/simplicity, or keep it exact?
+        // Usually brk starts page-aligned or just after data.
+        // Let's keep it exact, sys_brk will handle page alignment.
+
         Ok(Loaded {
-            entry_va: eh.e_entry as usize,
+            entry_va: elf.header.e_entry as usize,
             user_sp: sp,
             argc,
             argv_va,
             envp_va,
+            brk: max_brk,
         })
     }
 }
+
+/* ---------- user stack layout ---------- */
 
 unsafe fn setup_user_stack(
     user_stack_top_va: usize,
@@ -242,65 +236,67 @@ unsafe fn setup_user_stack(
     argv: &[&str],
     envp: &[&str],
     root: *mut u64,
-) -> Result<(usize, usize, usize, usize), &'static str> {
+) -> Result<(usize, usize, usize, usize), ElfLoadError> {
+    // Map stack pages U=RW
     let stack_pages = (user_stack_bytes + 4095) / 4096;
-    let mut va = (user_stack_top_va - stack_pages * 4096) & !(4095);
+    let mut va = (user_stack_top_va - stack_pages * 4096) & !4095;
     for _ in 0..stack_pages {
-        map_user_page(root, va, PTE_V | PTE_U | PTE_R | PTE_W | PTE_A | PTE_D);
+        unsafe { map_user_page(root, va, PTE_V | PTE_U | PTE_R | PTE_W | PTE_A | PTE_D) };
         va += 4096;
     }
 
-    // --- Lay out strings at the top, then pointer vectors, then argc ---
+    // Strings at top, then pointer vectors, then argc.
     let mut sp = user_stack_top_va;
-    // keep a tiny guard so debug reads can include the trailing NUL
-    sp -= 16;
+    sp -= 16; // tiny guard so trailing NUL sits inside the last page
 
-    // 1) Copy env strings
+    // env strings
     let mut env_ptrs: heapless::Vec<usize, 32> = heapless::Vec::new();
     for &s in envp {
-        let bytes = s.as_bytes();
-        sp -= bytes.len() + 1;
-        write_user_bytes(sp, bytes);
-        write_user_bytes(sp + bytes.len(), &[0]);
-        env_ptrs.push(sp).map_err(|_| "too many env")?;
+        let b = s.as_bytes();
+        sp -= b.len() + 1;
+        unsafe { write_user_bytes(sp, b);
+        write_user_bytes(sp + b.len(), &[0]); }
+        env_ptrs.push(sp).map_err(|_| ElfLoadError::SegmentOverflow)?;
     }
 
-    // 2) Copy argv strings (argv[0] first)
+    // argv strings
     let mut arg_ptrs: heapless::Vec<usize, 32> = heapless::Vec::new();
     for &s in argv {
-        let bytes = s.as_bytes();
-        sp -= bytes.len() + 1;
-        write_user_bytes(sp, bytes);
-        write_user_bytes(sp + bytes.len(), &[0]);
-        arg_ptrs.push(sp).map_err(|_| "too many args")?;
+        let b = s.as_bytes();
+        sp -= b.len() + 1;
+        unsafe { write_user_bytes(sp, b);
+        write_user_bytes(sp + b.len(), &[0]); }
+        arg_ptrs.push(sp).map_err(|_| ElfLoadError::SegmentOverflow)?;
     }
 
-    // 3) Align sp to 16
+    // 16-byte alignment before vectors
     sp &= !15;
 
-    // 4) Push NULL terminators and pointer arrays (stack grows down)
-    // envp NULL
-    sp -= core::mem::size_of::<usize>();
-    write_user_usize(sp, 0);
+    // envp NULL + vector (in reverse so argv[0] is lowest)
+    sp -= size_of::<usize>();
+    unsafe { write_user_usize(sp, 0) };
     for &p in env_ptrs.iter().rev() {
-        sp -= core::mem::size_of::<usize>();
-        write_user_usize(sp, p);
+        sp -= size_of::<usize>();
+        unsafe { write_user_usize(sp, p) };
     }
     let envp_va = sp;
 
-    // argv NULL
-    sp -= core::mem::size_of::<usize>();
-    write_user_usize(sp, 0);
+    // argv NULL + vector
+    sp -= size_of::<usize>();
+    unsafe { write_user_usize(sp, 0) };
     for &p in arg_ptrs.iter().rev() {
-        sp -= core::mem::size_of::<usize>();
-        write_user_usize(sp, p);
+        sp -= size_of::<usize>();
+        unsafe { write_user_usize(sp, p) };
     }
     let argv_va = sp;
 
     // argc
     let argc = arg_ptrs.len();
-    sp -= core::mem::size_of::<usize>();
-    write_user_usize(sp, argc);
+    sp -= size_of::<usize>();
+    unsafe { write_user_usize(sp, argc) };
+
+    // final align (some ABIs like it; harmless otherwise)
     sp &= !15;
+
     Ok((sp, envp_va, argv_va, argc))
 }

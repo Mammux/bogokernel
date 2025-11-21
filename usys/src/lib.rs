@@ -27,6 +27,17 @@ unsafe fn sys_ecall3(nr: usize, a0: usize, a1: usize, a2: usize) -> usize {
     ret
 }
 #[inline(always)]
+unsafe fn sys_ecall0(nr: usize) -> usize {
+    let mut ret: usize;
+    core::arch::asm!(
+        "ecall",
+        in("a7") nr,
+        lateout("a0") ret,
+        options(nostack),
+    );
+    ret
+}
+
 unsafe fn sys_ecall1(nr: usize, a0: usize) -> usize {
     let mut ret: usize;
     core::arch::asm!(
@@ -97,6 +108,30 @@ pub fn open(path: &CStr) -> SysResult<Fd> {
     }
 }
 
+pub fn lseek(fd: Fd, offset: isize, whence: usize) -> SysResult<usize> {
+    let r = unsafe { sys_ecall3(nr::LSEEK, fd.0 as usize, offset as usize, whence) };
+    if is_err_sentinel(r) { Err(SysErr::Fail) } else { Ok(r) }
+}
+
+pub fn brk(addr: usize) -> SysResult<usize> {
+    let r = unsafe { sys_ecall1(nr::BRK, addr) };
+    Ok(r)
+}
+
+pub fn gettime() -> usize {
+    unsafe { sys_ecall1(nr::GETTIME, 0) }
+}
+
+pub fn poweroff() -> ! {
+    unsafe { sys_ecall0(nr::POWEROFF); }
+    loop {}
+}
+
+pub fn exec(path: &CStr) -> ! {
+    unsafe { sys_ecall1(nr::EXEC, path.as_ptr() as usize); }
+    loop {}
+}
+
 /* ---------- tiny io traits ---------- */
 
 pub trait IoWrite {
@@ -128,14 +163,14 @@ pub struct Stderr;
 
 impl Write for Stdout {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        let _ = write_fd(STDOUT, s.as_bytes());
+        let _ = STDOUT.write_all(s.as_bytes());
         Ok(())
     }
 }
 
 impl Write for Stderr {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        let _ = write_fd(STDERR, s.as_bytes());
+        let _ = STDERR.write_all(s.as_bytes());
         Ok(())
     }
 }

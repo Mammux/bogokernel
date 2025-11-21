@@ -4,7 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "userapp"
+name = "rogue"
+path = "src/bin/rogue.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "shell"
+path = "src/bin/shell.rs"
 test = false
 bench = false
 
@@ -22,3 +29,4 @@ strip = "none"
 target = "riscv64gc-unknown-none-elf"
 
 [dependencies]
+usys = { path = "../usys" }
