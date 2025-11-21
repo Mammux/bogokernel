@@ -1,0 +1,47 @@
+================================================================================
+                     BogoKernel Curses Test Demo
+================================================================================
+
++----------------------------+    +----------------------------+
+| Box Demo                   |    | Custom Border Demo         |
+| This is a box with         |    |                            |
+| default borders.           |    | Using custom chars:        |
+|                            |    | | - +                      |
+| Standout text!             |    |                            |
+|                            |    |                            |
++----------------------------+    +----------------------------+
+
+Line Drawing:
+-----------------------------
+|  Horizontal & Vertical
+|  Line Demo
+|
+|
+
+Attribute Demo:               Filled Rectangle:
+Normal text                   
+Bold text                     ##############
+Reverse text                  ##############
+Standout text                 ##############
+                              ##############
+
+
+
+
+
+                    Press any key to exit...
+
+
+================================================================================
+
+Legend:
++ = Corner characters (ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER)
+- = Horizontal line (ACS_HLINE)
+| = Vertical line (ACS_VLINE)
+# = Block character (ACS_BLOCK)
+
+Text Attributes:
+- Normal text: Plain rendering
+- Bold text: Rendered with A_BOLD attribute
+- Reverse text: Rendered with A_REVERSE attribute (inverted colors)
+- Standout text: Rendered with A_STANDOUT attribute (highlighted)
