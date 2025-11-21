@@ -28,6 +28,10 @@ pub static FILES: &[File] = &[
         data: include_bytes!("../hello.elf"),
     },
     File {
+        name: "crogue.elf",
+        data: include_bytes!("../crogue.elf"),
+    },
+    File {
         name: "etc/motd",
         data: ETC_MOTD,
     },
