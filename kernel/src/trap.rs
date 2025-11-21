@@ -82,6 +82,7 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
                 nr::GETTIME => sys_gettime(tf),     // gettime(ts_ptr)
                 nr::POWEROFF => sys_poweroff(tf),   // poweroff()
                 nr::EXEC => sys_exec(tf),           // exec(path)
+                nr::EXECV => sys_execv(tf),         // execv(path, argv)
                 nr => {
                     let mut uart = crate::uart::Uart::new();
                     let _ = writeln!(uart, "\r\nunknown syscall: {}", nr);
@@ -176,9 +177,10 @@ fn sys_write_cstr(tf: &mut super::trap::TrapFrame) {
 }
 
 fn sys_exit(tf: &mut TrapFrame) {
+    // exit code in a0
     let _ = writeln!(crate::uart::Uart::new(), "sys_exit: reloading shell");
     // Load shell.elf
-    load_program(tf, "shell.elf");
+    load_program(tf, "shell.elf", &["shell.elf"]);
 }
 
 // File system stuff
@@ -354,21 +356,84 @@ fn sys_exec(tf: &mut TrapFrame) {
         }
     };
     
-    load_program(tf, path);
+    // Use path as argv[0]
+    load_program(tf, path, &[path]);
 }
 
-fn load_program(tf: &mut TrapFrame, name: &str) {
+fn sys_execv(tf: &mut TrapFrame) {
+    // a0 = path, a1 = argv (NULL-terminated array of C string pointers)
+    let path_va = tf.a0;
+    let argv_va = tf.a1;
+    
+    let mut path_buf = [0u8; 256];
+    let path = match read_user_cstr_in_page(path_va, 255, &mut path_buf) {
+        Ok(s) => s,
+        Err(_) => {
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
+        }
+    };
+    
+    // Read argv array from user memory using fixed arrays
+    let mut argv_bufs: [[u8; 64]; 16] = [[0; 64]; 16];
+    let mut argv_lens: [usize; 16] = [0; 16];
+    let mut argv_count = 0usize;
+    
+    unsafe {
+        with_sum_no_timer(|| {
+            let mut i = 0usize;
+            loop {
+                if i >= 16 { break; } // Max 16 arguments
+                
+                // Read pointer from argv array
+                let ptr_addr = argv_va + i * core::mem::size_of::<usize>();
+                let arg_ptr = core::ptr::read(ptr_addr as *const usize);
+                
+                if arg_ptr == 0 { break; } // NULL terminator
+                
+                // Read the string
+                let mut arg_len = 0usize;
+                let page_end = ((arg_ptr + 4096) & !4095) as *const u8;
+                let mut p = arg_ptr as *const u8;
+                
+                while p < page_end && arg_len < 63 {
+                    let b = core::ptr::read(p);
+                    if b == 0 { break; }
+                    argv_bufs[argv_count][arg_len] = b;
+                    arg_len += 1;
+                    p = p.add(1);
+                }
+                
+                argv_lens[argv_count] = arg_len;
+                argv_count += 1;
+                i += 1;
+            }
+        });
+    }
+    
+    // Convert to &[&str] for load_program
+    let mut argv_strs: [&str; 16] = [""; 16];
+    for i in 0..argv_count {
+        if let Ok(s) = core::str::from_utf8(&argv_bufs[i][..argv_lens[i]]) {
+            argv_strs[i] = s;
+        }
+    }
+    
+    load_program(tf, path, &argv_strs[..argv_count]);
+}
+
+fn load_program(tf: &mut TrapFrame, name: &str, argv: &[&str]) {
     // Find file
     let file = fs::FILES.iter().find(|f| f.name == name);
     if let Some(f) = file {
-        let argv = [name]; // argv[0] = name
         let envp = ["PATH=/"];
         
         // Reuse stack constants from main.rs (should be shared)
         let user_stack_top_va: usize = 0x4000_8000;
         let user_stack_bytes: usize = 16 * 1024;
 
-        match crate::elf::load_user_elf(f.data, user_stack_top_va, user_stack_bytes, &argv, &envp) {
+        match crate::elf::load_user_elf(f.data, user_stack_top_va, user_stack_bytes, argv, &envp) {
             Ok(img) => {
                 // Update TrapFrame to start new program
                 tf.sepc = img.entry_va;

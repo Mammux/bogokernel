@@ -41,7 +41,21 @@ fn main() {
         
         if len == 0 { continue; }
         
-        let cmd = core::str::from_utf8(&buf[..len]).unwrap_or("");
+        let input = core::str::from_utf8(&buf[..len]).unwrap_or("");
+        
+        // Parse command line: split by whitespace
+        let mut tokens: [&str; 16] = [""; 16];
+        let mut token_count = 0;
+        for token in input.split_whitespace() {
+            if token_count < 16 {
+                tokens[token_count] = token;
+                token_count += 1;
+            }
+        }
+        
+        if token_count == 0 { continue; }
+        
+        let cmd = tokens[0];
         
         match cmd {
             "help" => println!("Available commands: hello, rogue, shutdown"),
@@ -51,11 +65,35 @@ fn main() {
             },
             "hello" => {
                 println!("Executing hello...");
-                usys::exec(usys::cstr!("hello.elf"));
+                // Build argv array with command line arguments
+                let mut argv_cstrs: [usys::CStrBuf<64>; 16] = Default::default();
+                let mut argv_count = 0;
+                
+                // First arg is program name
+                argv_cstrs[0] = usys::CStrBuf::from_str("hello.elf").unwrap();
+                argv_count = 1;
+                
+                // Add remaining arguments
+                for i in 1..token_count {
+                    if let Ok(cstr) = usys::CStrBuf::from_str(tokens[i]) {
+                        argv_cstrs[argv_count] = cstr;
+                        argv_count += 1;
+                    }
+                }
+                
+                // Build references array
+                let mut argv_refs: [&core::ffi::CStr; 16] = [usys::cstr!(""); 16];
+                for i in 0..argv_count {
+                    argv_refs[i] = argv_cstrs[i].as_cstr();
+                }
+                
+                usys::execv(usys::cstr!("hello.elf"), &argv_refs[..argv_count]);
             },
             "rogue" => {
                 println!("Executing rogue...");
-                usys::exec(usys::cstr!("rogue.elf"));
+                let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("rogue.elf").unwrap()];
+                let argv_refs = [argv_cstrs[0].as_cstr()];
+                usys::execv(usys::cstr!("rogue.elf"), &argv_refs);
             },
             _ => println!("Unknown command: {}", cmd),
         }

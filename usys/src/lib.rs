@@ -50,6 +50,19 @@ unsafe fn sys_ecall1(nr: usize, a0: usize) -> usize {
     ret
 }
 #[inline(always)]
+unsafe fn sys_ecall2(nr: usize, a0: usize, a1: usize) -> usize {
+    let mut ret: usize;
+    core::arch::asm!(
+        "ecall",
+        in("a7") nr,
+        in("a0") a0,
+        in("a1") a1,
+        lateout("a0") ret,
+        options(nostack),
+    );
+    ret
+}
+#[inline(always)]
 unsafe fn sys_ecall0_noreturn(nr: usize) -> ! {
     core::arch::asm!("ecall", in("a7") nr, options(noreturn, nostack));
 }
@@ -129,6 +142,22 @@ pub fn poweroff() -> ! {
 
 pub fn exec(path: &CStr) -> ! {
     unsafe { sys_ecall1(nr::EXEC, path.as_ptr() as usize); }
+    loop {}
+}
+
+pub fn execv(path: &CStr, argv: &[&CStr]) -> ! {
+    // Build NULL-terminated argv array on stack
+    let mut argv_ptrs: [usize; 17] = [0; 17];
+    let len = core::cmp::min(argv.len(), 16);
+    
+    for i in 0..len {
+        argv_ptrs[i] = argv[i].as_ptr() as usize;
+    }
+    argv_ptrs[len] = 0; // NULL terminator
+    
+    unsafe { 
+        sys_ecall2(nr::EXECV, path.as_ptr() as usize, argv_ptrs.as_ptr() as usize);
+    }
     loop {}
 }
 
@@ -307,5 +336,11 @@ impl<const N: usize> CStrBuf<N> {
     pub fn as_cstr(&self) -> &CStr {
         // SAFETY: we ensured exactly one trailing NUL and no interior NULs
         unsafe { CStr::from_bytes_with_nul_unchecked(&self.buf[..=self.len]) }
+    }
+}
+
+impl<const N: usize> Default for CStrBuf<N> {
+    fn default() -> Self {
+        Self { buf: [0; N], len: 0 }
     }
 }

@@ -1,7 +1,7 @@
 # BogoKernel
 
 A tiny experimental operating system kernel written in Rust, targeting **RISC-V (rv64)** and running under **QEMU** with **OpenSBI**.  
-This project is educational — it shows how to bring up a kernel in S-mode, set up paging (Sv39), and run user programs in U-mode loaded from ELF binaries.
+This project is educational — it demonstrates how to bring up a kernel in S-mode, set up paging (Sv39), run user programs in U-mode loaded from ELF binaries, and implement a basic syscall interface with file I/O.
 
 ---
 
@@ -12,17 +12,76 @@ This project is educational — it shows how to bring up a kernel in S-mode, set
 - **Custom entry** (`_start`) with trap stack, vectored trap handling, and timer interrupts.
 - **Sv39 paging** enabled with identity mapping for the kernel and U=1 mappings for user code/data.
 - **Minimal heap** (via `linked_list_allocator`) to allow kernel allocations.
-- **User programs**: ELF64 loader that maps PT_LOAD segments, lays out argv/envp on the user stack, and jumps to the ELF entry point in U-mode.
-- **System calls**:  
-  - `write(ptr,len)` → fd 1 (UART output)  
-  - `write_cstr(ptr)` → print a NUL-terminated string  
-  - `read()` → read from a file or stdin
-  - `exit()` → return to kernel shell loop  
+- **ELF64 loader**: Maps PT_LOAD segments, sets up argv/envp on user stack, and jumps to entry point in U-mode.
+- **RAMFS**: Embedded read-only filesystem with multiple files (ELF binaries, data files).
+- **File descriptor table**: Supports stdin (fd 0), stdout (fd 1), stderr (fd 2), and regular files (fd 3+).
+- **Dynamic program loading**: `exec()` syscall to load and run programs from RAMFS.
+- **User-space library** (`usys`): Syscall wrappers, I/O traits, and convenience macros (`print!`, `println!`).
+- **Multiple user applications**: Interactive shell, rogue-like game, cat utility, and hello world examples.
+- **System calls** (11 total):  
+  - `write(ptr, len)` → write bytes to stdout  
+  - `write_cstr(ptr)` → write NUL-terminated string  
+  - `write_fd(fd, buf, len)` → write to file descriptor  
+  - `read(fd, buf, len)` → read from file or stdin (blocking for stdin)  
+  - `open(path)` → open file from RAMFS, returns fd  
+  - `close(fd)` → close file descriptor  
+  - `lseek(fd, offset, whence)` → seek in file  
+  - `brk(addr)` → manage user heap (allocate/free pages)  
+  - `gettime()` → get system ticks  
+  - `exec(path)` → execute program from RAMFS  
+  - `poweroff()` → shutdown via SBI  
+  - `exit()` → reload shell  
 - Works under **QEMU virt machine** with `-bios default` (OpenSBI).
 
 ---
 
-## Building and running
+## Project Structure
+
+This is a Cargo workspace with multiple packages:
+
+- **`kernel`** — The S-mode kernel (main binary)
+- **`uapi`** — Syscall number definitions (shared between kernel and userspace)
+- **`usys`** — User-space syscall wrapper library with I/O helpers
+- **`userapp`** — Example user application (currently rogue)
+- **`cat`** — Cat utility for reading files
+- **`c_hello`** — C language example (demonstrates C interop)
+
+---
+
+## RAMFS (Embedded Filesystem)
+
+The kernel includes a simple read-only RAM filesystem with the following files:
+
+- `dungeon.map` — Map data for the rogue game
+- `shell.elf` — Interactive shell (loaded at boot)
+- `rogue.elf` — Rogue-like game
+- `hello.elf` — Hello world example
+- `etc/motd` — Message of the day
+
+Files are embedded at compile time via `include_bytes!` in `kernel/src/fs.rs`.
+
+---
+
+## User Applications
+
+### Shell (`shell.elf`)
+Interactive command shell loaded at boot. Supports:
+- Running programs via `exec()`
+- File I/O commands
+- Built-in commands
+
+### Rogue (`rogue.elf`)
+A rogue-like dungeon game that reads `dungeon.map` from RAMFS.
+
+### Cat (`cat.elf`)
+Utility to read and display file contents.
+
+### Hello (`hello.elf`)
+Simple hello world program (C version available in `c_hello/`).
+
+---
+
+## Building and Running
 
 ### Requirements
 
@@ -33,33 +92,39 @@ This project is educational — it shows how to bring up a kernel in S-mode, set
   rustup component add rust-src --toolchain nightly
   ```
     
-- **QEMU with RISC-V support (qemu-system-riscv64).**
+- **QEMU with RISC-V support** (`qemu-system-riscv64`)
 
-## Build steps
+### Build Steps
 
-### Build the user program:
+The project uses a Cargo workspace. Build individual applications, then build the kernel which embeds them:
 
-```
-cargo build -p userapp --release
-cp target/riscv64gc-unknown-none-elf/release/userapp kernel/userapp.elf
-```
+```sh
+# Build user applications
+cargo build -p cat --release
+cargo build -p userapp --release  # rogue
 
-### Build the kernel (linking in userapp.elf):
+# Copy to kernel directory (embedded via include_bytes!)
+cp target/riscv64gc-unknown-none-elf/release/cat kernel/cat.elf
+cp target/riscv64gc-unknown-none-elf/release/userapp kernel/rogue.elf
 
-```
+# Build the kernel (embeds all .elf files)
 cargo build -Z build-std=core --target riscv64gc-unknown-none-elf -p kernel
 ```
 
-### Run in QEMU:
+### Run in QEMU
 
-```
+```sh
 qemu-system-riscv64 \
   -machine virt -m 128M -nographic \
   -bios default \
   -kernel target/riscv64gc-unknown-none-elf/debug/kernel
 ```
 
-### Expected output
+Or use the provided scripts:
+- Windows: `run.bat` or `test.bat`
+- Linux/macOS: `run.sh`
+
+### Expected Output
 
 ```
 riscv-os: hello from S-mode at 0x8020_0000!
@@ -68,35 +133,57 @@ traps enabled
 timers initialized
 SV39 paging enabled (identity map + UART)
 Heap init OK.
-Loaded user ELF: entry=..., sp=..., argc=3
-userapp hello 42
-TERM=xterm LANG=C
-user program exited; back in S-mode.
-tick 50
-tick 100
-...
+Box value = 0xc0ffee
+Vec sum = 140
+Loaded shell: entry=0x10000, sp=0x40008000
+shell> _
 ```
+
+---
+
+## System Calls Reference
+
+| Number | Name | Signature | Description |
+|--------|------|-----------|-------------|
+| 1 | `WRITE` | `write(ptr, len) -> usize` | Write bytes to stdout |
+| 2 | `EXIT` | `exit() -> !` | Reload shell |
+| 3 | `WRITE_CSTR` | `write_cstr(ptr) -> usize` | Write NUL-terminated string |
+| 4 | `OPEN` | `open(path) -> fd` | Open file from RAMFS |
+| 5 | `READ` | `read(fd, buf, len) -> n` | Read from file/stdin |
+| 6 | `WRITE_FD` | `write_fd(fd, buf, len) -> n` | Write to file descriptor |
+| 7 | `CLOSE` | `close(fd) -> result` | Close file descriptor |
+| 8 | `LSEEK` | `lseek(fd, offset, whence) -> new_offset` | Seek in file |
+| 9 | `BRK` | `brk(addr) -> new_brk` | Manage heap (allocate pages) |
+| 10 | `GETTIME` | `gettime() -> ticks` | Get system ticks |
+| 11 | `POWEROFF` | `poweroff() -> !` | Shutdown system |
+| 12 | `EXEC` | `exec(path) -> !` | Execute program |
+
+All syscalls use the RISC-V calling convention: `a7` = syscall number, `a0-a2` = arguments, `a0` = return value.
+
+---
 
 ## Roadmap
 
-Some possible next steps for BogoKernel:
+Completed features:
+- ✅ Syscall table (open, read, write, close, lseek, brk, exec, poweroff, gettime)
+- ✅ User heap via brk
+- ✅ Embedded filesystem (RAMFS)
+- ✅ Dynamic program loading (exec)
 
-  -  Harden paging with correct section permissions.
+Possible next steps:
 
-  -  Add a real frame allocator.
+  -  Harden paging with correct section permissions (W^X enforcement)
 
-  -  Abstract user programs as processes, add scheduler.
+  -  Add a real frame allocator (buddy allocator or bitmap)
 
-  -  Extend ELF loader with relocations and auxv.
+  -  Abstract user programs as processes with PCB, add scheduler
 
-  -  Expand syscall table (read, open, brk, mmap, …).
+  -  Extend ELF loader with relocations and auxv
 
-  -  Implement userland heap via brk/mmap.
+  -  Add writable filesystem or virtio-blk driver
 
-  -  Add filesystem or virtio-blk driver.
+  -  Improve trap/interrupt handling (PLIC for external interrupts)
 
-  -  Improve trap/interrupt handling (PLIC, vectored).
+  -  Prepare for SMP with per-hart stacks and spinlocks
 
-  -  Prepare for SMP with per-hart stacks.
-
-  -  Developer tooling: GDB scripts, xtask runner.
+  -  Developer tooling: GDB scripts, xtask runner, automated testing

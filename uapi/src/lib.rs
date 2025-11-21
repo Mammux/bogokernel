@@ -13,6 +13,7 @@ pub mod nr {
     pub const GETTIME: usize = 10; // gettime(ts_ptr) -> 0
     pub const POWEROFF: usize = 11; // poweroff() -> !
     pub const EXEC: usize = 12; // exec(path) -> !
+    pub const EXECV: usize = 13; // execv(path, argv) -> !
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
