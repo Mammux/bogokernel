@@ -226,9 +226,21 @@ int wrefresh(WINDOW *win) {
     
     chtype last_attrs = A_NORMAL;
     
-    /* Update only dirty cells */
-    for (int y = 0; y < LINES; y++) {
-        for (int x = 0; x < COLS; x++) {
+    /* Calculate window bounds in screen coordinates */
+    int win_top = win->_begy;
+    int win_bottom = win->_begy + win->_maxy;
+    int win_left = win->_begx;
+    int win_right = win->_begx + win->_maxx;
+    
+    /* Clamp to screen bounds */
+    if (win_top < 0) win_top = 0;
+    if (win_bottom > LINES) win_bottom = LINES;
+    if (win_left < 0) win_left = 0;
+    if (win_right > COLS) win_right = COLS;
+    
+    /* Update only dirty cells within window bounds */
+    for (int y = win_top; y < win_bottom; y++) {
+        for (int x = win_left; x < win_right; x++) {
             if (dirty[y][x]) {
                 /* Move cursor to position */
                 _move_cursor(y, x);
