@@ -90,6 +90,8 @@ static mut USER_NEXT_PA: usize = 0x8800_0000 - 0x0100_000 - 0x10000; // start 1 
 pub unsafe fn alloc_user_page() -> usize {
     let pa = USER_NEXT_PA;
     USER_NEXT_PA += 4096;
+    // Zero the page to avoid stale data from previous programs
+    core::ptr::write_bytes(pa as *mut u8, 0, 4096);
     pa
 }
 

@@ -435,6 +435,9 @@ fn load_program(tf: &mut TrapFrame, name: &str, argv: &[&str]) {
 
         match crate::elf::load_user_elf(f.data, user_stack_top_va, user_stack_bytes, argv, &envp) {
             Ok(img) => {
+                // Flush TLB to ensure old mappings are invalidated
+                riscv::asm::sfence_vma_all();
+                
                 // Update TrapFrame to start new program
                 tf.sepc = img.entry_va;
                 tf.sp = img.user_sp;
