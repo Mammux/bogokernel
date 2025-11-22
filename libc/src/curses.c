@@ -238,7 +238,13 @@ int wrefresh(WINDOW *win) {
     if (win_left < 0) win_left = 0;
     if (win_right > COLS) win_right = COLS;
     
-    /* Update only dirty cells within window bounds */
+    /* 
+     * CRITICAL: Update only dirty cells within THIS window's bounds.
+     * We must NOT clear dirty flags outside the window area, as this would
+     * interfere with other windows that have been marked for redraw.
+     * Bug fix: Previously iterated over entire screen, causing inventory
+     * overlay refreshes to clear dirty flags set by touchwin(stdscr).
+     */
     for (int y = win_top; y < win_bottom; y++) {
         for (int x = win_left; x < win_right; x++) {
             if (dirty[y][x]) {
