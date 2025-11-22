@@ -167,45 +167,175 @@ int vsnprintf(char *str, size_t size, const char *format, va_list args) {
     while (*format && count < (int)remaining) {
         if (*format == '%') {
             format++;
+            
+            /* Parse flags */
+            int left_align = 0;
+            int zero_pad = 0;
+            int show_plus = 0;
+            int space_prefix = 0;
+            
+            while (*format == '-' || *format == '0' || *format == '+' || *format == ' ') {
+                if (*format == '-') left_align = 1;
+                else if (*format == '0') zero_pad = 1;
+                else if (*format == '+') show_plus = 1;
+                else if (*format == ' ') space_prefix = 1;
+                format++;
+            }
+            
+            /* Parse width */
+            int width = 0;
+            if (*format == '*') {
+                width = va_arg(args, int);
+                if (width < 0) {
+                    left_align = 1;
+                    width = -width;
+                }
+                format++;
+            } else {
+                while (*format >= '0' && *format <= '9') {
+                    width = width * 10 + (*format - '0');
+                    format++;
+                }
+            }
+            
+            /* Parse precision (we'll ignore it for simplicity but need to consume args) */
+            int precision = -1;
+            if (*format == '.') {
+                format++;
+                precision = 0;
+                if (*format == '*') {
+                    precision = va_arg(args, int);
+                    format++;
+                } else {
+                    while (*format >= '0' && *format <= '9') {
+                        precision = precision * 10 + (*format - '0');
+                        format++;
+                    }
+                }
+            }
+            
+            /* Parse length modifiers (we'll skip them but advance past them) */
+            while (*format == 'l' || *format == 'h' || *format == 'L' || *format == 'z') {
+                format++;
+            }
+            
+            /* Now handle the conversion specifier */
             switch (*format) {
                 case 'd':
                 case 'i': {
                     int val = va_arg(args, int);
                     int len = num_to_str(val, buf, 10, 1);
+                    
+                    /* Apply width and padding */
+                    int pad_len = (width > len) ? width - len : 0;
+                    if (!left_align && pad_len > 0) {
+                        char pad_char = zero_pad ? '0' : ' ';
+                        for (int i = 0; i < pad_len && count < (int)remaining; i++) {
+                            str[count++] = pad_char;
+                        }
+                    }
+                    
                     int copy_len = (len < (int)remaining - count) ? len : (int)remaining - count;
                     memcpy(str + count, buf, copy_len);
                     count += copy_len;
+                    
+                    if (left_align && pad_len > 0) {
+                        for (int i = 0; i < pad_len && count < (int)remaining; i++) {
+                            str[count++] = ' ';
+                        }
+                    }
                     break;
                 }
                 case 'u': {
                     unsigned int val = va_arg(args, unsigned int);
                     int len = num_to_str(val, buf, 10, 0);
+                    
+                    int pad_len = (width > len) ? width - len : 0;
+                    if (!left_align && pad_len > 0) {
+                        char pad_char = zero_pad ? '0' : ' ';
+                        for (int i = 0; i < pad_len && count < (int)remaining; i++) {
+                            str[count++] = pad_char;
+                        }
+                    }
+                    
                     int copy_len = (len < (int)remaining - count) ? len : (int)remaining - count;
                     memcpy(str + count, buf, copy_len);
                     count += copy_len;
+                    
+                    if (left_align && pad_len > 0) {
+                        for (int i = 0; i < pad_len && count < (int)remaining; i++) {
+                            str[count++] = ' ';
+                        }
+                    }
                     break;
                 }
                 case 'x':
                 case 'X': {
                     unsigned int val = va_arg(args, unsigned int);
                     int len = num_to_str(val, buf, 16, 0);
+                    
+                    int pad_len = (width > len) ? width - len : 0;
+                    if (!left_align && pad_len > 0) {
+                        char pad_char = zero_pad ? '0' : ' ';
+                        for (int i = 0; i < pad_len && count < (int)remaining; i++) {
+                            str[count++] = pad_char;
+                        }
+                    }
+                    
                     int copy_len = (len < (int)remaining - count) ? len : (int)remaining - count;
                     memcpy(str + count, buf, copy_len);
                     count += copy_len;
+                    
+                    if (left_align && pad_len > 0) {
+                        for (int i = 0; i < pad_len && count < (int)remaining; i++) {
+                            str[count++] = ' ';
+                        }
+                    }
                     break;
                 }
                 case 's': {
                     const char *s = va_arg(args, const char *);
                     if (!s) s = "(null)";
+                    int len = 0;
+                    const char *tmp = s;
+                    while (*tmp++) len++;
+                    
+                    int pad_len = (width > len) ? width - len : 0;
+                    if (!left_align && pad_len > 0) {
+                        for (int i = 0; i < pad_len && count < (int)remaining; i++) {
+                            str[count++] = ' ';
+                        }
+                    }
+                    
                     while (*s && count < (int)remaining) {
                         str[count++] = *s++;
+                    }
+                    
+                    if (left_align && pad_len > 0) {
+                        for (int i = 0; i < pad_len && count < (int)remaining; i++) {
+                            str[count++] = ' ';
+                        }
                     }
                     break;
                 }
                 case 'c': {
                     char c = (char)va_arg(args, int);
+                    
+                    int pad_len = width > 1 ? width - 1 : 0;
+                    if (!left_align && pad_len > 0) {
+                        for (int i = 0; i < pad_len && count < (int)remaining; i++) {
+                            str[count++] = ' ';
+                        }
+                    }
+                    
                     if (count < (int)remaining) {
                         str[count++] = c;
+                    }
+                    
+                    if (left_align && pad_len > 0) {
+                        for (int i = 0; i < pad_len && count < (int)remaining; i++) {
+                            str[count++] = ' ';
+                        }
                     }
                     break;
                 }
