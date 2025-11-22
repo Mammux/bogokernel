@@ -4,6 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 
+/* Termcap compatibility - stub */
+char *CE = "\033[K";  /* ANSI clear to end of line */
+
 /* ANSI escape sequences */
 #define ESC "\033"
 #define CLEAR_SCREEN    ESC "[2J" ESC "[H"
@@ -645,3 +648,207 @@ int mvwvline(WINDOW *win, int y, int x, chtype ch, int n) {
     }
     return wvline(win, ch, n);
 }
+
+/* Additional curses functions for rogue */
+
+/* Get character at cursor position */
+chtype inch(void) {
+    return winch(stdscr);
+}
+
+chtype winch(WINDOW *win) {
+    if (!win) {
+        return (chtype)' ';
+    }
+    int y = win->_cury + win->_begy;
+    int x = win->_curx + win->_begx;
+    if (y < 0 || y >= LINES || x < 0 || x >= COLS) {
+        return (chtype)' ';
+    }
+    return (chtype)screen_buffer[y][x] | attr_buffer[y][x];
+}
+
+/* Convert control character to printable string */
+static char unctrl_buf[3];
+char *unctrl(chtype c) {
+    unsigned char ch = (unsigned char)(c & 0xFF);
+    
+    if (ch < 32) {
+        /* Control character: ^A through ^Z, etc. */
+        unctrl_buf[0] = '^';
+        unctrl_buf[1] = ch + '@';
+        unctrl_buf[2] = '\0';
+    } else if (ch == 127) {
+        /* DEL character */
+        unctrl_buf[0] = '^';
+        unctrl_buf[1] = '?';
+        unctrl_buf[2] = '\0';
+    } else {
+        /* Printable character */
+        unctrl_buf[0] = ch;
+        unctrl_buf[1] = '\0';
+    }
+    
+    return unctrl_buf;
+}
+
+/* Get string from window */
+int wgetnstr(WINDOW *win, char *str, int n) {
+    if (!win || !str || n <= 0) {
+        return -1;
+    }
+    
+    int i = 0;
+    while (i < n - 1) {
+        int ch = wgetch(win);
+        if (ch == -1) {
+            break;
+        }
+        if (ch == '\n' || ch == '\r') {
+            break;
+        }
+        if (ch == 127 || ch == 8) {  /* Backspace or DEL */
+            if (i > 0) {
+                i--;
+                /* Move cursor back and erase character */
+                if (win->_curx > 0) {
+                    win->_curx--;
+                    waddch(win, ' ');
+                    win->_curx--;
+                }
+            }
+            continue;
+        }
+        str[i++] = (char)ch;
+    }
+    str[i] = '\0';
+    return i;
+}
+
+/* Low-level cursor movement */
+int mvcur(int oldrow, int oldcol, int newrow, int newcol) {
+    /* In a real implementation, this would use terminfo capabilities */
+    /* For now, just use ANSI escape sequences */
+    (void)oldrow;
+    (void)oldcol;
+    printf(ESC "[%d;%dH", newrow + 1, newcol + 1);
+    fflush(stdout);
+    return 0;
+}
+
+/* Enable/disable keypad mode */
+int keypad(WINDOW *win, bool bf) {
+    if (!win) {
+        return -1;
+    }
+    win->_use_keypad = bf;
+    return 0;
+}
+
+/* Get kill character */
+char killchar(void) {
+    /* Return the default kill character (Ctrl-U) */
+    return 0x15;  /* ^U */
+}
+
+/* Get erase character */
+char erasechar(void) {
+    /* Return the default erase character (Ctrl-H / backspace) */
+    return 0x08;  /* ^H */
+}
+
+/* Create subwindow */
+WINDOW *subwin(WINDOW *parent, int nlines, int ncols, int begin_y, int begin_x) {
+    if (!parent) {
+        return NULL;
+    }
+    
+    /* For simplicity, create a regular window */
+    /* In a full implementation, this would share the parent's buffer */
+    return newwin(nlines, ncols, begin_y, begin_x);
+}
+
+/* Move window to new position */
+int mvwin(WINDOW *win, int y, int x) {
+    if (!win) {
+        return -1;
+    }
+    win->_begy = y;
+    win->_begx = x;
+    return 0;
+}
+
+/* Mark window as changed (for refresh) */
+int touchwin(WINDOW *win) {
+    if (!win) {
+        return -1;
+    }
+    /* Mark all cells in the window as dirty */
+    for (int y = win->_begy; y < win->_begy + win->_maxy && y < LINES; y++) {
+        for (int x = win->_begx; x < win->_begx + win->_maxx && x < COLS; x++) {
+            dirty[y][x] = true;
+        }
+    }
+    return 0;
+}
+
+/* Control cursor leave behavior */
+int leaveok(WINDOW *win, bool bf) {
+    if (!win) {
+        return -1;
+    }
+    win->_leave = bf;
+    return 0;
+}
+
+/* Get window dimensions */
+int getmaxx(WINDOW *win) {
+    if (!win) {
+        return -1;
+    }
+    return win->_maxx;
+}
+
+int getmaxy(WINDOW *win) {
+    if (!win) {
+        return -1;
+    }
+    return win->_maxy;
+}
+
+/* Additional curses stub functions for compatibility */
+
+/* flushinp - flush input buffer */
+int flushinp(void) {
+    /* Stub - nothing to flush in our implementation */
+    return 0;
+}
+
+/* idlok - enable/disable hardware insert/delete line */
+int idlok(WINDOW *win, bool bf) {
+    /* Stub - we don't support hardware scrolling */
+    (void)win;
+    (void)bf;
+    return 0;
+}
+
+/* baudrate - get terminal baud rate */
+int baudrate(void) {
+    /* Return a reasonable default */
+    return 9600;
+}
+
+/* isendwin - check if endwin has been called */
+int isendwin(void) {
+    return !_initialized;
+}
+
+/* halfdelay - set half-delay mode */
+int halfdelay(int tenths) {
+    /* Stub - we don't implement timed input */
+    (void)tenths;
+    return 0;
+}
+
+
+

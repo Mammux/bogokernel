@@ -76,3 +76,48 @@ void *sbrk(long increment) {
     
     return (void *)-1;
 }
+
+/* unlink - remove a file (stub) */
+int unlink(const char *pathname) {
+    /* BogoKernel doesn't support file deletion */
+    (void)pathname;
+    return -1;
+}
+
+/* getpid - get process ID (stub) */
+pid_t getpid(void) {
+    /* Return a fixed PID since we don't have processes */
+    return 1;
+}
+
+/* getuid - get user ID (stub) */
+uid_t getuid(void) {
+    /* Return a fixed UID */
+    return 0;
+}
+
+/* sleep - sleep for specified seconds (stub) */
+unsigned int sleep(unsigned int seconds) {
+    /* Stub - no real sleep implementation */
+    (void)seconds;
+    return 0;
+}
+
+/* getpwuid - get password entry (stub) */
+#include <pwd.h>
+static struct passwd _stub_passwd = {
+    .pw_name = "user",
+    .pw_passwd = "",
+    .pw_uid = 0,
+    .pw_gid = 0,
+    .pw_gecos = "User",
+    .pw_dir = "/",
+    .pw_shell = "/bin/sh"
+};
+
+struct passwd *getpwuid(uid_t uid) {
+    (void)uid;
+    return &_stub_passwd;
+}
+
+

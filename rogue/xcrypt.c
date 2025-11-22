@@ -51,6 +51,7 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <stddef.h>
 
 unsigned int md_endian = 0x01020304;
 

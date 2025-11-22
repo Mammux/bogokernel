@@ -1,5 +1,6 @@
 /* libc/src/string.c - String and memory functions */
 #include <string.h>
+#include <stdio.h>
 
 size_t strlen(const char *s) {
     size_t len = 0;
@@ -97,3 +98,45 @@ int memcmp(const void *s1, const void *s2, size_t n) {
     }
     return 0;
 }
+
+/* Concatenate strings */
+char *strcat(char *dest, const char *src) {
+    char *d = dest;
+    /* Find end of dest */
+    while (*d) d++;
+    /* Copy src to end of dest */
+    while ((*d++ = *src++));
+    return dest;
+}
+
+/* Concatenate strings with limit */
+char *strncat(char *dest, const char *src, size_t n) {
+    char *d = dest;
+    /* Find end of dest */
+    while (*d) d++;
+    /* Copy up to n characters from src */
+    while (n-- > 0 && *src) {
+        *d++ = *src++;
+    }
+    *d = '\0';
+    return dest;
+}
+
+/* Get error string */
+char *strerror(int errnum) {
+    static char buf[32];
+    switch (errnum) {
+        case 0: return "Success";
+        case 1: return "Operation not permitted";
+        case 2: return "No such file or directory";
+        case 5: return "I/O error";
+        case 9: return "Bad file descriptor";
+        case 12: return "Out of memory";
+        case 13: return "Permission denied";
+        case 22: return "Invalid argument";
+        default:
+            snprintf(buf, sizeof(buf), "Unknown error %d", errnum);
+            return buf;
+    }
+}
+

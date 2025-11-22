@@ -42,6 +42,18 @@
 #define KEY_UP      0403
 #define KEY_LEFT    0404
 #define KEY_RIGHT   0405
+#define KEY_HOME    0406
+#define KEY_PPAGE   0407
+#define KEY_NPAGE   0410
+#define KEY_END     0411
+#define KEY_A1      0412
+#define KEY_A3      0413
+#define KEY_B2      0414
+#define KEY_C1      0415
+#define KEY_C3      0416
+
+/* Error return value */
+#define ERR         (-1)
 
 /* Boolean type for compatibility */
 #ifndef TRUE
@@ -92,6 +104,10 @@ int mvwaddch(WINDOW *win, int y, int x, chtype ch);
 int waddstr(WINDOW *win, const char *str);
 chtype mvwinch(WINDOW *win, int y, int x);
 
+/* Macros for convenience */
+#define mvinch(y, x)        mvwinch(stdscr, y, x)
+#define getyx(win, y, x)    ((y) = (win)->_cury, (x) = (win)->_curx)
+
 /* Screen update */
 int refresh(void);
 int wrefresh(WINDOW *win);
@@ -106,6 +122,19 @@ int clearok(WINDOW *win, bool bf);
 /* Input functions */
 int getch(void);
 int wgetch(WINDOW *win);
+int wgetnstr(WINDOW *win, char *str, int n);
+char *unctrl(chtype c);
+chtype inch(void);
+chtype winch(WINDOW *win);
+int mvcur(int oldrow, int oldcol, int newrow, int newcol);
+int keypad(WINDOW *win, bool bf);
+char killchar(void);
+char erasechar(void);
+int flushinp(void);
+int idlok(WINDOW *win, bool bf);
+int baudrate(void);
+int isendwin(void);
+int halfdelay(int tenths);
 
 /* Terminal mode functions */
 int cbreak(void);
@@ -128,7 +157,16 @@ int attrset(chtype attrs);
 
 /* Window management */
 WINDOW *newwin(int nlines, int ncols, int begin_y, int begin_x);
+WINDOW *subwin(WINDOW *parent, int nlines, int ncols, int begin_y, int begin_x);
 int delwin(WINDOW *win);
+int mvwin(WINDOW *win, int y, int x);
+int touchwin(WINDOW *win);
+int leaveok(WINDOW *win, bool bf);
+int getmaxx(WINDOW *win);
+int getmaxy(WINDOW *win);
+
+/* Macros for convenience */
+#define getyx(win, y, x)    ((y) = (win)->_cury, (x) = (win)->_curx)
 
 /* Box and border drawing */
 int box(WINDOW *win, chtype verch, chtype horch);

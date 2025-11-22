@@ -2,10 +2,18 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
-/* Fake FILE for stdout */
+/* Global errno */
+int errno = 0;
+
+/* Fake FILE for stdout, stdin, and stderr */
 static FILE _stdout = { .fd = STDOUT_FILENO };
+static FILE _stdin = { .fd = 0 };
+static FILE _stderr = { .fd = 2 };
 FILE *stdout = &_stdout;
+FILE *stdin = &_stdin;
+FILE *stderr = &_stderr;
 
 int putchar(int c) {
     char ch = (char)c;
@@ -127,10 +135,17 @@ int printf(const char *format, ...) {
 }
 
 int sprintf(char *str, const char *format, ...) {
-    /* TODO: Implement sprintf */
-    (void)str;
-    (void)format;
-    return 0;
+    va_list args;
+    va_start(args, format);
+    int ret = vsprintf(str, format, args);
+    va_end(args);
+    return ret;
+}
+
+int vsprintf(char *str, const char *format, va_list args) {
+    /* vsprintf is like vsnprintf with no size limit */
+    /* For safety, we'll use a large buffer size */
+    return vsnprintf(str, 4096, format, args);
 }
 
 int snprintf(char *str, size_t size, const char *format, ...) {
@@ -224,3 +239,214 @@ int fflush(FILE *stream) {
     (void)stream;
     return 0;
 }
+
+/* File I/O functions - minimal stub implementations */
+FILE *fopen(const char *pathname, const char *mode) {
+    /* In BogoKernel, we don't have a real filesystem */
+    /* These are stubs to allow compilation */
+    (void)pathname;
+    (void)mode;
+    errno = ENOENT;
+    return NULL;
+}
+
+int fclose(FILE *stream) {
+    if (!stream) {
+        errno = EBADF;
+        return EOF;
+    }
+    /* Nothing to do in our stub implementation */
+    return 0;
+}
+
+char *fgets(char *s, int size, FILE *stream) {
+    if (!s || size <= 0 || !stream) {
+        errno = EINVAL;
+        return NULL;
+    }
+    
+    if (stream == stdin) {
+        /* Read from stdin */
+        int i = 0;
+        while (i < size - 1) {
+            char c;
+            ssize_t n = read(0, &c, 1);
+            if (n <= 0) {
+                break;
+            }
+            s[i++] = c;
+            if (c == '\n') {
+                break;
+            }
+        }
+        s[i] = '\0';
+        return (i > 0) ? s : NULL;
+    }
+    
+    errno = EBADF;
+    return NULL;
+}
+
+size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
+    if (!ptr || !stream) {
+        errno = EINVAL;
+        return 0;
+    }
+    
+    /* Stub implementation */
+    (void)size;
+    (void)nmemb;
+    errno = EBADF;
+    return 0;
+}
+
+int putc(int c, FILE *stream) {
+    if (!stream) {
+        errno = EBADF;
+        return EOF;
+    }
+    
+    if (stream == stdout) {
+        return putchar(c);
+    }
+    
+    /* Stub for file output */
+    errno = EBADF;
+    return EOF;
+}
+
+void rewind(FILE *stream) {
+    if (!stream) {
+        return;
+    }
+    /* Stub - nothing to do */
+}
+
+/* Minimal sscanf implementation */
+int sscanf(const char *str, const char *format, ...) {
+    if (!str || !format) {
+        return 0;
+    }
+    
+    va_list args;
+    va_start(args, format);
+    
+    int count = 0;
+    const char *s = str;
+    const char *f = format;
+    
+    while (*f) {
+        /* Skip whitespace in format */
+        while (*f == ' ' || *f == '\t' || *f == '\n') f++;
+        
+        if (*f == '%') {
+            f++;
+            if (*f == 'd') {
+                /* Parse integer */
+                int *ip = va_arg(args, int *);
+                int sign = 1;
+                int val = 0;
+                
+                /* Skip whitespace */
+                while (*s == ' ' || *s == '\t') s++;
+                
+                /* Check for sign */
+                if (*s == '-') {
+                    sign = -1;
+                    s++;
+                } else if (*s == '+') {
+                    s++;
+                }
+                
+                /* Parse digits */
+                if (*s >= '0' && *s <= '9') {
+                    while (*s >= '0' && *s <= '9') {
+                        val = val * 10 + (*s - '0');
+                        s++;
+                    }
+                    *ip = sign * val;
+                    count++;
+                }
+                f++;
+            } else if (*f == 's') {
+                /* Parse string */
+                char *sp = va_arg(args, char *);
+                
+                /* Skip whitespace */
+                while (*s == ' ' || *s == '\t') s++;
+                
+                /* Copy until whitespace */
+                while (*s && *s != ' ' && *s != '\t' && *s != '\n') {
+                    *sp++ = *s++;
+                }
+                *sp = '\0';
+                count++;
+                f++;
+            } else {
+                f++;
+            }
+        } else if (*f == *s) {
+            f++;
+            s++;
+        } else {
+            break;
+        }
+    }
+    
+    va_end(args);
+    return count;
+}
+
+/* Print error message */
+void perror(const char *s) {
+    if (s && *s) {
+        printf("%s: ", s);
+    }
+    printf("%s\n", strerror(errno));
+}
+
+/* fputs - write string to file stream */
+int fputs(const char *s, FILE *stream) {
+    if (!s || !stream) {
+        errno = EINVAL;
+        return EOF;
+    }
+    
+    if (stream == stdout || stream == stderr) {
+        size_t len = strlen(s);
+        int fd = (stream == stdout) ? STDOUT_FILENO : 2;
+        ssize_t written = write(fd, s, len);
+        return (written == (ssize_t)len) ? 0 : EOF;
+    }
+    
+    errno = EBADF;
+    return EOF;
+}
+
+/* fputc - write character to file stream */
+int fputc(int c, FILE *stream) {
+    if (!stream) {
+        errno = EBADF;
+        return EOF;
+    }
+    
+    if (stream == stdout) {
+        return putchar(c);
+    } else if (stream == stderr) {
+        char ch = (char)c;
+        write(2, &ch, 1);
+        return c;
+    }
+    
+    errno = EBADF;
+    return EOF;
+}
+
+/* setbuf - set buffer for stream (stub) */
+void setbuf(FILE *stream, char *buf) {
+    /* Stub - our implementation is unbuffered */
+    (void)stream;
+    (void)buf;
+}
+
+
