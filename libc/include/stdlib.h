@@ -18,4 +18,11 @@ int atoi(const char *nptr);
 long atol(const char *nptr);
 int abs(int j);
 
+/* Random number generation */
+void srand(unsigned int seed);
+int rand(void);
+
+/* Environment */
+char *getenv(const char *name);
+
 #endif /* _STDLIB_H */

@@ -22,5 +22,13 @@ off_t lseek(int fd, off_t offset, int whence);
 void _exit(int status) __attribute__((noreturn));
 int brk(void *addr);
 void *sbrk(long increment);
+int unlink(const char *pathname);
+pid_t getpid(void);
+uid_t getuid(void);
+unsigned int sleep(unsigned int seconds);
+int chmod(const char *pathname, unsigned int mode);
+
+/* Environment variables */
+extern char **environ;
 
 #endif /* _UNISTD_H */

@@ -20,7 +20,7 @@
 #undef HAVE_DOPRNT
 
 /* Define to 1 if you have the `erasechar' function. */
-#undef HAVE_ERASECHAR
+#define HAVE_ERASECHAR 1
 
 /* Define if ncurses has ESCDELAY variable */
 #undef HAVE_ESCDELAY
@@ -50,7 +50,7 @@
 #undef HAVE_INTTYPES_H
 
 /* Define to 1 if you have the `killchar' function. */
-#undef HAVE_KILLCHAR
+#define HAVE_KILLCHAR 1
 
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
@@ -84,7 +84,7 @@
 #undef HAVE_PROCESS_H
 
 /* Define to 1 if you have the <pwd.h> header file. */
-#undef HAVE_PWD_H
+#define HAVE_PWD_H 1
 
 /* Define to 1 if you have the `setenv' function. */
 #undef HAVE_SETENV
@@ -151,7 +151,7 @@
 #undef HAVE_TERMIOS_H
 
 /* Define to 1 if you have the <term.h> header file. */
-#undef HAVE_TERM_H
+#define HAVE_TERM_H 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
@@ -242,26 +242,31 @@
 
 /* define if we should use program's user counting function instead of
    system's */
-#define UCOUNT
+/* BogoKernel doesn't have utmp */
+#undef UCOUNT
 
 /* utmp like file to pass to ucount() when counting online users (unlikely to
    work) */
-#define UTMP
+/* BogoKernel doesn't have a utmp file */
+#undef UTMP
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #define const
 
 /* Define to `int' if <sys/types.h> doesn't define. */
-#define gid_t int
+/* Now defined in libc sys/types.h */
+#undef gid_t
 
 /* Define to `int' if <sys/types.h> does not define. */
-#define pid_t int
+/* Now defined in libc sys/types.h */
+#undef pid_t
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef size_t
 
 /* Define to `int' if <sys/types.h> doesn't define. */
-#define uid_t int
+/* Now defined in libc sys/types.h */
+#undef uid_t
 
 /* Define as `fork' if `vfork' does not work. */
 #undef vfork 
