@@ -1,5 +1,3 @@
-/* config.h.in.  Generated from configure.ac by autoheader.  */
-
 /* Define if scorefile is top scores, not top players */
 #undef ALLSCORES
 
@@ -260,7 +258,7 @@
 #define pid_t int
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
-#define size_t unsigned int
+#undef size_t
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #define uid_t int

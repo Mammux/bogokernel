@@ -15,4 +15,4 @@ REM Link with libc.a
 %LD% -T linker.ld -o hello.elf hello.o ../libc/libc.a
 
 echo Build complete: hello.elf
-echo Copy to kernel: copy hello.elf ..\kernel\hello.elf
+copy hello.elf ..\kernel\hello.elf

@@ -15,8 +15,9 @@ REM Compile source files
 %CC% %CFLAGS% -c src/string.c -o src/string.o
 %CC% %CFLAGS% -c src/stdlib.c -o src/stdlib.o
 %CC% %CFLAGS% -c src/stdio.c -o src/stdio.o
+%CC% %CFLAGS% -c src/curses.c -o src/curses.o
 
 REM Create static library
-%AR% rcs libc.a src/crt0.o src/syscall.o src/unistd.o src/string.o src/stdlib.o src/stdio.o
+x%AR% rcs libc.a src/crt0.o src/syscall.o src/unistd.o src/string.o src/stdlib.o src/stdio.o src/curses.o
 
 echo Build complete: libc.a

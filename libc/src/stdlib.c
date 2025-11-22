@@ -82,3 +82,7 @@ int atoi(const char *nptr) {
 long atol(const char *nptr) {
     return (long)atoi(nptr);
 }
+
+int abs(int j) {
+    return j < 0 ? -j : j;
+}

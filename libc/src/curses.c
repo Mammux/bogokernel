@@ -120,8 +120,8 @@ int waddch(WINDOW *win, chtype ch) {
         return -1;
     }
     
-    int y = win->_cury;
-    int x = win->_curx;
+    int y = win->_cury + win->_begy;
+    int x = win->_curx + win->_begx;
     
     if (y < 0 || y >= LINES || x < 0 || x >= COLS) {
         return -1;

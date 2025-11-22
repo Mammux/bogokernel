@@ -15,4 +15,4 @@ REM Link with libc.a
 %LD% -T linker.ld -o crogue.elf crogue.o ../libc/libc.a
 
 echo Build complete: crogue.elf
-echo Copy to kernel: copy crogue.elf ..\kernel\crogue.elf
+copy crogue.elf ..\kernel\crogue.elf

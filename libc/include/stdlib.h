@@ -16,5 +16,6 @@ void *realloc(void *ptr, size_t size);
 /* Numeric conversion */
 int atoi(const char *nptr);
 long atol(const char *nptr);
+int abs(int j);
 
 #endif /* _STDLIB_H */
