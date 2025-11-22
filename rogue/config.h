@@ -154,7 +154,7 @@
 #define HAVE_TERM_H 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
+#define HAVE_UNISTD_H 1
 
 /* Define to 1 if you have the <utmp.h> header file. */
 #undef HAVE_UTMP_H

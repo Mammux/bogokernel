@@ -58,7 +58,7 @@ fn main() {
         let cmd = tokens[0];
         
         match cmd {
-            "help" => println!("Available commands: hello, rogue, crogue, curses_test, shutdown"),
+            "help" => println!("Available commands: hello, rogue, crogue, bigrogue, curses_test, shutdown"),
             "shutdown" => {
                 println!("Shutting down...");
                 usys::poweroff();
@@ -100,6 +100,12 @@ fn main() {
                 let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("crogue.elf").unwrap()];
                 let argv_refs = [argv_cstrs[0].as_cstr()];
                 usys::execv(usys::cstr!("crogue.elf"), &argv_refs);
+            },
+            "bigrogue" => {
+                println!("Executing bigrogue...");
+                let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("bigrogue.elf").unwrap()];
+                let argv_refs = [argv_cstrs[0].as_cstr()];
+                usys::execv(usys::cstr!("bigrogue.elf"), &argv_refs);
             },
             "curses_test" => {
                 println!("Executing curses_test...");
