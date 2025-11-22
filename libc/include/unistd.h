@@ -26,5 +26,9 @@ int unlink(const char *pathname);
 pid_t getpid(void);
 uid_t getuid(void);
 unsigned int sleep(unsigned int seconds);
+int chmod(const char *pathname, unsigned int mode);
+
+/* Environment variables */
+extern char **environ;
 
 #endif /* _UNISTD_H */

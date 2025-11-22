@@ -449,4 +449,15 @@ void setbuf(FILE *stream, char *buf) {
     (void)buf;
 }
 
+/* Windows conio compatibility */
+int _getch(void) {
+    /* Read a single character without echo */
+    char c;
+    if (read(0, &c, 1) != 1) {
+        return -1;
+    }
+    return (int)(unsigned char)c;
+}
+
+
 

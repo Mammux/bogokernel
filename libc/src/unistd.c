@@ -1,5 +1,6 @@
 /* libc/src/unistd.c - POSIX syscall wrappers */
 #include <unistd.h>
+#include <stddef.h>
 
 /* Syscall numbers */
 #define SYS_WRITE      1
@@ -102,6 +103,17 @@ unsigned int sleep(unsigned int seconds) {
     (void)seconds;
     return 0;
 }
+
+/* chmod - change file permissions (stub) */
+int chmod(const char *pathname, unsigned int mode) {
+    /* BogoKernel doesn't support file permissions */
+    (void)pathname;
+    (void)mode;
+    return 0;
+}
+
+/* environ - environment variables array (stub) */
+char **environ = NULL;
 
 /* getpwuid - get password entry (stub) */
 #include <pwd.h>

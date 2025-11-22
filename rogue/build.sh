@@ -5,7 +5,7 @@ set -e
 
 CC=riscv64-linux-gnu-gcc
 LD=riscv64-linux-gnu-ld
-CFLAGS="-march=rv64gc -mabi=lp64d -ffreestanding -nostdlib -I../libc/include"
+CFLAGS="-march=rv64gc -mabi=lp64d -ffreestanding -nostdlib -nostdinc -I../libc/include"
 
 echo "Building rogue.elf with libc..."
 
