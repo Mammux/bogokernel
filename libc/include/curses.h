@@ -165,9 +165,6 @@ int leaveok(WINDOW *win, bool bf);
 int getmaxx(WINDOW *win);
 int getmaxy(WINDOW *win);
 
-/* Macros for convenience */
-#define getyx(win, y, x)    ((y) = (win)->_cury, (x) = (win)->_curx)
-
 /* Box and border drawing */
 int box(WINDOW *win, chtype verch, chtype horch);
 int border(chtype ls, chtype rs, chtype ts, chtype bs, 

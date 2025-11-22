@@ -144,7 +144,8 @@ int sprintf(char *str, const char *format, ...) {
 
 int vsprintf(char *str, const char *format, va_list args) {
     /* vsprintf is like vsnprintf with no size limit */
-    /* For safety, we'll use a large buffer size */
+    /* WARNING: This assumes str buffer is large enough (at least 4096 bytes) */
+    /* For safety, callers should use vsnprintf with explicit size instead */
     return vsnprintf(str, 4096, format, args);
 }
 
