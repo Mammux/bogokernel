@@ -533,8 +533,6 @@ int putc(int c, FILE *stream) {
     
     return (unsigned char)c;
 }
-    return EOF;
-}
 
 void rewind(FILE *stream) {
     if (!stream) {
