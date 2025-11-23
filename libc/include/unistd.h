@@ -4,7 +4,7 @@
 #include <sys/types.h>
 
 /* Standard file descriptors */
-#define STDIN_FILENO  0
+#define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
@@ -27,6 +27,7 @@ pid_t getpid(void);
 uid_t getuid(void);
 unsigned int sleep(unsigned int seconds);
 int chmod(const char *pathname, unsigned int mode);
+int creat(const char *pathname, unsigned int mode);
 
 /* Environment variables */
 extern char **environ;

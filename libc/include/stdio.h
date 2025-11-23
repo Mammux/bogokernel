@@ -1,8 +1,8 @@
 #ifndef _STDIO_H
 #define _STDIO_H
 
-#include <sys/types.h>
 #include <stdarg.h>
+#include <sys/types.h>
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -21,7 +21,7 @@
 
 /* Fake FILE structure for compatibility */
 typedef struct {
-    int fd;
+  int fd;
 } FILE;
 
 extern FILE *stdout;

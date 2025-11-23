@@ -11,7 +11,7 @@ pub extern "C" fn _start(_argc: usize, _argv: *const *const u8, _envp: *const *c
 
 fn main() {
     println!("Welcome to BogoShell!");
-    println!("Commands: hello, rogue, crogue, curses_test, shutdown, help");
+    println!("Commands: hello, rogue, crogue, bigrogue, curses_test, fstest, shutdown, help");
 
     let mut buf = [0u8; 64];
     loop {
@@ -58,7 +58,7 @@ fn main() {
         let cmd = tokens[0];
         
         match cmd {
-            "help" => println!("Available commands: hello, rogue, crogue, bigrogue, curses_test, shutdown"),
+            "help" => println!("Available commands: hello, rogue, crogue, bigrogue, curses_test, fstest, shutdown"),
             "shutdown" => {
                 println!("Shutting down...");
                 usys::poweroff();
@@ -112,6 +112,12 @@ fn main() {
                 let argv_refs = [argv_cstrs[0].as_cstr()];
                 usys::execv(usys::cstr!("curses_test.elf"), &argv_refs);
             },
+            "fstest" => {
+                println!("Executing fstest...");
+                let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("fstest.elf").unwrap()];
+                let argv_refs = [argv_cstrs[0].as_cstr()];
+                usys::execv(usys::cstr!("fstest.elf"), &argv_refs);
+            },            
             _ => println!("Unknown command: {}", cmd),
         }
     }
