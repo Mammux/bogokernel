@@ -132,33 +132,44 @@ fn main() {
                     core::str::from_utf8(&filename_buf[..len]).unwrap_or(cmd)
                 };
                 
-                // Build argv array with command line arguments
-                let mut argv_cstrs: [usys::CStrBuf<64>; 16] = Default::default();
-                
-                // First arg is program name
-                if let Ok(cstr) = usys::CStrBuf::<64>::from_str(filename) {
-                    argv_cstrs[0] = cstr;
-                    let mut argv_count = 1;
-                    
-                    // Add remaining arguments
-                    for i in 1..token_count {
-                        if argv_count >= 16 {
-                            break;
+                // Check if file exists before trying to execute
+                if let Ok(filename_cstr) = usys::CStrBuf::<64>::from_str(filename) {
+                    let mut stat_buf = [0u64; 2];
+                    match usys::stat(filename_cstr.as_cstr(), &mut stat_buf) {
+                        Ok(_) => {
+                            // File exists, proceed with execution
+                            // Build argv array with command line arguments
+                            let mut argv_cstrs: [usys::CStrBuf<64>; 16] = Default::default();
+                            
+                            // First arg is program name
+                            argv_cstrs[0] = filename_cstr;
+                            let mut argv_count = 1;
+                            
+                            // Add remaining arguments
+                            for i in 1..token_count {
+                                if argv_count >= 16 {
+                                    break;
+                                }
+                                if let Ok(cstr) = usys::CStrBuf::<64>::from_str(tokens[i]) {
+                                    argv_cstrs[argv_count] = cstr;
+                                    argv_count += 1;
+                                }
+                            }
+                            
+                            // Build references array
+                            let mut argv_refs: [&core::ffi::CStr; 16] = [usys::cstr!(""); 16];
+                            for i in 0..argv_count {
+                                argv_refs[i] = argv_cstrs[i].as_cstr();
+                            }
+                            
+                            // Execute the program
+                            usys::execv(argv_cstrs[0].as_cstr(), &argv_refs[..argv_count]);
                         }
-                        if let Ok(cstr) = usys::CStrBuf::<64>::from_str(tokens[i]) {
-                            argv_cstrs[argv_count] = cstr;
-                            argv_count += 1;
+                        Err(_) => {
+                            println!("Command not found: {}", filename);
+                            println!("Type 'help' for available commands or 'ls' to see programs");
                         }
                     }
-                    
-                    // Build references array
-                    let mut argv_refs: [&core::ffi::CStr; 16] = [usys::cstr!(""); 16];
-                    for i in 0..argv_count {
-                        argv_refs[i] = argv_cstrs[i].as_cstr();
-                    }
-                    
-                    // Execute the program
-                    usys::execv(argv_cstrs[0].as_cstr(), &argv_refs[..argv_count]);
                 } else {
                     println!("Error: Invalid filename '{}'", filename);
                 }
