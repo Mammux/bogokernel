@@ -83,6 +83,10 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
                 nr::POWEROFF => sys_poweroff(tf),   // poweroff()
                 nr::EXEC => sys_exec(tf),           // exec(path)
                 nr::EXECV => sys_execv(tf),         // execv(path, argv)
+                nr::CREAT => sys_creat(tf),         // creat(path, mode)
+                nr::UNLINK => sys_unlink(tf),       // unlink(path)
+                nr::STAT => sys_stat(tf),           // stat(path, buf)
+                nr::CHMOD => sys_chmod(tf),         // chmod(path, mode)
                 nr => {
                     let mut uart = crate::uart::Uart::new();
                     let _ = writeln!(uart, "\r\nunknown syscall: {}", nr);
@@ -188,30 +192,39 @@ fn sys_exit(tf: &mut TrapFrame) {
 const MAX_FD: usize = 32;
 
 #[derive(Clone, Copy)]
+enum FileType {
+    ReadOnly(usize),  // index into fs::FILES
+    Writable(usize),  // index into writable files
+}
+
+#[derive(Clone, Copy)]
 struct FdEntry {
     in_use: bool,
-    file_idx: usize, // index into fs::FILES
+    file_type: FileType,
     offset: usize,
+    writable: bool,
 }
 
 impl FdEntry {
     const EMPTY: Self = Self {
         in_use: false,
-        file_idx: 0,
+        file_type: FileType::ReadOnly(0),
         offset: 0,
+        writable: false,
     };
 }
 
 static FD_TABLE: Mutex<[FdEntry; MAX_FD]> = Mutex::new([FdEntry::EMPTY; MAX_FD]);
 
-fn fd_alloc(file_idx: usize) -> Option<usize> {
+fn fd_alloc(file_type: FileType, writable: bool) -> Option<usize> {
     let mut tbl = FD_TABLE.lock();
     for fd in 3..MAX_FD {
         if !tbl[fd].in_use {
             tbl[fd] = FdEntry {
                 in_use: true,
-                file_idx,
+                file_type,
                 offset: 0,
+                writable,
             };
             return Some(fd);
         }
@@ -323,9 +336,19 @@ fn sys_open(tf: &mut TrapFrame) {
 
     let _ = write!(crate::uart::Uart::new(), "sys_open: path='{}'\r\n", path);
 
-    if let Some((idx, _f)) = fs::FILES.iter().enumerate().find(|(_, f)| f.name == path) {
+    // First check writable files
+    if let Some(idx) = fs::lookup_writable(path) {
+        let _ = write!(crate::uart::Uart::new(), "sys_open: writable file found at idx={}\r\n", idx);
+        if let Some(fd) = fd_alloc(FileType::Writable(idx), false) {
+            let _ = write!(crate::uart::Uart::new(), "sys_open: allocated fd={}\r\n", fd);
+            tf.a0 = fd;
+        } else {
+            let _ = write!(crate::uart::Uart::new(), "sys_open: unable to alloc fd\r\n");
+            tf.a0 = usize::MAX; // no fds
+        }
+    } else if let Some((idx, _f)) = fs::FILES.iter().enumerate().find(|(_, f)| f.name == path) {
         let _ = write!(crate::uart::Uart::new(), "sys_open: file found at idx={}\r\n", idx);
-        if let Some(fd) = fd_alloc(idx) {
+        if let Some(fd) = fd_alloc(FileType::ReadOnly(idx), false) {
             let _ = write!(crate::uart::Uart::new(), "sys_open: allocated fd={}\r\n", fd);
             tf.a0 = fd;
         } else {
@@ -513,21 +536,43 @@ fn sys_read(tf: &mut TrapFrame) {
         return;
     }
 
-    // --- Regular files via RAMFS (existing code path) ---
+    // --- Regular files via RAMFS or writable files ---
     let entry = match fd_get(fd as usize) {
         Some(e) => e,
         None => { tf.a0 = usize::MAX; tf.sepc = tf.sepc.wrapping_add(4); return; }
     };
-    let file = &crate::fs::FILES[entry.file_idx];
-    if entry.offset >= file.data.len() {
-        tf.a0 = 0; tf.sepc = tf.sepc.wrapping_add(4); return;
-    }
-    let remain = &file.data[entry.offset..];
-    let chunk = &remain[..core::cmp::min(len, remain.len())];
+    
+    match entry.file_type {
+        FileType::ReadOnly(idx) => {
+            let file = &crate::fs::FILES[idx];
+            if entry.offset >= file.data.len() {
+                tf.a0 = 0; tf.sepc = tf.sepc.wrapping_add(4); return;
+            }
+            let remain = &file.data[entry.offset..];
+            let chunk = &remain[..core::cmp::min(len, remain.len())];
 
-    let n = copy_to_user(buf, chunk);
-    fd_advance(fd as usize, n);
-    tf.a0 = n;
+            let n = copy_to_user(buf, chunk);
+            fd_advance(fd as usize, n);
+            tf.a0 = n;
+        }
+        FileType::Writable(idx) => {
+            // Read from writable file
+            let mut temp_buf = [0u8; 4096];
+            let read_len = core::cmp::min(len, temp_buf.len());
+            
+            match fs::read_file(idx, entry.offset, &mut temp_buf[..read_len]) {
+                Ok(n) => {
+                    let copied = copy_to_user(buf, &temp_buf[..n]);
+                    fd_advance(fd as usize, copied);
+                    tf.a0 = copied;
+                }
+                Err(_) => {
+                    tf.a0 = usize::MAX;
+                }
+            }
+        }
+    }
+    
     tf.sepc = tf.sepc.wrapping_add(4);
 }
 
@@ -539,7 +584,7 @@ fn sys_close(tf: &mut TrapFrame) {
 
 fn sys_write_fd(tf: &mut TrapFrame) {
     // a0 = fd, a1 = buf, a2 = len
-    let _fd = tf.a0 as isize; // currently we only have UART; treat 1/2 the same
+    let fd = tf.a0 as isize;
     let buf = tf.a1;
     let mut len = tf.a2;
 
@@ -548,17 +593,64 @@ fn sys_write_fd(tf: &mut TrapFrame) {
     }
     len = cap_to_page(buf, len);
 
-    let mut uart = crate::uart::Uart::new();
-    unsafe {
-        with_sum_no_timer(|| {
-            for i in 0..len {
-                let b = core::ptr::read((buf + i) as *const u8);
-                if b == b'\n' { uart.write_byte(b'\r'); }
-                uart.write_byte(b);
-            }
-        });
+    // Check if this is stdout/stderr - write to UART
+    if fd == 1 || fd == 2 {
+        let mut uart = crate::uart::Uart::new();
+        unsafe {
+            with_sum_no_timer(|| {
+                for i in 0..len {
+                    let b = core::ptr::read((buf + i) as *const u8);
+                    if b == b'\n' { uart.write_byte(b'\r'); }
+                    uart.write_byte(b);
+                }
+            });
+        }
+        tf.a0 = len;
+        tf.sepc = tf.sepc.wrapping_add(4);
+        return;
     }
-    tf.a0 = len;
+
+    // Handle file writes
+    let entry = match fd_get(fd as usize) {
+        Some(e) => e,
+        None => { tf.a0 = usize::MAX; tf.sepc = tf.sepc.wrapping_add(4); return; }
+    };
+
+    if !entry.writable {
+        // Read-only file
+        tf.a0 = usize::MAX;
+        tf.sepc = tf.sepc.wrapping_add(4);
+        return;
+    }
+
+    match entry.file_type {
+        FileType::Writable(idx) => {
+            // Copy from user to kernel buffer, then write
+            let mut temp_buf = [0u8; 4096];
+            let write_len = core::cmp::min(len, temp_buf.len());
+            
+            unsafe {
+                with_sum_no_timer(|| {
+                    core::ptr::copy_nonoverlapping(buf as *const u8, temp_buf.as_mut_ptr(), write_len);
+                });
+            }
+            
+            match fs::write_file(idx, entry.offset, &temp_buf[..write_len]) {
+                Ok(n) => {
+                    fd_advance(fd as usize, n);
+                    tf.a0 = n;
+                }
+                Err(_) => {
+                    tf.a0 = usize::MAX;
+                }
+            }
+        }
+        FileType::ReadOnly(_) => {
+            // Should not happen (checked writable above)
+            tf.a0 = usize::MAX;
+        }
+    }
+    
     tf.sepc = tf.sepc.wrapping_add(4);
 }
 
@@ -576,7 +668,21 @@ fn sys_lseek(tf: &mut TrapFrame) {
             return;
         }
     };
-    let file_len = crate::fs::FILES[entry.file_idx].data.len();
+    
+    let file_len = match entry.file_type {
+        FileType::ReadOnly(idx) => crate::fs::FILES[idx].data.len(),
+        FileType::Writable(idx) => {
+            match fs::file_size(idx) {
+                Some(sz) => sz,
+                None => {
+                    tf.a0 = usize::MAX;
+                    tf.sepc = tf.sepc.wrapping_add(4);
+                    return;
+                }
+            }
+        }
+    };
+    
     let new_off = match whence {
         0 => offset, // SEEK_SET
         1 => entry.offset as isize + offset, // SEEK_CUR
@@ -634,5 +740,124 @@ fn sys_gettime(tf: &mut TrapFrame) {
     // a0 = ptr to timeval/timespec (ignored for now, just return ticks)
     // Return ticks in a0
     tf.a0 = crate::timer::TICKS.load(core::sync::atomic::Ordering::Relaxed) as usize;
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_creat(tf: &mut TrapFrame) {
+    // a0 = path (C string in user VA), a1 = mode (ignored for now)
+    let path_va = tf.a0;
+    let mut buf = [0u8; 256];
+    let path = match read_user_cstr_in_page(path_va, 255, &mut buf) {
+        Ok(s) => s,
+        Err(_) => {
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
+        }
+    };
+
+    let _ = write!(crate::uart::Uart::new(), "sys_creat: path='{}'\r\n", path);
+
+    match fs::create_file(path) {
+        Ok(idx) => {
+            if let Some(fd) = fd_alloc(FileType::Writable(idx), true) {
+                let _ = write!(crate::uart::Uart::new(), "sys_creat: created fd={}\r\n", fd);
+                tf.a0 = fd;
+            } else {
+                tf.a0 = usize::MAX;
+            }
+        }
+        Err(_) => {
+            tf.a0 = usize::MAX;
+        }
+    }
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_unlink(tf: &mut TrapFrame) {
+    // a0 = path (C string in user VA)
+    let path_va = tf.a0;
+    let mut buf = [0u8; 256];
+    let path = match read_user_cstr_in_page(path_va, 255, &mut buf) {
+        Ok(s) => s,
+        Err(_) => {
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
+        }
+    };
+
+    let _ = write!(crate::uart::Uart::new(), "sys_unlink: path='{}'\r\n", path);
+
+    match fs::unlink_file(path) {
+        Ok(_) => tf.a0 = 0,
+        Err(_) => tf.a0 = usize::MAX,
+    }
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_stat(tf: &mut TrapFrame) {
+    // a0 = path (C string in user VA), a1 = stat buffer (user VA)
+    let path_va = tf.a0;
+    let stat_buf = tf.a1;
+    
+    let mut path_buf = [0u8; 256];
+    let path = match read_user_cstr_in_page(path_va, 255, &mut path_buf) {
+        Ok(s) => s,
+        Err(_) => {
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
+        }
+    };
+
+    let _ = write!(crate::uart::Uart::new(), "sys_stat: path='{}'\r\n", path);
+
+    match fs::stat_file(path) {
+        Some(stat) => {
+            // Write simplified stat structure to user buffer
+            // For now, just write size and mode (8 bytes each)
+            let stat_data = [
+                stat.size as u64,
+                stat.mode as u64,
+            ];
+            
+            unsafe {
+                with_sum_no_timer(|| {
+                    let ptr = stat_buf as *mut u64;
+                    core::ptr::write(ptr, stat_data[0]);
+                    core::ptr::write(ptr.add(1), stat_data[1]);
+                });
+            }
+            tf.a0 = 0;
+        }
+        None => {
+            tf.a0 = usize::MAX;
+        }
+    }
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_chmod(tf: &mut TrapFrame) {
+    // a0 = path (C string in user VA), a1 = mode
+    let path_va = tf.a0;
+    let mode = tf.a1 as u32;
+    
+    let mut buf = [0u8; 256];
+    let path = match read_user_cstr_in_page(path_va, 255, &mut buf) {
+        Ok(s) => s,
+        Err(_) => {
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
+        }
+    };
+
+    let _ = write!(crate::uart::Uart::new(), "sys_chmod: path='{}' mode={:o}\r\n", path, mode);
+
+    match fs::chmod_file(path, mode) {
+        Ok(_) => tf.a0 = 0,
+        Err(_) => tf.a0 = usize::MAX,
+    }
     tf.sepc = tf.sepc.wrapping_add(4);
 }
