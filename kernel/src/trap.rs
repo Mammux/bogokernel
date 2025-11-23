@@ -538,8 +538,8 @@ fn load_program(tf: &mut TrapFrame, name: &str, argv: &[&str]) {
     // CRITICAL: Clear old user mappings and reset allocator before loading new program
     let _ = writeln!(crate::uart::Uart::new(), "load_program: clearing user pages");
     unsafe {
-        crate::sv39::clear_user_mappings();
         crate::sv39::reset_user_pages();
+        crate::sv39::clear_user_mappings();
     }
 
     let _ = writeln!(crate::uart::Uart::new(), "load_program: calling load_user_elf");

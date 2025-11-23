@@ -85,7 +85,9 @@ fn vpn_indices(va: usize) -> [usize; 3] {
 // ---- very simple user-phys page bump allocator ----
 // Reserve a small chunk near the *top* of DRAM for user pages so we don't race the kernel heap.
 // Top of DRAM is 0x8000_0000 + 128 MiB = 0x8800_0000. Keep 64 KiB for the kernel stack headroom.
-static mut USER_NEXT_PA: usize = 0x8800_0000 - 0x0100_000 - 0x10000; // start 1 MiB below top - 64 KiB
+const USER_PA_POOL_START: usize = 0x8800_0000 - 0x0100_000 - 0x10000; // start 1 MiB below top - 64 KiB
+const USER_PA_POOL_END: usize = 0x8800_0000 - 0x10000; // 1 MiB pool
+static mut USER_NEXT_PA: usize = USER_PA_POOL_START;
 
 pub unsafe fn alloc_user_page() -> usize {
     let pa = USER_NEXT_PA;
@@ -97,7 +99,13 @@ pub unsafe fn alloc_user_page() -> usize {
 
 /// Reset the user page allocator to the initial state, effectively freeing all user pages
 pub unsafe fn reset_user_pages() {
-    USER_NEXT_PA = 0x8800_0000 - 0x0100_000 - 0x10000;
+    USER_NEXT_PA = USER_PA_POOL_START;
+}
+
+/// Helper to extract physical address from a PTE
+#[inline]
+fn pte_to_pa(pte: u64) -> usize {
+    (((pte >> 10) & ((1 << 44) - 1)) as usize) << 12
 }
 
 /// Clear all user mappings in the page table (VAs with U=1 flag)
@@ -129,7 +137,12 @@ pub unsafe fn clear_user_mappings() {
         }
         
         // Non-leaf, walk to L1
-        let l1 = ((((entry2 >> 10) & ((1 << 44) - 1)) as usize) << 12) as *mut u64;
+        let l1_pa = pte_to_pa(entry2);
+        // Validate PA is in valid DRAM range
+        if l1_pa < DRAM_BASE || l1_pa >= DRAM_BASE + DRAM_SIZE {
+            continue;
+        }
+        let l1 = l1_pa as *mut u64;
         
         for i1 in 0..ENTRIES {
             let pte1 = l1.add(i1);
@@ -148,7 +161,12 @@ pub unsafe fn clear_user_mappings() {
             }
             
             // Non-leaf, walk to L0
-            let l0 = ((((entry1 >> 10) & ((1 << 44) - 1)) as usize) << 12) as *mut u64;
+            let l0_pa = pte_to_pa(entry1);
+            // Validate PA is in valid DRAM range
+            if l0_pa < DRAM_BASE || l0_pa >= DRAM_BASE + DRAM_SIZE {
+                continue;
+            }
+            let l0 = l0_pa as *mut u64;
             
             for i0 in 0..ENTRIES {
                 let pte0 = l0.add(i0);
