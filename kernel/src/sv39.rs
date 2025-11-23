@@ -12,6 +12,7 @@ const ENTRIES: usize = 512;
 // PTE constants
 const PTE_PPN_SHIFT: usize = 10;
 const PTE_PPN_MASK_BITS: usize = 44;
+const PAGE_OFFSET_BITS: usize = 12; // 4 KiB = 2^12 bytes
 
 // PTE flag bits
 pub const PTE_V: u64 = 1 << 0;
@@ -99,7 +100,10 @@ pub unsafe fn alloc_user_page() -> usize {
     
     // Check if we're out of space in the user page pool
     if next_pa > USER_PA_POOL_END {
-        panic!("Out of user pages! Pool exhausted.");
+        panic!(
+            "Out of user pages! Pool exhausted at address 0x{:x}, limit 0x{:x}",
+            pa, USER_PA_POOL_END
+        );
     }
     
     USER_NEXT_PA = next_pa;
@@ -116,7 +120,7 @@ pub unsafe fn reset_user_pages() {
 /// Helper to extract physical address from a PTE
 #[inline]
 fn pte_to_pa(pte: u64) -> usize {
-    (((pte >> PTE_PPN_SHIFT) & ((1 << PTE_PPN_MASK_BITS) - 1)) as usize) << 12
+    (((pte >> PTE_PPN_SHIFT) & ((1 << PTE_PPN_MASK_BITS) - 1)) as usize) << PAGE_OFFSET_BITS
 }
 
 /// Clear all user mappings in the page table (VAs with U=1 flag)
