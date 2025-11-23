@@ -1008,25 +1008,12 @@ fn sys_readdir(tf: &mut TrapFrame) {
     // Cap to page boundary
     len = cap_to_page(buf_va, len);
 
-    let _ = write!(
-        crate::uart::Uart::new(),
-        "sys_readdir: buf_va=0x{:x} len={}\r\n",
-        buf_va,
-        len
-    );
-
     // Use a kernel buffer to collect the filenames
     let mut kernel_buf = [0u8; 4096];
     let safe_len = core::cmp::min(len, kernel_buf.len());
     
     // Get list of writable files
     let count = fs::list_writable_files(&mut kernel_buf[..safe_len]);
-
-    let _ = write!(
-        crate::uart::Uart::new(),
-        "sys_readdir: found {} files\r\n",
-        count
-    );
 
     // Copy to user space
     if count > 0 {
@@ -1043,14 +1030,7 @@ fn sys_readdir(tf: &mut TrapFrame) {
             }
         }
 
-        let copied = copy_to_user(buf_va, &kernel_buf[..bytes_used]);
-        
-        let _ = write!(
-            crate::uart::Uart::new(),
-            "sys_readdir: copied {} bytes\r\n",
-            copied
-        );
-        
+        let _copied = copy_to_user(buf_va, &kernel_buf[..bytes_used]);
         tf.a0 = count;
     } else {
         tf.a0 = 0;

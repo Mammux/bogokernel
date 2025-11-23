@@ -70,19 +70,26 @@ fn main() {
                             println!("Files in writable filesystem:");
                             let mut offset = 0;
                             for _ in 0..count {
-                                // Find the null terminator
+                                // Find the null terminator, but cap search to buffer size
                                 let mut end = offset;
                                 while end < buf.len() && buf[end] != 0 {
                                     end += 1;
                                 }
                                 
-                                if end > offset {
+                                // If we found a valid filename, print it
+                                if end > offset && end < buf.len() {
                                     if let Ok(filename) = core::str::from_utf8(&buf[offset..end]) {
                                         println!("  {}", filename);
                                     }
                                 }
                                 
+                                // Move to next filename (past the null terminator)
                                 offset = end + 1;
+                                
+                                // Safety check: if we've gone past the buffer, stop
+                                if offset >= buf.len() {
+                                    break;
+                                }
                             }
                         }
                     }
