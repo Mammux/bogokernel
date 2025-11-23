@@ -2,17 +2,17 @@
                0                0        0     1 KERNEL_LOAD_ADDR = 0x80200000
         80200000         80200000    14968  4096 .text
         80200000         80200000        0     1         __text_start = .
-        80200000         80200000       48     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text.entry)
+        80200000         80200000       48     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text.entry)
         80200000         80200000        0     1                 .Lpcrel_hi0
         80200000         80200000        0     1                 $x
         80200000         80200000        0     1                 _start
         80200022         80200022        0     1                 .Lpcrel_hi1
         8020002a         8020002a        0     1                 .Lpcrel_hi2
         8020003e         8020003e        0     1                 .Lpcrel_hi3
-        80200048         80200048       80     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text.trap)
+        80200048         80200048       80     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text.trap)
         80200048         80200048        0     1                 $x
         80200048         80200048        0     1                 __trap_entry
-        802000c8         802000c8      10a     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RINvNtCs6zfuTrR9sko_4core3ptr13drop_in_placeNtNtCsepDPzRGIFU1_6goblin3elf3ElfECs2A9kJLaWm4K_6kernel)
+        802000c8         802000c8      10a     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RINvNtCs6zfuTrR9sko_4core3ptr13drop_in_placeNtNtCsepDPzRGIFU1_6goblin3elf3ElfECs2A9kJLaWm4K_6kernel)
         802000c8         802000c8      10a     1                 core::ptr::drop_in_place::<goblin::elf::Elf>
         802000c8         802000c8        0     1                 .L0 
         802000c8         802000c8        0     1                 .L0 
@@ -43,7 +43,7 @@
         802001b6         802001b6        0     1                 .L0 
         802001c0         802001c0        0     1                 .L0 
         802001d2         802001d2        0     1                 .L0 
-        802001d2         802001d2       50     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc12___rust_alloc)
+        802001d2         802001d2       50     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc12___rust_alloc)
         802001d2         802001d2        0     1                 .L0 
         802001d2         802001d2        0     1                 .L0 
         802001d2         802001d2        0     1                 $x
@@ -59,7 +59,7 @@
         80200208         80200208        0     1                 .Lpcrel_hi5
         80200222         80200222        0     1                 .L0 
         80200222         80200222        0     1                 .L0 
-        80200222         80200222       5c     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc14___rust_dealloc)
+        80200222         80200222       5c     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc14___rust_dealloc)
         80200222         80200222        0     1                 .L0 
         80200222         80200222        0     1                 .L0 
         80200222         80200222        0     1                 $x
@@ -75,7 +75,7 @@
         80200264         80200264        0     1                 .Lpcrel_hi8
         8020027e         8020027e        0     1                 .L0 
         8020027e         8020027e        0     1                 .L0 
-        8020027e         8020027e       ea     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc14___rust_realloc)
+        8020027e         8020027e       ea     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc14___rust_realloc)
         8020027e         8020027e        0     1                 .L0 
         8020027e         8020027e        0     1                 .L0 
         8020027e         8020027e        0     1                 $x
@@ -117,7 +117,7 @@
         8020034e         8020034e        0     1                 .Lpcrel_hi13
         8020035a         8020035a        0     1                 .L0 
         80200368         80200368        0     1                 .L0 
-        80200368         80200368       fa     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc17rust_begin_unwind)
+        80200368         80200368       fa     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc17rust_begin_unwind)
         80200368         80200368        0     1                 .L0 
         80200368         80200368        0     1                 .L0 
         80200368         80200368        0     1                 $x
@@ -171,7 +171,7 @@
         8020045c         8020045c        0     1                 .L0 
         80200460         80200460        0     1                 .L0 
         80200462         80200462        0     1                 .L0 
-        80200462         80200462       68     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc19___rust_alloc_zeroed)
+        80200462         80200462       68     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc19___rust_alloc_zeroed)
         80200462         80200462        0     1                 .L0 
         80200462         80200462        0     1                 .L0 
         80200462         80200462        0     1                 $x
@@ -191,7 +191,7 @@
         802004b0         802004b0        0     1                 .Lpcrel_hi25
         802004ca         802004ca        0     1                 .L0 
         802004ca         802004ca        0     1                 .L0 
-        802004ca         802004ca       2e     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvMs0_NtCskOpdoXuvXWw_5alloc7raw_vecINtB5_6RawVecNtNtCs2A9kJLaWm4K_6kernel2fs12WritableFileE8grow_oneBQ_)
+        802004ca         802004ca       2e     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvMs0_NtCskOpdoXuvXWw_5alloc7raw_vecINtB5_6RawVecNtNtCs2A9kJLaWm4K_6kernel2fs12WritableFileE8grow_oneBQ_)
         802004ca         802004ca       2e     1                 <alloc::raw_vec::RawVec<kernel::fs::WritableFile>>::grow_one
         802004ca         802004ca        0     1                 .L0 
         802004ca         802004ca        0     1                 .L0 
@@ -204,7 +204,7 @@
         802004f0         802004f0        0     1                 .L0 
         802004f8         802004f8        0     1                 .L0 
         802004f8         802004f8        0     1                 .L0 
-        802004f8         802004f8       2c     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvMs0_NtCskOpdoXuvXWw_5alloc7raw_vecINtB5_6RawVecmE8grow_oneCs2A9kJLaWm4K_6kernel)
+        802004f8         802004f8       2c     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvMs0_NtCskOpdoXuvXWw_5alloc7raw_vecINtB5_6RawVecmE8grow_oneCs2A9kJLaWm4K_6kernel)
         802004f8         802004f8       2c     1                 <alloc::raw_vec::RawVec<u32>>::grow_one
         802004f8         802004f8        0     1                 .L0 
         802004f8         802004f8        0     1                 .L0 
@@ -217,7 +217,7 @@
         8020051c         8020051c        0     1                 .L0 
         80200524         80200524        0     1                 .L0 
         80200524         80200524        0     1                 .L0 
-        80200524         80200524      5a8     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel3elf13load_user_elf)
+        80200524         80200524      5a8     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel3elf13load_user_elf)
         80200524         80200524      5a8     1                 kernel::elf::load_user_elf
         80200524         80200524        0     1                 .L0 
         80200524         80200524        0     1                 .L0 
@@ -467,7 +467,7 @@
         80200abc         80200abc        0     1                 .Lpcrel_hi29
         80200acc         80200acc        0     1                 .L0 
         80200acc         80200acc        0     1                 .L0 
-        80200acc         80200acc      734     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel3elf16setup_user_stack)
+        80200acc         80200acc      734     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel3elf16setup_user_stack)
         80200acc         80200acc      734     1                 kernel::elf::setup_user_stack
         80200acc         80200acc        0     1                 .L0 
         80200acc         80200acc        0     1                 .L0 
@@ -828,7 +828,7 @@
         802011f0         802011f0        0     1                 .Lpcrel_hi52
         80201200         80201200        0     1                 .L0 
         80201200         80201200        0     1                 .L0 
-        80201200         80201200       14     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel3sbi8shutdown)
+        80201200         80201200       14     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel3sbi8shutdown)
         80201200         80201200       14     1                 kernel::sbi::shutdown
         80201200         80201200        0     1                 .L0 
         80201200         80201200        0     1                 .L0 
@@ -836,7 +836,7 @@
         80201200         80201200        0     1                 .L0 
         8020120e         8020120e        0     1                 .L0 
         80201214         80201214        0     1                 .L0 
-        80201214         80201214      1a4     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4sv396map_4k)
+        80201214         80201214      1a4     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4sv396map_4k)
         80201214         80201214      1a4     1                 kernel::sv39::map_4k
         80201214         80201214        0     1                 .L0 
         80201214         80201214        0     1                 .L0 
@@ -902,7 +902,7 @@
         802013a8         802013a8        0     1                 .Lpcrel_hi101
         802013b8         802013b8        0     1                 .L0 
         802013b8         802013b8        0     1                 .L0 
-        802013b8         802013b8       54     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap10fd_advance)
+        802013b8         802013b8       54     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap10fd_advance)
         802013b8         802013b8       54     1                 kernel::trap::fd_advance
         802013b8         802013b8        0     1                 .L0 
         802013b8         802013b8        0     1                 .L0 
@@ -922,7 +922,7 @@
         802013f4         802013f4        0     1                 .L0 
         80201402         80201402        0     1                 .L0 
         8020140c         8020140c        0     1                 .L0 
-        8020140c         8020140c      2f0     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap10sys_unlink)
+        8020140c         8020140c      2f0     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap10sys_unlink)
         8020140c         8020140c      2f0     1                 kernel::trap::sys_unlink
         8020140c         8020140c        0     1                 .L0 
         8020140c         8020140c        0     1                 .L0 
@@ -1065,7 +1065,7 @@
         802016ec         802016ec        0     1                 .Lpcrel_hi103
         802016fc         802016fc        0     1                 .L0 
         802016fc         802016fc        0     1                 .L0 
-        802016fc         802016fc       a0     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap12copy_to_user)
+        802016fc         802016fc       a0     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap12copy_to_user)
         802016fc         802016fc       a0     1                 kernel::trap::copy_to_user
         802016fc         802016fc        0     1                 .L0 
         802016fc         802016fc        0     1                 .L0 
@@ -1100,7 +1100,7 @@
         8020178c         8020178c        0     1                 .Lpcrel_hi118
         8020179c         8020179c        0     1                 .L0 
         8020179c         8020179c        0     1                 .L0 
-        8020179c         8020179c      5b2     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap12load_program)
+        8020179c         8020179c      5b2     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap12load_program)
         8020179c         8020179c      5b2     1                 kernel::trap::load_program
         8020179c         8020179c        0     1                 .L0 
         8020179c         8020179c        0     1                 .L0 
@@ -1439,7 +1439,7 @@
         80201d4c         80201d4c        0     1                 .L0 
         80201d4e         80201d4e        0     1                 .L0 
         80201d4e         80201d4e        0     1                 .L0 
-        80201d4e         80201d4e      34c     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap12sys_write_fd)
+        80201d4e         80201d4e      34c     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap12sys_write_fd)
         80201d4e         80201d4e      34c     1                 kernel::trap::sys_write_fd
         80201d4e         80201d4e        0     1                 .L0 
         80201d4e         80201d4e        0     1                 .L0 
@@ -1631,7 +1631,7 @@
         8020208a         8020208a        0     1                 .Lpcrel_hi165
         8020209a         8020209a        0     1                 .L0 
         8020209a         8020209a        0     1                 .L0 
-        8020209a         8020209a       98     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap14sys_write_cstr)
+        8020209a         8020209a       98     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap14sys_write_cstr)
         8020209a         8020209a       98     1                 kernel::trap::sys_write_cstr
         8020209a         8020209a        0     1                 .L0 
         8020209a         8020209a        0     1                 .L0 
@@ -1674,7 +1674,7 @@
         80202122         80202122        0     1                 .Lpcrel_hi170
         80202132         80202132        0     1                 .L0 
         80202132         80202132        0     1                 .L0 
-        80202132         80202132       80     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap16sys_write_ptrlen)
+        80202132         80202132       80     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap16sys_write_ptrlen)
         80202132         80202132       80     1                 kernel::trap::sys_write_ptrlen
         80202132         80202132        0     1                 .L0 
         80202132         80202132        0     1                 .L0 
@@ -1713,7 +1713,7 @@
         802021a4         802021a4        0     1                 .L0 
         802021ac         802021ac        0     1                 .L0 
         802021b2         802021b2        0     1                 .L0 
-        802021b2         802021b2      142     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap7sys_brk)
+        802021b2         802021b2      142     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap7sys_brk)
         802021b2         802021b2      142     1                 kernel::trap::sys_brk
         802021b2         802021b2        0     1                 .L0 
         802021b2         802021b2        0     1                 .L0 
@@ -1771,7 +1771,7 @@
         802022e4         802022e4        0     1                 .Lpcrel_hi174
         802022f4         802022f4        0     1                 .L0 
         802022f4         802022f4        0     1                 .L0 
-        802022f4         802022f4      1f4     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8fd_alloc)
+        802022f4         802022f4      1f4     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8fd_alloc)
         802022f4         802022f4      1f4     1                 kernel::trap::fd_alloc
         802022f4         802022f4        0     1                 .L0 
         802022f4         802022f4        0     1                 .L0 
@@ -1893,7 +1893,7 @@
         802024d0         802024d0        0     1                 .L0 
         802024d0         802024d0        0     1                 .L0 
         802024e8         802024e8        0     1                 .L0 
-        802024e8         802024e8      206     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_exec)
+        802024e8         802024e8      206     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_exec)
         802024e8         802024e8      206     1                 kernel::trap::sys_exec
         802024e8         802024e8        0     1                 .L0 
         802024e8         802024e8        0     1                 .L0 
@@ -2008,7 +2008,7 @@
         802026de         802026de        0     1                 .L0 
         802026ee         802026ee        0     1                 .L0 
         802026ee         802026ee        0     1                 .L0 
-        802026ee         802026ee      434     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_exit)
+        802026ee         802026ee      434     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_exit)
         802026ee         802026ee      434     1                 kernel::trap::sys_exit
         802026ee         802026ee        0     1                 .L0 
         802026ee         802026ee        0     1                 .L0 
@@ -2174,7 +2174,7 @@
         80202b1a         80202b1a        0     1                 .L0 
         80202b1a         80202b1a        0     1                 .L0 
         80202b22         80202b22        0     1                 .L0 
-        80202b22         80202b22      44e     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_open)
+        80202b22         80202b22      44e     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_open)
         80202b22         80202b22      44e     1                 kernel::trap::sys_open
         80202b22         80202b22        0     1                 .L0 
         80202b22         80202b22        0     1                 .L0 
@@ -2418,7 +2418,7 @@
         80202f60         80202f60        0     1                 .Lpcrel_hi202
         80202f70         80202f70        0     1                 .L0 
         80202f70         80202f70        0     1                 .L0 
-        80202f70         80202f70      2a4     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_read)
+        80202f70         80202f70      2a4     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_read)
         80202f70         80202f70      2a4     1                 kernel::trap::sys_read
         80202f70         80202f70        0     1                 .L0 
         80202f70         80202f70        0     1                 .L0 
@@ -2570,7 +2570,7 @@
         80203200         80203200        0     1                 .Lpcrel_hi235
         80203214         80203214        0     1                 .L0 
         80203214         80203214        0     1                 .L0 
-        80203214         80203214      418     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_stat)
+        80203214         80203214      418     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_stat)
         80203214         80203214      418     1                 kernel::trap::sys_stat
         80203214         80203214        0     1                 .L0 
         80203214         80203214        0     1                 .L0 
@@ -2816,7 +2816,7 @@
         8020361c         8020361c        0     1                 .L0 
         8020362c         8020362c        0     1                 .L0 
         8020362c         8020362c        0     1                 .L0 
-        8020362c         8020362c      1f0     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap9sys_chmod)
+        8020362c         8020362c      1f0     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap9sys_chmod)
         8020362c         8020362c      1f0     1                 kernel::trap::sys_chmod
         8020362c         8020362c        0     1                 .L0 
         8020362c         8020362c        0     1                 .L0 
@@ -2921,7 +2921,7 @@
         8020380c         8020380c        0     1                 .Lpcrel_hi266
         8020381c         8020381c        0     1                 .L0 
         8020381c         8020381c        0     1                 .L0 
-        8020381c         8020381c       60     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap9sys_close)
+        8020381c         8020381c       60     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap9sys_close)
         8020381c         8020381c       60     1                 kernel::trap::sys_close
         8020381c         8020381c        0     1                 .L0 
         8020381c         8020381c        0     1                 .L0 
@@ -2941,7 +2941,7 @@
         8020386a         8020386a        0     1                 .L0 
         80203876         80203876        0     1                 .L0 
         8020387c         8020387c        0     1                 .L0 
-        8020387c         8020387c      572     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap9sys_creat)
+        8020387c         8020387c      572     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap9sys_creat)
         8020387c         8020387c      572     1                 kernel::trap::sys_creat
         8020387c         8020387c        0     1                 .L0 
         8020387c         8020387c        0     1                 .L0 
@@ -3241,7 +3241,7 @@
         80203ddc         80203ddc        0     1                 .Lpcrel_hi300
         80203dee         80203dee        0     1                 .L0 
         80203dee         80203dee        0     1                 .L0 
-        80203dee         80203dee      46c     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap9sys_execv)
+        80203dee         80203dee      46c     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap9sys_execv)
         80203dee         80203dee      46c     1                 kernel::trap::sys_execv
         80203dee         80203dee        0     1                 .L0 
         80203dee         80203dee        0     1                 .L0 
@@ -3439,7 +3439,7 @@
         8020424a         8020424a        0     1                 .Lpcrel_hi310
         8020425a         8020425a        0     1                 .L0 
         8020425a         8020425a        0     1                 .L0 
-        8020425a         8020425a      1be     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap9sys_lseek)
+        8020425a         8020425a      1be     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvNtCs2A9kJLaWm4K_6kernel4trap9sys_lseek)
         8020425a         8020425a      1be     1                 kernel::trap::sys_lseek
         8020425a         8020425a        0     1                 .L0 
         8020425a         8020425a        0     1                 .L0 
@@ -3533,7 +3533,7 @@
         80204408         80204408        0     1                 .Lpcrel_hi324
         80204418         80204418        0     1                 .L0 
         80204418         80204418        0     1                 .L0 
-        80204418         80204418       2a     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvXNtCs2A9kJLaWm4K_6kernel3elfNtB2_12ElfLoadErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt)
+        80204418         80204418       2a     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvXNtCs2A9kJLaWm4K_6kernel3elfNtB2_12ElfLoadErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt)
         80204418         80204418       2a     1                 <kernel::elf::ElfLoadError as core::fmt::Debug>::fmt
         80204418         80204418        0     1                 .L0 
         80204418         80204418        0     1                 .L0 
@@ -3542,7 +3542,7 @@
         8020441c         8020441c        0     1                 .Lpcrel_hi326
         80204420         80204420        0     1                 .Lpcrel_hi327
         80204442         80204442        0     1                 .L0 
-        80204442         80204442       2a     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvXs1g_NtCs6zfuTrR9sko_4core3fmtRNtNtNtCske5mGmtzYPO_5riscv9interrupt10supervisor9ExceptionNtB6_5Debug3fmtCs2A9kJLaWm4K_6kernel)
+        80204442         80204442       2a     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvXs1g_NtCs6zfuTrR9sko_4core3fmtRNtNtNtCske5mGmtzYPO_5riscv9interrupt10supervisor9ExceptionNtB6_5Debug3fmtCs2A9kJLaWm4K_6kernel)
         80204442         80204442       2a     1                 <&riscv::interrupt::supervisor::Exception as core::fmt::Debug>::fmt
         80204442         80204442        0     1                 .L0 
         80204442         80204442        0     1                 .L0 
@@ -3552,7 +3552,7 @@
         80204444         80204444        0     1                 .Lpcrel_hi328
         8020444a         8020444a        0     1                 .Lpcrel_hi329
         8020446c         8020446c        0     1                 .L0 
-        8020446c         8020446c       48     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvXs1g_NtCs6zfuTrR9sko_4core3fmtRNtNtNtCske5mGmtzYPO_5riscv9interrupt10supervisor9InterruptNtB6_5Debug3fmtCs2A9kJLaWm4K_6kernel)
+        8020446c         8020446c       48     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvXs1g_NtCs6zfuTrR9sko_4core3fmtRNtNtNtCske5mGmtzYPO_5riscv9interrupt10supervisor9InterruptNtB6_5Debug3fmtCs2A9kJLaWm4K_6kernel)
         8020446c         8020446c       48     1                 <&riscv::interrupt::supervisor::Interrupt as core::fmt::Debug>::fmt
         8020446c         8020446c        0     1                 .L0 
         8020446c         8020446c        0     1                 .L0 
@@ -3567,7 +3567,7 @@
         80204490         80204490        0     1                 .Lpcrel_hi330
         802044a2         802044a2        0     1                 .Lpcrel_hi332
         802044b4         802044b4        0     1                 .L0 
-        802044b4         802044b4      19a     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvXs2_NtCs5XQ52DozPOU_9riscv_pac6resultNtB5_5ErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt)
+        802044b4         802044b4      19a     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvXs2_NtCs5XQ52DozPOU_9riscv_pac6resultNtB5_5ErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt)
         802044b4         802044b4      19a     1                 <riscv_pac::result::Error as core::fmt::Debug>::fmt
         802044b4         802044b4        0     1                 .L0 
         802044b4         802044b4        0     1                 .L0 
@@ -3620,7 +3620,7 @@
         80204638         80204638        0     1                 .L0 
         80204638         80204638        0     1                 .Lpcrel_hi359
         8020464e         8020464e        0     1                 .L0 
-        8020464e         8020464e       48     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvXs2_NtCske5mGmtzYPO_5riscv9interruptINtB5_4TrapNtNtB5_10supervisor9InterruptNtBO_9ExceptionENtNtCs6zfuTrR9sko_4core3fmt5Debug3fmtCs2A9kJLaWm4K_6kernel)
+        8020464e         8020464e       48     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvXs2_NtCske5mGmtzYPO_5riscv9interruptINtB5_4TrapNtNtB5_10supervisor9InterruptNtBO_9ExceptionENtNtCs6zfuTrR9sko_4core3fmt5Debug3fmtCs2A9kJLaWm4K_6kernel)
         8020464e         8020464e       48     1                 <riscv::interrupt::Trap<riscv::interrupt::supervisor::Interrupt, riscv::interrupt::supervisor::Exception> as core::fmt::Debug>::fmt
         8020464e         8020464e        0     1                 .L0 
         8020464e         8020464e        0     1                 .L0 
@@ -3637,7 +3637,7 @@
         80204672         80204672        0     1                 .L0 
         80204676         80204676        0     1                 .Lpcrel_hi363
         80204696         80204696        0     1                 .L0 
-        80204696         80204696       5e     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvXs_NtCs2A9kJLaWm4K_6kernel4uartNtB4_4UartNtNtCs6zfuTrR9sko_4core3fmt5Write9write_str)
+        80204696         80204696       5e     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvXs_NtCs2A9kJLaWm4K_6kernel4uartNtB4_4UartNtNtCs6zfuTrR9sko_4core3fmt5Write9write_str)
         80204696         80204696       5e     1                 <kernel::uart::Uart as core::fmt::Write>::write_str
         80204696         80204696        0     1                 .L0 
         80204696         80204696        0     1                 .L0 
@@ -3671,7 +3671,7 @@
         802046f0         802046f0        0     1                 .L0 
         802046f0         802046f0        0     1                 .L0 
         802046f4         802046f4        0     1                 .L0 
-        802046f4         802046f4       f8     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvYNtNtCs2A9kJLaWm4K_6kernel4uart4UartNtNtCs6zfuTrR9sko_4core3fmt5Write10write_charB6_)
+        802046f4         802046f4       f8     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvYNtNtCs2A9kJLaWm4K_6kernel4uart4UartNtNtCs6zfuTrR9sko_4core3fmt5Write10write_charB6_)
         802046f4         802046f4       f8     1                 <kernel::uart::Uart as core::fmt::Write>::write_char
         802046f4         802046f4        0     1                 .L0 
         802046f4         802046f4        0     1                 .L0 
@@ -3738,7 +3738,7 @@
         802047e6         802047e6        0     1                 .L0 
         802047ec         802047ec        0     1                 .L0 
         802047ec         802047ec        0     1                 .L0 
-        802047ec         802047ec       14     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._RNvYNtNtCs2A9kJLaWm4K_6kernel4uart4UartNtNtCs6zfuTrR9sko_4core3fmt5Write9write_fmtB6_)
+        802047ec         802047ec       14     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._RNvYNtNtCs2A9kJLaWm4K_6kernel4uart4UartNtNtCs6zfuTrR9sko_4core3fmt5Write9write_fmtB6_)
         802047ec         802047ec       14     1                 <kernel::uart::Uart as core::fmt::Write>::write_fmt
         802047ec         802047ec        0     1                 .L0 
         802047ec         802047ec        0     1                 .L0 
@@ -3747,7 +3747,7 @@
         802047f0         802047f0        0     1                 .L0 
         802047f0         802047f0        0     1                 .Lpcrel_hi364
         80204800         80204800        0     1                 .L0 
-        80204800         80204800       2a     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._ZN4core3fmt3num52_$LT$impl$u20$core..fmt..Debug$u20$for$u20$usize$GT$3fmt17h52f5d334373c1728E)
+        80204800         80204800       2a     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._ZN4core3fmt3num52_$LT$impl$u20$core..fmt..Debug$u20$for$u20$usize$GT$3fmt17h52f5d334373c1728E)
         80204800         80204800       2a     1                 core::fmt::num::_$LT$impl$u20$core..fmt..Debug$u20$for$u20$usize$GT$::fmt::h52f5d334373c1728
         80204800         80204800        0     1                 .L0 
         80204800         80204800        0     1                 .L0 
@@ -3757,7 +3757,7 @@
         8020480c         8020480c        0     1                 .L0 
         80204812         80204812        0     1                 .L0 
         8020482a         8020482a        0     1                 .L0 
-        8020482a         8020482a       12     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text._ZN76_$LT$core..panic..panic_info..PanicMessage$u20$as$u20$core..fmt..Display$GT$3fmt17hcc53ad54f56f3f37E)
+        8020482a         8020482a       12     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text._ZN76_$LT$core..panic..panic_info..PanicMessage$u20$as$u20$core..fmt..Display$GT$3fmt17hcc53ad54f56f3f37E)
         8020482a         8020482a       12     1                 _$LT$core..panic..panic_info..PanicMessage$u20$as$u20$core..fmt..Display$GT$::fmt::hcc53ad54f56f3f37
         8020482a         8020482a        0     1                 .L0 
         8020482a         8020482a        0     1                 .L0 
@@ -3765,7 +3765,7 @@
         8020482a         8020482a        0     1                 .L0 
         80204830         80204830        0     1                 .L0 
         8020483c         8020483c        0     1                 .L0 
-        8020483c         8020483c      808     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text.rust_start)
+        8020483c         8020483c      808     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text.rust_start)
         8020483c         8020483c        0     1                 .L0 
         8020483c         8020483c        0     1                 .L0 
         8020483c         8020483c        0     1                 $x
@@ -4166,7 +4166,7 @@
         80205022         80205022        0     1                 .L0 
         80205044         80205044        0     1                 .L0 
         80205044         80205044        0     1                 .L0 
-        80205044         80205044      308     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.text.rust_trap)
+        80205044         80205044      308     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.text.rust_trap)
         80205044         80205044        0     1                 .L0 
         80205044         80205044        0     1                 .L0 
         80205044         80205044        0     1                 $x
@@ -4289,15 +4289,15 @@
         80205344         80205344        0     1                 .L0 
         8020534c         8020534c        0     1                 .L0 
         8020534c         8020534c        0     1                 .L0 
-        8020534c         8020534c        8     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.bhu3powgxmcs12f4b7kmzwrwy.0q7jsdd.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc26___rust_alloc_error_handler)
+        8020534c         8020534c        8     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.bhu3powgxmcs12f4b7kmzwrwy.1wxsp1w.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc26___rust_alloc_error_handler)
         8020534c         8020534c        0     1                 .L0 
         8020534c         8020534c        0     1                 $x
         8020534c         8020534c        8     1                 __rustc::__rust_alloc_error_handler
-        80205354         80205354        4     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.bhu3powgxmcs12f4b7kmzwrwy.0q7jsdd.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc42___rust_alloc_error_handler_should_panic_v2)
+        80205354         80205354        4     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.bhu3powgxmcs12f4b7kmzwrwy.1wxsp1w.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc42___rust_alloc_error_handler_should_panic_v2)
         80205354         80205354        0     1                 .L0 
         80205354         80205354        0     1                 $x
         80205354         80205354        4     1                 __rustc::__rust_alloc_error_handler_should_panic_v2
-        80205358         80205358        2     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.bhu3powgxmcs12f4b7kmzwrwy.0q7jsdd.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc35___rust_no_alloc_shim_is_unstable_v2)
+        80205358         80205358        2     2         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.bhu3powgxmcs12f4b7kmzwrwy.1wxsp1w.rcgu.o:(.text._RNvCsfHF5UXtEvMp_7___rustc35___rust_no_alloc_shim_is_unstable_v2)
         80205358         80205358        0     1                 .L0 
         80205358         80205358        0     1                 $x
         80205358         80205358        2     1                 __rustc::__rust_no_alloc_shim_is_unstable_v2
@@ -15506,535 +15506,535 @@
         80215000         80215000    556d8  4096 .rodata
         80215000         80215000        0     1         __rodata_start = .
         80215000         80215000       98     8         <internal>:(.rodata.cst8)
-        80215098         80215098      100     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata._RNvNtCs2A9kJLaWm4K_6kernel4trap12load_program)
+        80215098         80215098      100     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata._RNvNtCs2A9kJLaWm4K_6kernel4trap12load_program)
         80215098         80215098        0     1                 .LJTI15_0
         80215098         80215098        0     1                 $d
         802150d8         802150d8        0     1                 .LJTI15_1
         80215118         80215118        0     1                 .LJTI15_2
         80215158         80215158        0     1                 .LJTI15_3
-        80215198         80215198      100     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_stat)
+        80215198         80215198      100     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata._RNvNtCs2A9kJLaWm4K_6kernel4trap8sys_stat)
         80215198         80215198        0     1                 .LJTI25_0
         80215198         80215198        0     1                 $d
         802151d8         802151d8        0     1                 .LJTI25_1
         80215218         80215218        0     1                 .LJTI25_2
         80215258         80215258        0     1                 .LJTI25_3
-        80215298         80215298       30     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata._RNvXs2_NtCs5XQ52DozPOU_9riscv_pac6resultNtB5_5ErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt)
+        80215298         80215298       30     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata._RNvXs2_NtCs5XQ52DozPOU_9riscv_pac6resultNtB5_5ErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt)
         80215298         80215298        0     1                 .LJTI34_0
         80215298         80215298        0     1                 $d
-        802152c8         802152c8       88     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata.rust_trap)
+        802152c8         802152c8       88     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata.rust_trap)
         802152c8         802152c8        0     1                 .LJTI43_0
         802152c8         802152c8        0     1                 $d
         80215350         80215350     1361     1         <internal>:(.rodata.str1.1)
-        802166b8         802166b8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.1)
+        802166b8         802166b8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.1)
         802166b8         802166b8       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.1
         802166b8         802166b8        0     1                 $d
-        802166d0         802166d0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.2)
+        802166d0         802166d0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.2)
         802166d0         802166d0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.2
         802166d0         802166d0        0     1                 $d
-        802166e8         802166e8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.4)
+        802166e8         802166e8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.4)
         802166e8         802166e8       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.4
         802166e8         802166e8        0     1                 $d
-        80216700         80216700       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.6)
+        80216700         80216700       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.6)
         80216700         80216700       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.6
         80216700         80216700        0     1                 $d
-        80216718         80216718       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.9)
+        80216718         80216718       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.9)
         80216718         80216718       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.9
         80216718         80216718        0     1                 $d
-        80216730         80216730        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.10)
+        80216730         80216730        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.10)
         80216730         80216730        9     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.10
         80216730         80216730        0     1                 $d
-        80216740         80216740       10     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.11)
+        80216740         80216740       10     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.11)
         80216740         80216740       10     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.11
         80216740         80216740        0     1                 $d
-        80216750         80216750       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.13)
+        80216750         80216750       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.13)
         80216750         80216750       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.13
         80216750         80216750        0     1                 $d
-        80216768         80216768       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.14)
+        80216768         80216768       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.14)
         80216768         80216768       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.14
         80216768         80216768        0     1                 $d
-        80216780         80216780       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.15)
+        80216780         80216780       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.15)
         80216780         80216780       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.15
         80216780         80216780        0     1                 $d
-        80216798         80216798       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.16)
+        80216798         80216798       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.16)
         80216798         80216798       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.16
         80216798         80216798        0     1                 $d
-        802167b0         802167b0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.17)
+        802167b0         802167b0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.17)
         802167b0         802167b0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.17
         802167b0         802167b0        0     1                 $d
-        802167c8         802167c8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.18)
+        802167c8         802167c8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.18)
         802167c8         802167c8       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.18
         802167c8         802167c8        0     1                 $d
-        802167e0         802167e0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.20)
+        802167e0         802167e0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.20)
         802167e0         802167e0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.20
         802167e0         802167e0        0     1                 $d
-        802167f8         802167f8       17     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.21)
+        802167f8         802167f8       17     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.21)
         802167f8         802167f8       17     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.21
         802167f8         802167f8        0     1                 $d
-        80216810         80216810       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.24)
+        80216810         80216810       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.24)
         80216810         80216810       20     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.24
         80216810         80216810        0     1                 $d
-        80216830         80216830       2b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.25)
+        80216830         80216830       2b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.25)
         80216830         80216830       2b     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.25
         80216830         80216830        0     1                 $d
-        80216860         80216860       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.27)
+        80216860         80216860       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.27)
         80216860         80216860       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.27
         80216860         80216860        0     1                 $d
-        80216878         80216878       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.29)
+        80216878         80216878       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.29)
         80216878         80216878       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.29
         80216878         80216878        0     1                 $d
-        80216890         80216890       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.30)
+        80216890         80216890       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.30)
         80216890         80216890       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.30
         80216890         80216890        0     1                 $d
-        802168a8         802168a8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.31)
+        802168a8         802168a8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.31)
         802168a8         802168a8       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.31
         802168a8         802168a8        0     1                 $d
-        802168c0         802168c0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.32)
+        802168c0         802168c0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.32)
         802168c0         802168c0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.32
         802168c0         802168c0        0     1                 $d
-        802168d8         802168d8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.34)
+        802168d8         802168d8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.34)
         802168d8         802168d8       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.34
         802168d8         802168d8        0     1                 $d
-        802168f0         802168f0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.35)
+        802168f0         802168f0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.35)
         802168f0         802168f0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.35
         802168f0         802168f0        0     1                 $d
-        80216908         80216908       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.36)
+        80216908         80216908       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.36)
         80216908         80216908       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.36
         80216908         80216908        0     1                 $d
-        80216920         80216920       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.37)
+        80216920         80216920       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.37)
         80216920         80216920       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.37
         80216920         80216920        0     1                 $d
-        80216938         80216938       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.38)
+        80216938         80216938       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.38)
         80216938         80216938       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.38
         80216938         80216938        0     1                 $d
-        80216950         80216950       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.39)
+        80216950         80216950       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.39)
         80216950         80216950       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.39
         80216950         80216950        0     1                 $d
-        80216968         80216968       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.40)
+        80216968         80216968       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.40)
         80216968         80216968       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.40
         80216968         80216968        0     1                 $d
-        80216980         80216980        b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.41)
+        80216980         80216980        b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.41)
         80216980         80216980        b     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.41
         80216980         80216980        0     1                 $d
-        8021698b         8021698b      340     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.42)
+        8021698b         8021698b      340     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.42)
         8021698b         8021698b      340     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.42
         8021698b         8021698b        0     1                 $d
-        80216ccb         80216ccb     1f10     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.43)
+        80216ccb         80216ccb     1f10     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.43)
         80216ccb         80216ccb     1f10     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.43
         80216ccb         80216ccb        0     1                 $d
-        80218bdb         80218bdb        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.44)
+        80218bdb         80218bdb        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.44)
         80218bdb         80218bdb        9     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.44
         80218bdb         80218bdb        0     1                 $d
-        80218be4         80218be4     2310     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.45)
+        80218be4         80218be4     2310     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.45)
         80218be4         80218be4     2310     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.45
         80218be4         80218be4        0     1                 $d
-        8021aef4         8021aef4        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.46)
+        8021aef4         8021aef4        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.46)
         8021aef4         8021aef4        9     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.46
         8021aef4         8021aef4        0     1                 $d
-        8021aefd         8021aefd     5660     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.47)
+        8021aefd         8021aefd     5660     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.47)
         8021aefd         8021aefd     5660     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.47
         8021aefd         8021aefd        0     1                 $d
-        8022055d         8022055d        a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.48)
+        8022055d         8022055d        a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.48)
         8022055d         8022055d        a     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.48
         8022055d         8022055d        0     1                 $d
-        80220567         80220567     6790     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.49)
+        80220567         80220567     6790     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.49)
         80220567         80220567     6790     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.49
         80220567         80220567        0     1                 $d
-        80226cf7         80226cf7        f     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.50)
+        80226cf7         80226cf7        f     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.50)
         80226cf7         80226cf7        f     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.50
         80226cf7         80226cf7        0     1                 $d
-        80226d06         80226d06     9580     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.51)
+        80226d06         80226d06     9580     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.51)
         80226d06         80226d06     9580     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.51
         80226d06         80226d06        0     1                 $d
-        80230286         80230286        c     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.52)
+        80230286         80230286        c     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.52)
         80230286         80230286        c     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.52
         80230286         80230286        0     1                 $d
-        80230292         80230292    34298     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.53)
+        80230292         80230292    34298     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.53)
         80230292         80230292    34298     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.53
         80230292         80230292        0     1                 $d
-        8026452a         8026452a        a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.54)
+        8026452a         8026452a        a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.54)
         8026452a         8026452a        a     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.54
         8026452a         8026452a        0     1                 $d
-        80264534         80264534     27f0     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.55)
+        80264534         80264534     27f0     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.55)
         80264534         80264534     27f0     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.55
         80264534         80264534        0     1                 $d
-        80266d24         80266d24       17     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.57)
+        80266d24         80266d24       17     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.57)
         80266d24         80266d24       17     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.57
         80266d24         80266d24        0     1                 $d
-        80266d40         80266d40      120     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.58)
+        80266d40         80266d40      120     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.58)
         80266d40         80266d40      120     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.58
         80266d40         80266d40        0     1                 $d
-        80266e60         80266e60       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.59)
+        80266e60         80266e60       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.59)
         80266e60         80266e60       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.59
         80266e60         80266e60        0     1                 $d
-        80266e78         80266e78       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.61)
+        80266e78         80266e78       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.61)
         80266e78         80266e78       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.61
         80266e78         80266e78        0     1                 $d
-        80266e90         80266e90       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.62)
+        80266e90         80266e90       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.62)
         80266e90         80266e90       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.62
         80266e90         80266e90        0     1                 $d
-        80266ea8         80266ea8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.63)
+        80266ea8         80266ea8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.63)
         80266ea8         80266ea8       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.63
         80266ea8         80266ea8        0     1                 $d
-        80266ec0         80266ec0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.64)
+        80266ec0         80266ec0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.64)
         80266ec0         80266ec0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.64
         80266ec0         80266ec0        0     1                 $d
-        80266ed8         80266ed8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.65)
+        80266ed8         80266ed8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.65)
         80266ed8         80266ed8       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.65
         80266ed8         80266ed8        0     1                 $d
-        80266ef0         80266ef0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.66)
+        80266ef0         80266ef0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.66)
         80266ef0         80266ef0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.66
         80266ef0         80266ef0        0     1                 $d
-        80266f08         80266f08       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.67)
+        80266f08         80266f08       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.67)
         80266f08         80266f08       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.67
         80266f08         80266f08        0     1                 $d
-        80266f20         80266f20       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.68)
+        80266f20         80266f20       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.68)
         80266f20         80266f20       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.68
         80266f20         80266f20        0     1                 $d
-        80266f38         80266f38       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.69)
+        80266f38         80266f38       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.69)
         80266f38         80266f38       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.69
         80266f38         80266f38        0     1                 $d
-        80266f50         80266f50       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.70)
+        80266f50         80266f50       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.70)
         80266f50         80266f50       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.70
         80266f50         80266f50        0     1                 $d
-        80266f68         80266f68       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.72)
+        80266f68         80266f68       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.72)
         80266f68         80266f68       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.72
         80266f68         80266f68        0     1                 $d
-        80266f80         80266f80       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.73)
+        80266f80         80266f80       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.73)
         80266f80         80266f80       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.73
         80266f80         80266f80        0     1                 $d
-        80266f98         80266f98       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.74)
+        80266f98         80266f98       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.74)
         80266f98         80266f98       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.74
         80266f98         80266f98        0     1                 $d
-        80266fb0         80266fb0        f     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.76)
+        80266fb0         80266fb0        f     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.76)
         80266fb0         80266fb0        f     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.76
         80266fb0         80266fb0        0     1                 $d
-        80266fc0         80266fc0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.77)
+        80266fc0         80266fc0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.77)
         80266fc0         80266fc0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.77
         80266fc0         80266fc0        0     1                 $d
-        80266fd8         80266fd8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.78)
+        80266fd8         80266fd8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.78)
         80266fd8         80266fd8       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.78
         80266fd8         80266fd8        0     1                 $d
-        80266ff0         80266ff0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.79)
+        80266ff0         80266ff0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.79)
         80266ff0         80266ff0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.79
         80266ff0         80266ff0        0     1                 $d
-        80267008         80267008       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.80)
+        80267008         80267008       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.80)
         80267008         80267008       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.80
         80267008         80267008        0     1                 $d
-        80267020         80267020       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.81)
+        80267020         80267020       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.81)
         80267020         80267020       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.81
         80267020         80267020        0     1                 $d
-        80267038         80267038       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.82)
+        80267038         80267038       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.82)
         80267038         80267038       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.82
         80267038         80267038        0     1                 $d
-        80267050         80267050       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.84)
+        80267050         80267050       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.84)
         80267050         80267050       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.84
         80267050         80267050        0     1                 $d
-        80267068         80267068       35     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.86)
+        80267068         80267068       35     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.86)
         80267068         80267068       35     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.86
         80267068         80267068        0     1                 $d
-        8026709d         8026709d        6     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.87)
+        8026709d         8026709d        6     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.87)
         8026709d         8026709d        6     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.87
         8026709d         8026709d        0     1                 $d
-        802670a3         802670a3       24     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.88)
+        802670a3         802670a3       24     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.88)
         802670a3         802670a3       24     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.88
         802670a3         802670a3        0     1                 $d
-        802670c7         802670c7       26     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.89)
+        802670c7         802670c7       26     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.89)
         802670c7         802670c7       26     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.89
         802670c7         802670c7        0     1                 $d
         802670ed         802670ed       40     1         <internal>:(.rodata.cst32)
-        8026712d         8026712d       3a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.91)
+        8026712d         8026712d       3a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.91)
         8026712d         8026712d       3a     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.91
         8026712d         8026712d        0     1                 $d
-        80267167         80267167       18     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.94)
+        80267167         80267167       18     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.94)
         80267167         80267167       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.94
         80267167         80267167        0     1                 $d
-        80267180         80267180       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.95)
+        80267180         80267180       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.95)
         80267180         80267180       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.95
         80267180         80267180        0     1                 $d
-        80267198         80267198       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.96)
+        80267198         80267198       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.96)
         80267198         80267198       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.96
         80267198         80267198        0     1                 $d
-        802671b0         802671b0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.97)
+        802671b0         802671b0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.97)
         802671b0         802671b0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.97
         802671b0         802671b0        0     1                 $d
-        802671c8         802671c8       21     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.98)
+        802671c8         802671c8       21     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.98)
         802671c8         802671c8       21     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.98
         802671c8         802671c8        0     1                 $d
-        802671e9         802671e9       21     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.99)
+        802671e9         802671e9       21     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.99)
         802671e9         802671e9       21     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.99
         802671e9         802671e9        0     1                 $d
-        8026720a         8026720a       16     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.100)
+        8026720a         8026720a       16     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.100)
         8026720a         8026720a       16     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.100
         8026720a         8026720a        0     1                 $d
-        80267220         80267220       28     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.103)
+        80267220         80267220       28     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.103)
         80267220         80267220       28     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.103
         80267220         80267220        0     1                 $d
-        80267248         80267248       38     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.104)
+        80267248         80267248       38     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.104)
         80267248         80267248       38     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.104
         80267248         80267248        0     1                 $d
-        80267280         80267280       1a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.105)
+        80267280         80267280       1a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.105)
         80267280         80267280       1a     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.105
         80267280         80267280        0     1                 $d
-        8026729a         8026729a       1c     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.106)
+        8026729a         8026729a       1c     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.106)
         8026729a         8026729a       1c     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.106
         8026729a         8026729a        0     1                 $d
-        802672b6         802672b6       1b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.107)
+        802672b6         802672b6       1b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.107)
         802672b6         802672b6       1b     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.107
         802672b6         802672b6        0     1                 $d
-        802672d1         802672d1       18     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.108)
+        802672d1         802672d1       18     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.108)
         802672d1         802672d1       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.108
         802672d1         802672d1        0     1                 $d
-        802672e9         802672e9       22     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.109)
+        802672e9         802672e9       22     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.109)
         802672e9         802672e9       22     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.109
         802672e9         802672e9        0     1                 $d
-        8026730b         8026730b       1e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.113)
+        8026730b         8026730b       1e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.113)
         8026730b         8026730b       1e     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.113
         8026730b         8026730b        0     1                 $d
-        80267329         80267329       1a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.115)
+        80267329         80267329       1a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.115)
         80267329         80267329       1a     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.115
         80267329         80267329        0     1                 $d
-        80267348         80267348       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.116)
+        80267348         80267348       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.116)
         80267348         80267348       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.116
         80267348         80267348        0     1                 $d
-        80267360         80267360       32     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.120)
+        80267360         80267360       32     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.120)
         80267360         80267360       32     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.120
         80267360         80267360        0     1                 $d
-        80267392         80267392       1b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.121)
+        80267392         80267392       1b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.121)
         80267392         80267392       1b     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.121
         80267392         80267392        0     1                 $d
-        802673ad         802673ad       39     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.122)
+        802673ad         802673ad       39     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.122)
         802673ad         802673ad       39     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.122
         802673ad         802673ad        0     1                 $d
-        802673e6         802673e6       1c     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.124)
+        802673e6         802673e6       1c     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.124)
         802673e6         802673e6       1c     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.124
         802673e6         802673e6        0     1                 $d
-        80267402         80267402       14     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.125)
+        80267402         80267402       14     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.125)
         80267402         80267402       14     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.125
         80267402         80267402        0     1                 $d
-        80267416         80267416       32     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.126)
+        80267416         80267416       32     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.126)
         80267416         80267416       32     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.126
         80267416         80267416        0     1                 $d
-        80267448         80267448       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.127)
+        80267448         80267448       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.127)
         80267448         80267448       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.127
         80267448         80267448        0     1                 $d
-        80267460         80267460       39     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.128)
+        80267460         80267460       39     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.128)
         80267460         80267460       39     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.128
         80267460         80267460        0     1                 $d
-        802674a0         802674a0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.129)
+        802674a0         802674a0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.129)
         802674a0         802674a0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.129
         802674a0         802674a0        0     1                 $d
-        802674b8         802674b8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.130)
+        802674b8         802674b8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.130)
         802674b8         802674b8       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.130
         802674b8         802674b8        0     1                 $d
-        802674d0         802674d0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.131)
+        802674d0         802674d0       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.131)
         802674d0         802674d0       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.131
         802674d0         802674d0        0     1                 $d
-        802674e8         802674e8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.132)
+        802674e8         802674e8       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.132)
         802674e8         802674e8       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.132
         802674e8         802674e8        0     1                 $d
-        80267500         80267500       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.134)
+        80267500         80267500       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.134)
         80267500         80267500       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.134
         80267500         80267500        0     1                 $d
-        80267518         80267518       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.136)
+        80267518         80267518       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.136)
         80267518         80267518       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.136
         80267518         80267518        0     1                 $d
-        80267530         80267530       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.137)
+        80267530         80267530       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.137)
         80267530         80267530       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.137
         80267530         80267530        0     1                 $d
-        80267548         80267548       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.139)
+        80267548         80267548       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.139)
         80267548         80267548       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.139
         80267548         80267548        0     1                 $d
-        80267560         80267560       15     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.140)
+        80267560         80267560       15     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.140)
         80267560         80267560       15     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.140
         80267560         80267560        0     1                 $d
-        80267578         80267578       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.141)
+        80267578         80267578       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.141)
         80267578         80267578       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.141
         80267578         80267578        0     1                 $d
-        80267590         80267590        5     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.142)
+        80267590         80267590        5     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.142)
         80267590         80267590        5     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.142
         80267590         80267590        0     1                 $d
-        80267595         80267595        7     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.144)
+        80267595         80267595        7     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.144)
         80267595         80267595        7     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.144
         80267595         80267595        0     1                 $d
-        8026759c         8026759c        d     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.146)
+        8026759c         8026759c        d     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.146)
         8026759c         8026759c        d     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.146
         8026759c         8026759c        0     1                 $d
-        802675a9         802675a9        a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.147)
+        802675a9         802675a9        a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.147)
         802675a9         802675a9        a     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.147
         802675a9         802675a9        0     1                 $d
-        802675b3         802675b3        f     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.148)
+        802675b3         802675b3        f     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.148)
         802675b3         802675b3        f     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.148
         802675b3         802675b3        0     1                 $d
-        802675c8         802675c8       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.149)
+        802675c8         802675c8       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.149)
         802675c8         802675c8       20     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.149
         802675c8         802675c8        0     1                 $d
-        802675e8         802675e8       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.150)
+        802675e8         802675e8       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.150)
         802675e8         802675e8       20     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.150
         802675e8         802675e8        0     1                 $d
         80267608         80267608       40     2         <internal>:(.rodata.cst16)
-        80267648         80267648        5     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.152)
+        80267648         80267648        5     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.152)
         80267648         80267648        5     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.152
         80267648         80267648        0     1                 $d
-        8026764d         8026764d        3     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.153)
+        8026764d         8026764d        3     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.153)
         8026764d         8026764d        3     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.153
         8026764d         8026764d        0     1                 $d
-        80267650         80267650        3     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.154)
+        80267650         80267650        3     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.154)
         80267650         80267650        3     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.154
         80267650         80267650        0     1                 $d
-        80267658         80267658       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.155)
+        80267658         80267658       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.155)
         80267658         80267658       20     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.155
         80267658         80267658        0     1                 $d
-        80267678         80267678       11     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.156)
+        80267678         80267678       11     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.156)
         80267678         80267678       11     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.156
         80267678         80267678        0     1                 $d
-        80267689         80267689        5     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.157)
+        80267689         80267689        5     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.157)
         80267689         80267689        5     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.157
         80267689         80267689        0     1                 $d
-        8026768e         8026768e        5     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.158)
+        8026768e         8026768e        5     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.158)
         8026768e         8026768e        5     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.158
         8026768e         8026768e        0     1                 $d
-        80267693         80267693        7     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.159)
+        80267693         80267693        7     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.159)
         80267693         80267693        7     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.159
         80267693         80267693        0     1                 $d
-        8026769a         8026769a       13     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.160)
+        8026769a         8026769a       13     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.160)
         8026769a         8026769a       13     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.160
         8026769a         8026769a        0     1                 $d
-        802676ad         802676ad        c     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.161)
+        802676ad         802676ad        c     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.161)
         802676ad         802676ad        c     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.161
         802676ad         802676ad        0     1                 $d
-        802676b9         802676b9        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.162)
+        802676b9         802676b9        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.162)
         802676b9         802676b9        e     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.162
         802676b9         802676b9        0     1                 $d
-        802676c7         802676c7        d     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.163)
+        802676c7         802676c7        d     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.163)
         802676c7         802676c7        d     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.163
         802676c7         802676c7        0     1                 $d
-        802676d8         802676d8       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.164)
+        802676d8         802676d8       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.164)
         802676d8         802676d8       20     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.164
         802676d8         802676d8        0     1                 $d
-        802676f8         802676f8        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.165)
+        802676f8         802676f8        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.165)
         802676f8         802676f8        9     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.165
         802676f8         802676f8        0     1                 $d
-        80267708         80267708       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.166)
+        80267708         80267708       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.166)
         80267708         80267708       20     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.166
         80267708         80267708        0     1                 $d
-        80267728         80267728        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.167)
+        80267728         80267728        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.167)
         80267728         80267728        9     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.167
         80267728         80267728        0     1                 $d
-        80267731         80267731        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.168)
+        80267731         80267731        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.168)
         80267731         80267731        e     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.168
         80267731         80267731        0     1                 $d
-        8026773f         8026773f        f     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.169)
+        8026773f         8026773f        f     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.169)
         8026773f         8026773f        f     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.169
         8026773f         8026773f        0     1                 $d
-        8026774e         8026774e       12     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.170)
+        8026774e         8026774e       12     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.170)
         8026774e         8026774e       12     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.170
         8026774e         8026774e        0     1                 $d
-        80267760         80267760       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.171)
+        80267760         80267760       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.171)
         80267760         80267760       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.171
         80267760         80267760        0     1                 $d
-        80267778         80267778       30     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.172)
+        80267778         80267778       30     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.172)
         80267778         80267778       30     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.172
         80267778         80267778        0     1                 $d
-        802677a8         802677a8       15     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.173)
+        802677a8         802677a8       15     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.173)
         802677a8         802677a8       15     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.173
         802677a8         802677a8        0     1                 $d
-        802677bd         802677bd       12     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.175)
+        802677bd         802677bd       12     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.175)
         802677bd         802677bd       12     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.175
         802677bd         802677bd        0     1                 $d
-        802677cf         802677cf        a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.176)
+        802677cf         802677cf        a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.176)
         802677cf         802677cf        a     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.176
         802677cf         802677cf        0     1                 $d
-        802677d9         802677d9        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.177)
+        802677d9         802677d9        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.177)
         802677d9         802677d9        e     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.177
         802677d9         802677d9        0     1                 $d
-        802677e7         802677e7        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.178)
+        802677e7         802677e7        9     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.178)
         802677e7         802677e7        9     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.178
         802677e7         802677e7        0     1                 $d
-        802677f0         802677f0        f     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.179)
+        802677f0         802677f0        f     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.179)
         802677f0         802677f0        f     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.179
         802677f0         802677f0        0     1                 $d
-        802677ff         802677ff        a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.180)
+        802677ff         802677ff        a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.180)
         802677ff         802677ff        a     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.180
         802677ff         802677ff        0     1                 $d
-        80267809         80267809        b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.181)
+        80267809         80267809        b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.181)
         80267809         80267809        b     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.181
         80267809         80267809        0     1                 $d
-        80267814         80267814       11     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.182)
+        80267814         80267814       11     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.182)
         80267814         80267814       11     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.182
         80267814         80267814        0     1                 $d
-        80267825         80267825       14     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.183)
+        80267825         80267825       14     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.183)
         80267825         80267825       14     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.183
         80267825         80267825        0     1                 $d
-        80267839         80267839        d     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.184)
+        80267839         80267839        d     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.184)
         80267839         80267839        d     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.184
         80267839         80267839        0     1                 $d
-        80267846         80267846        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.185)
+        80267846         80267846        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.185)
         80267846         80267846        e     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.185
         80267846         80267846        0     1                 $d
-        80267858         80267858       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.187)
+        80267858         80267858       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.187)
         80267858         80267858       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.187
         80267858         80267858        0     1                 $d
-        80267870         80267870       e4     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.188)
+        80267870         80267870       e4     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.188)
         80267870         80267870       e4     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.188
         80267870         80267870        0     1                 $d
-        80267954         80267954      11b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.189)
+        80267954         80267954      11b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.189)
         80267954         80267954      11b     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.189
         80267954         80267954        0     1                 $d
-        80267a6f         80267a6f       dd     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.190)
+        80267a6f         80267a6f       dd     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.190)
         80267a6f         80267a6f       dd     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.190
         80267a6f         80267a6f        0     1                 $d
-        80267b4c         80267b4c      119     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.191)
+        80267b4c         80267b4c      119     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.191)
         80267b4c         80267b4c      119     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.191
         80267b4c         80267b4c        0     1                 $d
-        80267c65         80267c65      117     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.192)
+        80267c65         80267c65      117     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.192)
         80267c65         80267c65      117     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.192
         80267c65         80267c65        0     1                 $d
-        80267d7c         80267d7c      11b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.193)
+        80267d7c         80267d7c      11b     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.193)
         80267d7c         80267d7c      11b     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.193
         80267d7c         80267d7c        0     1                 $d
-        80267e97         80267e97       c6     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.194)
+        80267e97         80267e97       c6     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.194)
         80267e97         80267e97       c6     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.194
         80267e97         80267e97        0     1                 $d
-        80267f60         80267f60       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.196)
+        80267f60         80267f60       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.196)
         80267f60         80267f60       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.196
         80267f60         80267f60        0     1                 $d
-        80267f78         80267f78       2e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.198)
+        80267f78         80267f78       2e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.198)
         80267f78         80267f78       2e     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.198
         80267f78         80267f78        0     1                 $d
-        80267fa6         80267fa6       17     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.199)
+        80267fa6         80267fa6       17     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.199)
         80267fa6         80267fa6       17     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.199
         80267fa6         80267fa6        0     1                 $d
-        80267fbd         80267fbd        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.200)
+        80267fbd         80267fbd        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.200)
         80267fbd         80267fbd        e     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.200
         80267fbd         80267fbd        0     1                 $d
-        80267fcb         80267fcb       13     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.201)
+        80267fcb         80267fcb       13     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.201)
         80267fcb         80267fcb       13     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.201
         80267fcb         80267fcb        0     1                 $d
-        80267fde         80267fde       2a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.202)
+        80267fde         80267fde       2a     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.202)
         80267fde         80267fde       2a     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.202
         80267fde         80267fde        0     1                 $d
-        80268008         80268008        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.203)
+        80268008         80268008        e     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.203)
         80268008         80268008        e     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.203
         80268008         80268008        0     1                 $d
-        80268016         80268016        5     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.206)
+        80268016         80268016        5     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.206)
         80268016         80268016        5     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.206
         80268016         80268016        0     1                 $d
-        80268020         80268020       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.209)
+        80268020         80268020       18     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.209)
         80268020         80268020       18     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.209
         80268020         80268020        0     1                 $d
-        80268038         80268038       38     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.211)
+        80268038         80268038       38     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lanon.2e119c175e37cfb7024fe8678d1992de.211)
         80268038         80268038       38     1                 .Lanon.2e119c175e37cfb7024fe8678d1992de.211
         80268038         80268038        0     1                 $d
-        80268070         80268070       38     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lswitch.table._RNvXNtCs2A9kJLaWm4K_6kernel3elfNtB2_12ElfLoadErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt)
+        80268070         80268070       38     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lswitch.table._RNvXNtCs2A9kJLaWm4K_6kernel3elfNtB2_12ElfLoadErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt)
         80268070         80268070       38     1                 .Lswitch.table._RNvXNtCs2A9kJLaWm4K_6kernel3elfNtB2_12ElfLoadErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt
         80268070         80268070        0     1                 $d
-        802680a8         802680a8       38     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lswitch.table._RNvXNtCs2A9kJLaWm4K_6kernel3elfNtB2_12ElfLoadErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt.1)
+        802680a8         802680a8       38     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lswitch.table._RNvXNtCs2A9kJLaWm4K_6kernel3elfNtB2_12ElfLoadErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt.1)
         802680a8         802680a8       38     1                 .Lswitch.table._RNvXNtCs2A9kJLaWm4K_6kernel3elfNtB2_12ElfLoadErrorNtNtCs6zfuTrR9sko_4core3fmt5Debug3fmt.1
         802680a8         802680a8        0     1                 $d
-        802680e0         802680e0       80     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lswitch.table._RNvXs1g_NtCs6zfuTrR9sko_4core3fmtRNtNtNtCske5mGmtzYPO_5riscv9interrupt10supervisor9ExceptionNtB6_5Debug3fmtCs2A9kJLaWm4K_6kernel)
+        802680e0         802680e0       80     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lswitch.table._RNvXs1g_NtCs6zfuTrR9sko_4core3fmtRNtNtNtCske5mGmtzYPO_5riscv9interrupt10supervisor9ExceptionNtB6_5Debug3fmtCs2A9kJLaWm4K_6kernel)
         802680e0         802680e0       80     1                 .Lswitch.table._RNvXs1g_NtCs6zfuTrR9sko_4core3fmtRNtNtNtCske5mGmtzYPO_5riscv9interrupt10supervisor9ExceptionNtB6_5Debug3fmtCs2A9kJLaWm4K_6kernel
         802680e0         802680e0        0     1                 $d
-        80268160         80268160       80     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.rodata..Lswitch.table._RNvXs1g_NtCs6zfuTrR9sko_4core3fmtRNtNtNtCske5mGmtzYPO_5riscv9interrupt10supervisor9ExceptionNtB6_5Debug3fmtCs2A9kJLaWm4K_6kernel.2)
+        80268160         80268160       80     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.rodata..Lswitch.table._RNvXs1g_NtCs6zfuTrR9sko_4core3fmtRNtNtNtCske5mGmtzYPO_5riscv9interrupt10supervisor9ExceptionNtB6_5Debug3fmtCs2A9kJLaWm4K_6kernel.2)
         80268160         80268160       80     1                 .Lswitch.table._RNvXs1g_NtCs6zfuTrR9sko_4core3fmtRNtNtNtCske5mGmtzYPO_5riscv9interrupt10supervisor9ExceptionNtB6_5Debug3fmtCs2A9kJLaWm4K_6kernel.2
         80268160         80268160        0     1                 $d
         802681e0         802681e0      170     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/libgoblin-c1f459dec219f66d.rlib(goblin-c1f459dec219f66d.goblin.a7e24c120c556417-cgu.0.rcgu.o):(.rodata._RNvMs9_NtNtCsepDPzRGIFU1_6goblin3elf7dynamicNtB5_11DynamicInfo6update)
@@ -16574,7 +16574,7 @@
         8026a6c0         8026a6c0        0     1                 $d
         8026a6d8         8026a6d8        0     1         __rodata_end = .
         8026a6d8         8026a6d8      d60     8 .eh_frame
-        8026a6d8         8026a6d8       50     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.bhu3powgxmcs12f4b7kmzwrwy.0q7jsdd.rcgu.o:(.eh_frame+0x0)
+        8026a6d8         8026a6d8       50     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.bhu3powgxmcs12f4b7kmzwrwy.1wxsp1w.rcgu.o:(.eh_frame+0x0)
         8026a728         8026a728       20     1         /home/runner/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/riscv64gc-unknown-none-elf/lib/liballoc-9e33c13de5b87059.rlib(alloc-9e33c13de5b87059.alloc.f26c095c24889b22-cgu.0.rcgu.o):(.eh_frame+0x14)
         8026a748         8026a748       14     1         /home/runner/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/riscv64gc-unknown-none-elf/lib/liballoc-9e33c13de5b87059.rlib(alloc-9e33c13de5b87059.alloc.f26c095c24889b22-cgu.0.rcgu.o):(.eh_frame+0xa4)
         8026a75c         8026a75c       14     1         /home/runner/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/riscv64gc-unknown-none-elf/lib/liballoc-9e33c13de5b87059.rlib(alloc-9e33c13de5b87059.alloc.f26c095c24889b22-cgu.0.rcgu.o):(.eh_frame+0xcc)
@@ -16637,10 +16637,10 @@
         8026b420         8026b420       14     1         /home/runner/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/riscv64gc-unknown-none-elf/lib/libcompiler_builtins-323851fd81e594fe.rlib(compiler_builtins-323851fd81e594fe.compiler_builtins.a51261c50f1a2868-cgu.322.rcgu.o):(.eh_frame+0x14)
         8026c000         8026c000       38  4096 .data
         8026c000         8026c000        0     1         __data_start = .
-        8026c000         8026c000       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.data._RNvNtCs2A9kJLaWm4K_6kernel2fs14WRITABLE_FILES)
+        8026c000         8026c000       20     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.data._RNvNtCs2A9kJLaWm4K_6kernel2fs14WRITABLE_FILES)
         8026c000         8026c000       20     1                 kernel::fs::WRITABLE_FILES
         8026c000         8026c000        0     1                 $d
-        8026c020         8026c020        8     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.data._RNvNtCs2A9kJLaWm4K_6kernel4sv3912USER_NEXT_PA.0)
+        8026c020         8026c020        8     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.data._RNvNtCs2A9kJLaWm4K_6kernel4sv3912USER_NEXT_PA.0)
         8026c020         8026c020        8     1                 kernel::sv39::USER_NEXT_PA (.0)
         8026c020         8026c020        0     1                 $d
         8026c028         8026c028       10     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/liblog-88c0df48e584b025.rlib(log-88c0df48e584b025.log.33544da2cab04760-cgu.0.rcgu.o):(.data..L_MergedGlobals)
@@ -16651,16 +16651,16 @@
         8026c038         8026c038        0     1         __data_end = .
         8026d000         8026d000    22000  4096 .bss
         8026d000         8026d000        0     1         __bss_start = .
-        8026d000         8026d000    20000  4096         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.bss._RNvNtCs2A9kJLaWm4K_6kernel4sv397PT_POOL)
+        8026d000         8026d000    20000  4096         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.bss._RNvNtCs2A9kJLaWm4K_6kernel4sv397PT_POOL)
         8026d000         8026d000    20000     1                 kernel::sv39::PT_POOL
         8026d000         8026d000        0     1                 $d
-        8028d000         8028d000     1000    16         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.bss._RNvNtCs2A9kJLaWm4K_6kernel5stack11KTRAP_STACK)
+        8028d000         8028d000     1000    16         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.bss._RNvNtCs2A9kJLaWm4K_6kernel5stack11KTRAP_STACK)
         8028d000         8028d000     1000     1                 kernel::stack::KTRAP_STACK
         8028d000         8028d000        0     1                 $d
-        8028e000         8028e000        8     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.bss._RNvNtCs2A9kJLaWm4K_6kernel5timer5TICKS)
+        8028e000         8028e000        8     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.bss._RNvNtCs2A9kJLaWm4K_6kernel5timer5TICKS)
         8028e000         8028e000        8     1                 kernel::timer::TICKS
         8028e000         8028e000        0     1                 $d
-        8028e008         8028e008      458     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.bss..L_MergedGlobals)
+        8028e008         8028e008      458     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.bss..L_MergedGlobals)
         8028e008         8028e008      458     1                 .L_MergedGlobals
         8028e008         8028e008        0     1                 $d
         8028e008         8028e008        8     1                 kernel::sv39::PT_CUR (.0)
@@ -16681,7 +16681,7 @@
         88000000         88000000        0     1 __heap_start = __bss_end
         88000000         88000000        0     1 __heap_end = _stack_top - 0x10000
                0                0   1430ef     1 .debug_loc
-               0                0    20922     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.debug_loc)
+               0                0    20922     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.debug_loc)
                0                0        0     1                 .L0 
                0                0        0     1                 $d
               46               46        0     1                 .L0 
@@ -31768,7 +31768,7 @@
           143089           143089        0     1                 .L0 
           1430bc           1430bc        0     1                 .L0 
                0                0     237a     1 .debug_abbrev
-               0                0      551     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.debug_abbrev)
+               0                0      551     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.debug_abbrev)
                0                0        0     1                 $d
              551              551      5dc     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/libgoblin-c1f459dec219f66d.rlib(goblin-c1f459dec219f66d.goblin.a7e24c120c556417-cgu.0.rcgu.o):(.debug_abbrev)
              551              551        0     1                 $d
@@ -31805,7 +31805,7 @@
             2291             2291       e9     1         /home/runner/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/riscv64gc-unknown-none-elf/lib/libcompiler_builtins-323851fd81e594fe.rlib(compiler_builtins-323851fd81e594fe.compiler_builtins.a51261c50f1a2868-cgu.322.rcgu.o):(.debug_abbrev)
             2291             2291        0     1                 $d
                0                0    d6ce8     1 .debug_info
-               0                0    1f1b6     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.debug_info)
+               0                0    1f1b6     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.debug_info)
                0                0        0     1                 .L0 
                0                0        0     1                 $d
            1f1b6            1f1b6    7cb51     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/libgoblin-c1f459dec219f66d.rlib(goblin-c1f459dec219f66d.goblin.a7e24c120c556417-cgu.0.rcgu.o):(.debug_info)
@@ -31860,7 +31860,7 @@
            d69fd            d69fd        0     1                 .L0 
            d69fd            d69fd        0     1                 $d
                0                0     51c0     1 .debug_aranges
-               0                0      3c0     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.debug_aranges)
+               0                0      3c0     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.debug_aranges)
                0                0        0     1                 $d
              3c0              3c0     1da0     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/libgoblin-c1f459dec219f66d.rlib(goblin-c1f459dec219f66d.goblin.a7e24c120c556417-cgu.0.rcgu.o):(.debug_aranges)
              3c0              3c0        0     1                 $d
@@ -31897,7 +31897,7 @@
             5190             5190       30     1         /home/runner/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/riscv64gc-unknown-none-elf/lib/libcompiler_builtins-323851fd81e594fe.rlib(compiler_builtins-323851fd81e594fe.compiler_builtins.a51261c50f1a2868-cgu.322.rcgu.o):(.debug_aranges)
             5190             5190        0     1                 $d
                0                0    61600     1 .debug_ranges
-               0                0     7e90     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.debug_ranges)
+               0                0     7e90     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.debug_ranges)
                0                0        0     1                 .L0 
                0                0        0     1                 $d
               30               30        0     1                 .L0 
@@ -38011,7 +38011,7 @@
                0                0       74     1 .riscv.attributes
                0                0       74     1         <internal>:(.riscv.attributes)
                0                0     5d40     8 .debug_frame
-               0                0      918     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.debug_frame)
+               0                0      918     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.debug_frame)
                0                0        0     1                 .L0 
                0                0        0     1                 $d
              918              918     4c58     8         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/libgoblin-c1f459dec219f66d.rlib(goblin-c1f459dec219f66d.goblin.a7e24c120c556417-cgu.0.rcgu.o):(.debug_frame)
@@ -38030,7 +38030,7 @@
             5cc8             5cc8        0     1                 .L0 
             5cc8             5cc8        0     1                 $d
                0                0    4ab41     1 .debug_line
-               0                0     63ee     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.0q7jsdd.rcgu.o:(.debug_line)
+               0                0     63ee     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/kernel-e1ad26447a1545e4.4pv58hcygj4h6n2w6mzoglz48.1wxsp1w.rcgu.o:(.debug_line)
                0                0        0     1                 .Lline_table_start0
                0                0        0     1                 $d
             63ee             63ee    1eec0     1         /home/runner/work/bogokernel/bogokernel/target/riscv64gc-unknown-none-elf/debug/deps/libgoblin-c1f459dec219f66d.rlib(goblin-c1f459dec219f66d.goblin.a7e24c120c556417-cgu.0.rcgu.o):(.debug_line)
