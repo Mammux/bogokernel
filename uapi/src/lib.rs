@@ -18,6 +18,7 @@ pub mod nr {
     pub const UNLINK: usize = 15; // unlink(path) -> 0 or usize::MAX
     pub const STAT: usize = 16; // stat(path, buf) -> 0 or usize::MAX
     pub const CHMOD: usize = 17; // chmod(path, mode) -> 0 or usize::MAX
+    pub const READDIR: usize = 18; // readdir(buf, len) -> n or usize::MAX
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

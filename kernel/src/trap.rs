@@ -87,6 +87,7 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
                 nr::UNLINK => sys_unlink(tf),         // unlink(path)
                 nr::STAT => sys_stat(tf),             // stat(path, buf)
                 nr::CHMOD => sys_chmod(tf),           // chmod(path, mode)
+                nr::READDIR => sys_readdir(tf),       // readdir(buf, len)
                 nr => {
                     let mut uart = crate::uart::Uart::new();
                     let _ = writeln!(uart, "\r\nunknown syscall: {}", nr);
@@ -990,5 +991,50 @@ fn sys_chmod(tf: &mut TrapFrame) {
         Ok(_) => tf.a0 = 0,
         Err(_) => tf.a0 = usize::MAX,
     }
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_readdir(tf: &mut TrapFrame) {
+    // a0 = buffer (user VA), a1 = buffer length
+    let buf_va = tf.a0;
+    let mut len = tf.a1;
+
+    if buf_va == 0 || len == 0 {
+        tf.a0 = 0;
+        tf.sepc = tf.sepc.wrapping_add(4);
+        return;
+    }
+
+    // Cap to page boundary
+    len = cap_to_page(buf_va, len);
+
+    // Use a kernel buffer to collect the filenames
+    let mut kernel_buf = [0u8; 4096];
+    let safe_len = core::cmp::min(len, kernel_buf.len());
+    
+    // Get list of writable files
+    let count = fs::list_writable_files(&mut kernel_buf[..safe_len]);
+
+    // Copy to user space
+    if count > 0 {
+        // Find actual bytes used (up to the last null terminator)
+        let mut bytes_used = 0usize;
+        let mut nulls_found = 0usize;
+        for i in 0..safe_len {
+            if kernel_buf[i] == 0 {
+                nulls_found += 1;
+                bytes_used = i + 1;
+                if nulls_found == count {
+                    break;
+                }
+            }
+        }
+
+        let _copied = copy_to_user(buf_va, &kernel_buf[..bytes_used]);
+        tf.a0 = count;
+    } else {
+        tf.a0 = 0;
+    }
+
     tf.sepc = tf.sepc.wrapping_add(4);
 }

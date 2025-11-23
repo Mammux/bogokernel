@@ -11,7 +11,7 @@ pub extern "C" fn _start(_argc: usize, _argv: *const *const u8, _envp: *const *c
 
 fn main() {
     println!("Welcome to BogoShell!");
-    println!("Commands: hello, rogue, crogue, bigrogue, curses_test, fstest, shutdown, help");
+    println!("Commands: hello, rogue, crogue, bigrogue, curses_test, fstest, mkfiles, ls, shutdown, help");
 
     let mut buf = [0u8; 64];
     loop {
@@ -58,7 +58,44 @@ fn main() {
         let cmd = tokens[0];
         
         match cmd {
-            "help" => println!("Available commands: hello, rogue, crogue, bigrogue, curses_test, fstest, shutdown"),
+            "help" => println!("Available commands: hello, rogue, crogue, bigrogue, curses_test, fstest, mkfiles, ls, shutdown"),
+            "ls" => {
+                // List files in writable filesystem
+                let mut buf = [0u8; 4096];
+                match usys::readdir(&mut buf) {
+                    Ok(count) => {
+                        if count == 0 {
+                            println!("No files in writable filesystem");
+                        } else {
+                            println!("Files in writable filesystem:");
+                            let mut offset = 0;
+                            for _ in 0..count {
+                                // Find the null terminator, but cap search to buffer size
+                                let mut end = offset;
+                                while end < buf.len() && buf[end] != 0 {
+                                    end += 1;
+                                }
+                                
+                                // If we found a valid filename, print it
+                                if end > offset && end < buf.len() {
+                                    if let Ok(filename) = core::str::from_utf8(&buf[offset..end]) {
+                                        println!("  {}", filename);
+                                    }
+                                }
+                                
+                                // Move to next filename (past the null terminator)
+                                offset = end + 1;
+                                
+                                // Safety check: if we've gone past the buffer, stop
+                                if offset >= buf.len() {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    Err(_) => println!("Error listing files"),
+                }
+            },
             "shutdown" => {
                 println!("Shutting down...");
                 usys::poweroff();
@@ -118,6 +155,12 @@ fn main() {
                 let argv_refs = [argv_cstrs[0].as_cstr()];
                 usys::execv(usys::cstr!("fstest.elf"), &argv_refs);
             },            
+            "mkfiles" => {
+                println!("Executing mkfiles...");
+                let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("mkfiles.elf").unwrap()];
+                let argv_refs = [argv_cstrs[0].as_cstr()];
+                usys::execv(usys::cstr!("mkfiles.elf"), &argv_refs);
+            },
             _ => println!("Unknown command: {}", cmd),
         }
     }

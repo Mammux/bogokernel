@@ -197,6 +197,15 @@ pub fn chmod(path: &CStr, mode: u32) -> SysResult<()> {
     }
 }
 
+pub fn readdir(buf: &mut [u8]) -> SysResult<usize> {
+    let r = unsafe { sys_ecall2(nr::READDIR, buf.as_mut_ptr() as usize, buf.len()) };
+    if is_err_sentinel(r) {
+        Err(SysErr::Fail)
+    } else {
+        Ok(r)
+    }
+}
+
 /* ---------- tiny io traits ---------- */
 
 pub trait IoWrite {
