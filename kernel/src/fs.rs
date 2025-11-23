@@ -48,6 +48,10 @@ pub static FILES: &[File] = &[
         data: include_bytes!("../fstest.elf"),
     },
     File {
+        name: "mkfiles.elf",
+        data: include_bytes!("../mkfiles.elf"),
+    },
+    File {
         name: "etc/motd",
         data: ETC_MOTD,
     },
@@ -208,4 +212,32 @@ pub fn stat_file(name: &str) -> Option<FileStat> {
     }
     
     None
+}
+
+/// List writable files - returns number of files and writes names to buffer
+/// Each filename is null-terminated in the buffer
+pub fn list_writable_files(buf: &mut [u8]) -> usize {
+    let files = WRITABLE_FILES.lock();
+    let mut offset = 0usize;
+    let mut count = 0usize;
+    
+    for file in files.iter() {
+        let name_bytes = file.name.as_bytes();
+        // +1 for null terminator
+        if offset + name_bytes.len() + 1 > buf.len() {
+            break; // Buffer full
+        }
+        
+        // Copy filename
+        buf[offset..offset + name_bytes.len()].copy_from_slice(name_bytes);
+        offset += name_bytes.len();
+        
+        // Add null terminator
+        buf[offset] = 0;
+        offset += 1;
+        
+        count += 1;
+    }
+    
+    count
 }
