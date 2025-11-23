@@ -1,7 +1,7 @@
 #ifndef _CURSES_H
 #define _CURSES_H
 
-#include <stdarg.h>
+#include <stdarg.h> // IWYU pragma: keep
 #include <stdbool.h>
 
 /* Screen dimensions */
@@ -9,51 +9,51 @@
 #define COLS 80
 
 /* Character attributes */
-#define A_NORMAL    0x00
-#define A_STANDOUT  0x01
+#define A_NORMAL 0x00
+#define A_STANDOUT 0x01
 #define A_UNDERLINE 0x02
-#define A_REVERSE   0x04
-#define A_BLINK     0x08
-#define A_BOLD      0x10
-#define A_CHARTEXT  0xFF
+#define A_REVERSE 0x04
+#define A_BLINK 0x08
+#define A_BOLD 0x10
+#define A_CHARTEXT 0xFF
 
 /* ACS (Alternative Character Set) for line drawing */
-#define ACS_ULCORNER '+'  /* upper left corner */
-#define ACS_LLCORNER '+'  /* lower left corner */
-#define ACS_URCORNER '+'  /* upper right corner */
-#define ACS_LRCORNER '+'  /* lower right corner */
-#define ACS_LTEE     '+'  /* tee pointing right */
-#define ACS_RTEE     '+'  /* tee pointing left */
-#define ACS_BTEE     '+'  /* tee pointing up */
-#define ACS_TTEE     '+'  /* tee pointing down */
-#define ACS_HLINE    '-'  /* horizontal line */
-#define ACS_VLINE    '|'  /* vertical line */
-#define ACS_PLUS     '+'  /* large plus or crossover */
-#define ACS_BULLET   'o'  /* bullet */
-#define ACS_CKBOARD  '#'  /* checker board (stipple) */
-#define ACS_DEGREE   'o'  /* degree symbol */
-#define ACS_PLMINUS  '#'  /* plus/minus */
-#define ACS_BOARD    '#'  /* board of squares */
-#define ACS_LANTERN  '#'  /* lantern symbol */
-#define ACS_BLOCK    '#'  /* solid square block */
+#define ACS_ULCORNER '+' /* upper left corner */
+#define ACS_LLCORNER '+' /* lower left corner */
+#define ACS_URCORNER '+' /* upper right corner */
+#define ACS_LRCORNER '+' /* lower right corner */
+#define ACS_LTEE '+'     /* tee pointing right */
+#define ACS_RTEE '+'     /* tee pointing left */
+#define ACS_BTEE '+'     /* tee pointing up */
+#define ACS_TTEE '+'     /* tee pointing down */
+#define ACS_HLINE '-'    /* horizontal line */
+#define ACS_VLINE '|'    /* vertical line */
+#define ACS_PLUS '+'     /* large plus or crossover */
+#define ACS_BULLET 'o'   /* bullet */
+#define ACS_CKBOARD '#'  /* checker board (stipple) */
+#define ACS_DEGREE 'o'   /* degree symbol */
+#define ACS_PLMINUS '#'  /* plus/minus */
+#define ACS_BOARD '#'    /* board of squares */
+#define ACS_LANTERN '#'  /* lantern symbol */
+#define ACS_BLOCK '#'    /* solid square block */
 
 /* Special keys (for getch) */
-#define KEY_DOWN    0402
-#define KEY_UP      0403
-#define KEY_LEFT    0404
-#define KEY_RIGHT   0405
-#define KEY_HOME    0406
-#define KEY_PPAGE   0407
-#define KEY_NPAGE   0410
-#define KEY_END     0411
-#define KEY_A1      0412
-#define KEY_A3      0413
-#define KEY_B2      0414
-#define KEY_C1      0415
-#define KEY_C3      0416
+#define KEY_DOWN 0402
+#define KEY_UP 0403
+#define KEY_LEFT 0404
+#define KEY_RIGHT 0405
+#define KEY_HOME 0406
+#define KEY_PPAGE 0407
+#define KEY_NPAGE 0410
+#define KEY_END 0411
+#define KEY_A1 0412
+#define KEY_A3 0413
+#define KEY_B2 0414
+#define KEY_C1 0415
+#define KEY_C3 0416
 
 /* Error return value */
-#define ERR         (-1)
+#define ERR (-1)
 
 /* Boolean type for compatibility */
 #ifndef TRUE
@@ -66,21 +66,26 @@ typedef unsigned long chtype;
 
 /* Window structure */
 typedef struct _win_st {
-    int _cury, _curx;           /* Current cursor position */
-    int _maxy, _maxx;           /* Maximum coordinates */
-    int _begy, _begx;           /* Screen coords of upper-left corner */
-    short _flags;               /* Window state flags */
-    chtype _attrs;              /* Current attributes */
-    bool _clear;                /* Clear on next refresh */
-    bool _leave;                /* Leave cursor after refresh */
-    bool _scroll;               /* Scrolling allowed */
-    bool _use_keypad;           /* Keypad mode */
-    char **_y;                  /* Pointer to line array (not used in minimal) */
+  int _cury, _curx;          /* Current cursor position */
+  int _maxy, _maxx;          /* Maximum coordinates */
+  int _begy, _begx;          /* Screen coords of upper-left corner */
+  short _flags;              /* Window state flags */
+  chtype _attrs;             /* Current attributes */
+  bool _clear;               /* Clear on next refresh */
+  bool _leave;               /* Leave cursor after refresh */
+  bool _scroll;              /* Scrolling allowed */
+  bool _use_keypad;          /* Keypad mode */
+  chtype **_y;               /* Pointer to line array */
+  struct _win_st *_parent;   /* Parent window */
+  struct _win_st *_children; /* First child window */
+  struct _win_st *_sibling;  /* Next sibling window */
 } WINDOW;
 
+#define _IS_SUBWIN 0x01
+
 /* Global variables */
-extern WINDOW *stdscr;          /* Standard screen */
-extern WINDOW *curscr;          /* Current screen state */
+extern WINDOW *stdscr; /* Standard screen */
+extern WINDOW *curscr; /* Current screen state */
 
 /* Initialization and cleanup */
 WINDOW *initscr(void);
@@ -105,8 +110,8 @@ int waddstr(WINDOW *win, const char *str);
 chtype mvwinch(WINDOW *win, int y, int x);
 
 /* Macros for convenience */
-#define mvinch(y, x)        mvwinch(stdscr, y, x)
-#define getyx(win, y, x)    ((y) = (win)->_cury, (x) = (win)->_curx)
+#define mvinch(y, x) mvwinch(stdscr, y, x)
+#define getyx(win, y, x) ((y) = (win)->_cury, (x) = (win)->_curx)
 
 /* Screen update */
 int refresh(void);
@@ -167,10 +172,10 @@ int getmaxy(WINDOW *win);
 
 /* Box and border drawing */
 int box(WINDOW *win, chtype verch, chtype horch);
-int border(chtype ls, chtype rs, chtype ts, chtype bs, 
-           chtype tl, chtype tr, chtype bl, chtype br);
-int wborder(WINDOW *win, chtype ls, chtype rs, chtype ts, chtype bs,
-            chtype tl, chtype tr, chtype bl, chtype br);
+int border(chtype ls, chtype rs, chtype ts, chtype bs, chtype tl, chtype tr,
+           chtype bl, chtype br);
+int wborder(WINDOW *win, chtype ls, chtype rs, chtype ts, chtype bs, chtype tl,
+            chtype tr, chtype bl, chtype br);
 int hline(chtype ch, int n);
 int whline(WINDOW *win, chtype ch, int n);
 int vline(chtype ch, int n);
