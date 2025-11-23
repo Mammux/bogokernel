@@ -3,6 +3,9 @@
 
 use usys::{print, println, IoRead};
 
+// Maximum number of command-line arguments
+const MAX_ARGS: usize = 16;
+
 #[no_mangle]
 pub extern "C" fn _start(_argc: usize, _argv: *const *const u8, _envp: *const *const u8) -> ! {
     main();
@@ -44,10 +47,10 @@ fn main() {
         let input = core::str::from_utf8(&buf[..len]).unwrap_or("");
         
         // Parse command line: split by whitespace
-        let mut tokens: [&str; 16] = [""; 16];
+        let mut tokens: [&str; MAX_ARGS] = [""; MAX_ARGS];
         let mut token_count = 0;
         for token in input.split_whitespace() {
-            if token_count < 16 {
+            if token_count < MAX_ARGS {
                 tokens[token_count] = token;
                 token_count += 1;
             }
@@ -139,7 +142,7 @@ fn main() {
                         Ok(_) => {
                             // File exists, proceed with execution
                             // Build argv array with command line arguments
-                            let mut argv_cstrs: [usys::CStrBuf<64>; 16] = Default::default();
+                            let mut argv_cstrs: [usys::CStrBuf<64>; MAX_ARGS] = Default::default();
                             
                             // First arg is program name
                             argv_cstrs[0] = filename_cstr;
@@ -147,7 +150,7 @@ fn main() {
                             
                             // Add remaining arguments
                             for i in 1..token_count {
-                                if argv_count >= 16 {
+                                if argv_count >= MAX_ARGS {
                                     break;
                                 }
                                 if let Ok(cstr) = usys::CStrBuf::<64>::from_str(tokens[i]) {
@@ -157,7 +160,7 @@ fn main() {
                             }
                             
                             // Build references array
-                            let mut argv_refs: [&core::ffi::CStr; 16] = [usys::cstr!(""); 16];
+                            let mut argv_refs: [&core::ffi::CStr; MAX_ARGS] = [usys::cstr!(""); MAX_ARGS];
                             for i in 0..argv_count {
                                 argv_refs[i] = argv_cstrs[i].as_cstr();
                             }

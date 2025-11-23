@@ -258,7 +258,13 @@ pub fn init_writable_fs() {
 }
 
 /// Lookup a file by name in the writable filesystem
-/// Returns a reference to the file data if found
+/// Returns a copy of the file data if found
+/// 
+/// Note: This function clones the file data to avoid holding the filesystem
+/// lock during ELF loading. While this involves copying, it's necessary because:
+/// 1. ELF loading is a long operation that cannot hold the lock
+/// 2. File data must remain stable during the entire loading process
+/// 3. Program execution is not a hot path, so the overhead is acceptable
 pub fn get_file_data(name: &str) -> Option<Vec<u8>> {
     let files = WRITABLE_FILES.lock();
     files.iter().find(|f| f.name == name).map(|f| f.data.clone())
