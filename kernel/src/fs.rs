@@ -44,6 +44,10 @@ pub static FILES: &[File] = &[
         data: include_bytes!("../bigrogue.elf"),
     },
     File {
+        name: "fstest.elf",
+        data: include_bytes!("../fstest.elf"),
+    },
+    File {
         name: "etc/motd",
         data: ETC_MOTD,
     },

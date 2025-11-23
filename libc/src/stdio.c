@@ -371,13 +371,63 @@ int fflush(FILE *stream) {
     return 0;
 }
 
-/* File I/O functions - minimal stub implementations */
+/* File I/O functions - now with real filesystem support */
+
+/* Track open FILE* for cleanup */
+#define MAX_FILES 16
+static FILE _file_table[MAX_FILES];
+static int _file_used[MAX_FILES] = {0};
+
 FILE *fopen(const char *pathname, const char *mode) {
-    /* In BogoKernel, we don't have a real filesystem */
-    /* These are stubs to allow compilation */
-    (void)pathname;
-    (void)mode;
-    errno = ENOENT;
+    int fd = -1;
+    int is_write = 0;
+    
+    if (!pathname || !mode) {
+        errno = EINVAL;
+        return NULL;
+    }
+    
+    /* Parse mode - check for write modes */
+    if (mode[0] == 'w' || mode[0] == 'a' || (mode[0] == 'r' && mode[1] == '+')) {
+        is_write = 1;
+    }
+    
+    /* Open or create file */
+    if (mode[0] == 'w') {
+        /* Write mode - create/truncate */
+        fd = creat(pathname, 0644);
+    } else if (mode[0] == 'r') {
+        /* Read mode */
+        fd = open(pathname);
+    } else if (mode[0] == 'a') {
+        /* Append mode - open existing or create */
+        fd = open(pathname);
+        if (fd < 0) {
+            fd = creat(pathname, 0644);
+        }
+        /* Seek to end for append */
+        if (fd >= 0) {
+            lseek(fd, 0, SEEK_END);
+        }
+    }
+    
+    if (fd < 0) {
+        errno = ENOENT;
+        return NULL;
+    }
+    
+    /* Find free slot in file table */
+    for (int i = 0; i < MAX_FILES; i++) {
+        if (!_file_used[i]) {
+            _file_table[i].fd = fd;
+            _file_used[i] = 1;
+            return &_file_table[i];
+        }
+    }
+    
+    /* No free slots */
+    close(fd);
+    errno = EMFILE;
     return NULL;
 }
 
@@ -386,8 +436,23 @@ int fclose(FILE *stream) {
         errno = EBADF;
         return EOF;
     }
-    /* Nothing to do in our stub implementation */
-    return 0;
+    
+    /* Check if it's a special stream */
+    if (stream == stdin || stream == stdout || stream == stderr) {
+        return 0;
+    }
+    
+    /* Find in file table and mark as free */
+    for (int i = 0; i < MAX_FILES; i++) {
+        if (_file_used[i] && &_file_table[i] == stream) {
+            close(stream->fd);
+            _file_used[i] = 0;
+            return 0;
+        }
+    }
+    
+    errno = EBADF;
+    return EOF;
 }
 
 char *fgets(char *s, int size, FILE *stream) {
@@ -424,11 +489,32 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
         return 0;
     }
     
-    /* Stub implementation */
-    (void)size;
-    (void)nmemb;
-    errno = EBADF;
-    return 0;
+    size_t total_bytes = size * nmemb;
+    ssize_t n = read(stream->fd, ptr, total_bytes);
+    
+    if (n < 0) {
+        errno = EIO;
+        return 0;
+    }
+    
+    return n / size;  /* Return number of complete objects read */
+}
+
+size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream) {
+    if (!ptr || !stream) {
+        errno = EINVAL;
+        return 0;
+    }
+    
+    size_t total_bytes = size * nmemb;
+    ssize_t n = write(stream->fd, ptr, total_bytes);
+    
+    if (n < 0) {
+        errno = EIO;
+        return 0;
+    }
+    
+    return n / size;  /* Return number of complete objects written */
 }
 
 int putc(int c, FILE *stream) {
@@ -437,12 +523,16 @@ int putc(int c, FILE *stream) {
         return EOF;
     }
     
-    if (stream == stdout) {
-        return putchar(c);
+    unsigned char ch = (unsigned char)c;
+    ssize_t n = write(stream->fd, &ch, 1);
+    
+    if (n != 1) {
+        errno = EIO;
+        return EOF;
     }
     
-    /* Stub for file output */
-    errno = EBADF;
+    return (unsigned char)c;
+}
     return EOF;
 }
 

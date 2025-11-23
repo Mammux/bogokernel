@@ -13,6 +13,11 @@
 #define SYS_GETTIME    10
 #define SYS_POWEROFF   11
 #define SYS_EXEC       12
+#define SYS_EXECV      13
+#define SYS_CREAT      14
+#define SYS_UNLINK     15
+#define SYS_STAT       16
+#define SYS_CHMOD      17
 
 /* Low-level syscall wrappers using inline assembly */
 
