@@ -9,6 +9,10 @@ use core::mem::MaybeUninit;
 const PAGE_SIZE: usize = 4096;
 const ENTRIES: usize = 512;
 
+// PTE constants
+const PTE_PPN_SHIFT: usize = 10;
+const PTE_PPN_MASK_BITS: usize = 44;
+
 // PTE flag bits
 pub const PTE_V: u64 = 1 << 0;
 pub const PTE_R: u64 = 1 << 1;
@@ -91,9 +95,16 @@ static mut USER_NEXT_PA: usize = USER_PA_POOL_START;
 
 pub unsafe fn alloc_user_page() -> usize {
     let pa = USER_NEXT_PA;
-    USER_NEXT_PA += 4096;
+    let next_pa = pa + PAGE_SIZE;
+    
+    // Check if we're out of space in the user page pool
+    if next_pa > USER_PA_POOL_END {
+        panic!("Out of user pages! Pool exhausted.");
+    }
+    
+    USER_NEXT_PA = next_pa;
     // Zero the page to avoid stale data from previous programs
-    core::ptr::write_bytes(pa as *mut u8, 0, 4096);
+    core::ptr::write_bytes(pa as *mut u8, 0, PAGE_SIZE);
     pa
 }
 
@@ -105,7 +116,7 @@ pub unsafe fn reset_user_pages() {
 /// Helper to extract physical address from a PTE
 #[inline]
 fn pte_to_pa(pte: u64) -> usize {
-    (((pte >> 10) & ((1 << 44) - 1)) as usize) << 12
+    (((pte >> PTE_PPN_SHIFT) & ((1 << PTE_PPN_MASK_BITS) - 1)) as usize) << 12
 }
 
 /// Clear all user mappings in the page table (VAs with U=1 flag)
