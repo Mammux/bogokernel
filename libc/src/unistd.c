@@ -11,9 +11,13 @@
 #define SYS_CLOSE      7
 #define SYS_LSEEK      8
 #define SYS_BRK        9
+#define SYS_CREAT      14
+#define SYS_UNLINK     15
+#define SYS_CHMOD      17
 
 /* External syscall helpers */
 extern long syscall1(long nr, long a0);
+extern long syscall2(long nr, long a0, long a1);
 extern long syscall3(long nr, long a0, long a1, long a2);
 
 ssize_t write(int fd, const void *buf, size_t count) {
@@ -28,6 +32,12 @@ ssize_t read(int fd, void *buf, size_t count) {
 
 int open(const char *pathname) {
     long ret = syscall1(SYS_OPEN, (long)pathname);
+    if (ret == (long)-1) return -1;
+    return (int)ret;
+}
+
+int creat(const char *pathname, unsigned int mode) {
+    long ret = syscall2(SYS_CREAT, (long)pathname, mode);
     if (ret == (long)-1) return -1;
     return (int)ret;
 }
@@ -78,11 +88,10 @@ void *sbrk(long increment) {
     return (void *)-1;
 }
 
-/* unlink - remove a file (stub) */
+/* unlink - remove a file */
 int unlink(const char *pathname) {
-    /* BogoKernel doesn't support file deletion */
-    (void)pathname;
-    return -1;
+    long ret = syscall1(SYS_UNLINK, (long)pathname);
+    return (ret == 0) ? 0 : -1;
 }
 
 /* getpid - get process ID (stub) */
@@ -104,12 +113,10 @@ unsigned int sleep(unsigned int seconds) {
     return 0;
 }
 
-/* chmod - change file permissions (stub) */
+/* chmod - change file permissions */
 int chmod(const char *pathname, unsigned int mode) {
-    /* BogoKernel doesn't support file permissions */
-    (void)pathname;
-    (void)mode;
-    return 0;
+    long ret = syscall2(SYS_CHMOD, (long)pathname, mode);
+    return (ret == 0) ? 0 : -1;
 }
 
 /* environ - environment variables array (stub) */

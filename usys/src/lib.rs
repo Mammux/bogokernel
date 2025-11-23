@@ -161,6 +161,42 @@ pub fn execv(path: &CStr, argv: &[&CStr]) -> ! {
     loop {}
 }
 
+pub fn creat(path: &CStr, mode: u32) -> SysResult<Fd> {
+    let r = unsafe { sys_ecall2(nr::CREAT, path.as_ptr() as usize, mode as usize) };
+    if is_err_sentinel(r) {
+        Err(SysErr::Fail)
+    } else {
+        Ok(Fd(r as i32))
+    }
+}
+
+pub fn unlink(path: &CStr) -> SysResult<()> {
+    let r = unsafe { sys_ecall1(nr::UNLINK, path.as_ptr() as usize) };
+    if is_err_sentinel(r) {
+        Err(SysErr::Fail)
+    } else {
+        Ok(())
+    }
+}
+
+pub fn stat(path: &CStr, buf: &mut [u64; 2]) -> SysResult<()> {
+    let r = unsafe { sys_ecall2(nr::STAT, path.as_ptr() as usize, buf.as_mut_ptr() as usize) };
+    if is_err_sentinel(r) {
+        Err(SysErr::Fail)
+    } else {
+        Ok(())
+    }
+}
+
+pub fn chmod(path: &CStr, mode: u32) -> SysResult<()> {
+    let r = unsafe { sys_ecall2(nr::CHMOD, path.as_ptr() as usize, mode as usize) };
+    if is_err_sentinel(r) {
+        Err(SysErr::Fail)
+    } else {
+        Ok(())
+    }
+}
+
 /* ---------- tiny io traits ---------- */
 
 pub trait IoWrite {

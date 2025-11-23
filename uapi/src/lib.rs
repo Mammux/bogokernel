@@ -14,6 +14,10 @@ pub mod nr {
     pub const POWEROFF: usize = 11; // poweroff() -> !
     pub const EXEC: usize = 12; // exec(path) -> !
     pub const EXECV: usize = 13; // execv(path, argv) -> !
+    pub const CREAT: usize = 14; // creat(path, mode) -> fd or usize::MAX
+    pub const UNLINK: usize = 15; // unlink(path) -> 0 or usize::MAX
+    pub const STAT: usize = 16; // stat(path, buf) -> 0 or usize::MAX
+    pub const CHMOD: usize = 17; // chmod(path, mode) -> 0 or usize::MAX
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

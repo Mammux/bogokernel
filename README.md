@@ -13,22 +13,28 @@ This project is educational — it demonstrates how to bring up a kernel in S-mo
 - **Sv39 paging** enabled with identity mapping for the kernel and U=1 mappings for user code/data.
 - **Minimal heap** (via `linked_list_allocator`) to allow kernel allocations.
 - **ELF64 loader**: Maps PT_LOAD segments, sets up argv/envp on user stack, and jumps to entry point in U-mode.
-- **RAMFS**: Embedded read-only filesystem with multiple files (ELF binaries, data files).
+- **Hybrid filesystem**: Embedded read-only RAMFS + in-memory writable filesystem layer.
 - **File descriptor table**: Supports stdin (fd 0), stdout (fd 1), stderr (fd 2), and regular files (fd 3+).
-- **Dynamic program loading**: `exec()` syscall to load and run programs from RAMFS.
+- **Dynamic program loading**: `exec()` and `execv()` syscalls to load and run programs.
 - **User-space library** (`usys`): Syscall wrappers, I/O traits, and convenience macros (`print!`, `println!`).
+- **Minimal libc**: Standard C library with file I/O, string functions, malloc/free, and printf.
 - **Multiple user applications**: Interactive shell, rogue-like game, cat utility, and hello world examples.
-- **System calls** (11 total):  
+- **System calls** (17 total):  
   - `write(ptr, len)` → write bytes to stdout  
   - `write_cstr(ptr)` → write NUL-terminated string  
   - `write_fd(fd, buf, len)` → write to file descriptor  
   - `read(fd, buf, len)` → read from file or stdin (blocking for stdin)  
-  - `open(path)` → open file from RAMFS, returns fd  
+  - `open(path)` → open file from filesystem, returns fd  
+  - `creat(path, mode)` → create/truncate writable file  
   - `close(fd)` → close file descriptor  
   - `lseek(fd, offset, whence)` → seek in file  
+  - `unlink(path)` → delete file  
+  - `stat(path, buf)` → get file metadata  
+  - `chmod(path, mode)` → change file permissions  
   - `brk(addr)` → manage user heap (allocate/free pages)  
   - `gettime()` → get system ticks  
-  - `exec(path)` → execute program from RAMFS  
+  - `exec(path)` → execute program  
+  - `execv(path, argv)` → execute program with arguments  
   - `poweroff()` → shutdown via SBI  
   - `exit()` → reload shell  
 - Works under **QEMU virt machine** with `-bios default` (OpenSBI).
@@ -148,7 +154,7 @@ shell> _
 | 1 | `WRITE` | `write(ptr, len) -> usize` | Write bytes to stdout |
 | 2 | `EXIT` | `exit() -> !` | Reload shell |
 | 3 | `WRITE_CSTR` | `write_cstr(ptr) -> usize` | Write NUL-terminated string |
-| 4 | `OPEN` | `open(path) -> fd` | Open file from RAMFS |
+| 4 | `OPEN` | `open(path) -> fd` | Open file from filesystem |
 | 5 | `READ` | `read(fd, buf, len) -> n` | Read from file/stdin |
 | 6 | `WRITE_FD` | `write_fd(fd, buf, len) -> n` | Write to file descriptor |
 | 7 | `CLOSE` | `close(fd) -> result` | Close file descriptor |
@@ -157,6 +163,11 @@ shell> _
 | 10 | `GETTIME` | `gettime() -> ticks` | Get system ticks |
 | 11 | `POWEROFF` | `poweroff() -> !` | Shutdown system |
 | 12 | `EXEC` | `exec(path) -> !` | Execute program |
+| 13 | `EXECV` | `execv(path, argv) -> !` | Execute program with arguments |
+| 14 | `CREAT` | `creat(path, mode) -> fd` | Create/truncate file |
+| 15 | `UNLINK` | `unlink(path) -> result` | Delete file |
+| 16 | `STAT` | `stat(path, buf) -> result` | Get file metadata |
+| 17 | `CHMOD` | `chmod(path, mode) -> result` | Change file permissions |
 
 All syscalls use the RISC-V calling convention: `a7` = syscall number, `a0-a2` = arguments, `a0` = return value.
 
@@ -169,6 +180,8 @@ Completed features:
 - ✅ User heap via brk
 - ✅ Embedded filesystem (RAMFS)
 - ✅ Dynamic program loading (exec)
+- ✅ Writable filesystem (in-memory)
+- ✅ File creation, deletion, and modification syscalls
 
 Possible next steps:
 
@@ -180,7 +193,7 @@ Possible next steps:
 
   -  Extend ELF loader with relocations and auxv
 
-  -  Add writable filesystem or virtio-blk driver
+  -  Add persistent storage via virtio-blk driver
 
   -  Improve trap/interrupt handling (PLIC for external interrupts)
 
