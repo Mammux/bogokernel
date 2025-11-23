@@ -95,6 +95,74 @@ pub unsafe fn alloc_user_page() -> usize {
     pa
 }
 
+/// Reset the user page allocator to the initial state, effectively freeing all user pages
+pub unsafe fn reset_user_pages() {
+    USER_NEXT_PA = 0x8800_0000 - 0x0100_000 - 0x10000;
+}
+
+/// Clear all user mappings in the page table (VAs with U=1 flag)
+/// This unmaps all user-space pages but preserves kernel mappings
+pub unsafe fn clear_user_mappings() {
+    let root = PT_ROOT;
+    if root.is_null() {
+        return;
+    }
+    
+    // Walk through all L2 entries (covers entire VA space)
+    for i2 in 0..ENTRIES {
+        let pte2 = root.add(i2);
+        let entry2 = *pte2;
+        
+        // Skip invalid entries
+        if (entry2 & PTE_V) == 0 {
+            continue;
+        }
+        
+        // Check if this is a leaf (unlikely at L2, but possible)
+        if (entry2 & (PTE_R | PTE_W | PTE_X)) != 0 {
+            // Leaf at L2 (1 GiB page)
+            if (entry2 & PTE_U) != 0 {
+                // User page - clear it
+                *pte2 = 0;
+            }
+            continue;
+        }
+        
+        // Non-leaf, walk to L1
+        let l1 = ((((entry2 >> 10) & ((1 << 44) - 1)) as usize) << 12) as *mut u64;
+        
+        for i1 in 0..ENTRIES {
+            let pte1 = l1.add(i1);
+            let entry1 = *pte1;
+            
+            if (entry1 & PTE_V) == 0 {
+                continue;
+            }
+            
+            // Check if this is a leaf at L1 (2 MiB page)
+            if (entry1 & (PTE_R | PTE_W | PTE_X)) != 0 {
+                if (entry1 & PTE_U) != 0 {
+                    *pte1 = 0;
+                }
+                continue;
+            }
+            
+            // Non-leaf, walk to L0
+            let l0 = ((((entry1 >> 10) & ((1 << 44) - 1)) as usize) << 12) as *mut u64;
+            
+            for i0 in 0..ENTRIES {
+                let pte0 = l0.add(i0);
+                let entry0 = *pte0;
+                
+                // Clear if it's a valid user page
+                if (entry0 & PTE_V) != 0 && (entry0 & PTE_U) != 0 {
+                    *pte0 = 0;
+                }
+            }
+        }
+    }
+}
+
 // ----- Mapping helpers -----
 
 pub(crate) unsafe fn map_4k(root: *mut u64, va: usize, pa: usize, flags: u64) {
