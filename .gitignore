@@ -31,6 +31,9 @@ crogue/crogue
 c_hello/hello
 curses_test/curses_test
 
+# Build artifacts - kernel
+kernel.map
+
 # Test outputs
 test_output.txt
 *.log
