@@ -110,6 +110,92 @@ WINDOW *initscr(void) {
   return stdscr;
 }
 
+/* End curses mode */
+int endwin(void) {
+  if (!_initialized) {
+    return -1;
+  }
+
+  /* Move cursor to bottom */
+  _move_cursor(LINES - 1, 0);
+  printf("\n");
+  printf(ATTR_NORMAL);
+  printf(CURSOR_SHOW);
+  fflush(stdout);
+
+  delwin(stdscr);
+  delwin(curscr);
+  stdscr = NULL;
+  curscr = NULL;
+
+  _initialized = false;
+  return 0;
+}
+
+/* Move cursor in window */
+int wmove(WINDOW *win, int y, int x) {
+  if (!win || y < 0 || y >= win->_maxy || x < 0 || x >= win->_maxx) {
+    return -1;
+  }
+  win->_cury = y;
+  win->_curx = x;
+  return 0;
+}
+
+int move(int y, int x) { return wmove(stdscr, y, x); }
+
+/* Add character to window */
+int waddch(WINDOW *win, chtype ch) {
+  if (!win) {
+    return -1;
+  }
+
+  int y = win->_cury;
+  int x = win->_curx;
+
+  if (y < 0 || y >= win->_maxy || x < 0 || x >= win->_maxx) {
+    return -1;
+  }
+
+  char c = (char)(ch & A_CHARTEXT);
+  chtype attrs = ch & ~A_CHARTEXT;
+
+  /* Handle special characters */
+  if (c == '\n') {
+    win->_curx = 0;
+    if (win->_cury < win->_maxy - 1) {
+      win->_cury++;
+    }
+    return 0;
+  } else if (c == '\r') {
+    win->_curx = 0;
+    return 0;
+  } else if (c == '\t') {
+    win->_curx = (win->_curx + 8) & ~7;
+    if (win->_curx >= win->_maxx) {
+      win->_curx = 0;
+      if (win->_cury < win->_maxy - 1) {
+        win->_cury++;
+      }
+    }
+    return 0;
+  }
+
+  /* Store character in buffer */
+  win->_y[y][x] = c | attrs | win->_attrs;
+
+  /* Advance cursor */
+  win->_curx++;
+  if (win->_curx >= win->_maxx) {
+    win->_curx = 0;
+    if (win->_cury < win->_maxy - 1) {
+      win->_cury++;
+    }
+  }
+
+  return 0;
+}
+
 int addch(chtype ch) { return waddch(stdscr, ch); }
 
 int mvwaddch(WINDOW *win, int y, int x, chtype ch) {
@@ -152,6 +238,67 @@ chtype mvwinch(WINDOW *win, int y, int x) {
 }
 
 /* Refresh screen */
+int wrefresh(WINDOW *win) {
+  if (!win || !_initialized) {
+    return -1;
+  }
+
+  chtype last_attrs = A_NORMAL;
+  bool force_redraw = win->_clear || (curscr && curscr->_clear);
+
+  /* Calculate window bounds in screen coordinates */
+  int win_top = win->_begy;
+  int win_left = win->_begx;
+
+  /* Iterate over window buffer */
+  for (int y = 0; y < win->_maxy; y++) {
+    int screen_y = win_top + y;
+    if (screen_y >= LINES)
+      break;
+
+    for (int x = 0; x < win->_maxx; x++) {
+      int screen_x = win_left + x;
+      if (screen_x >= COLS)
+        break;
+
+      chtype ch = win->_y[y][x];
+
+      /* Optimization: only update if different from physical screen */
+      if (ch != curscr->_y[screen_y][screen_x] || force_redraw) {
+        _move_cursor(screen_y, screen_x);
+
+        chtype attrs = ch & ~A_CHARTEXT;
+        if (attrs != last_attrs) {
+          _set_attrs(attrs);
+          last_attrs = attrs;
+        }
+
+        putchar((char)(ch & A_CHARTEXT));
+
+        /* Update physical screen buffer */
+        curscr->_y[screen_y][screen_x] = ch;
+      }
+    }
+  }
+
+  win->_clear = false;
+  if (curscr)
+    curscr->_clear = false;
+
+  /* Reset attributes */
+  if (last_attrs != A_NORMAL) {
+    printf(ATTR_NORMAL);
+  }
+
+  /* Position cursor at window position */
+  _move_cursor(win->_begy + win->_cury, win->_begx + win->_curx);
+
+  fflush(stdout);
+  return 0;
+}
+
+int refresh(void) { return wrefresh(stdscr); }
+
 /* Clear window */
 int wclear(WINDOW *win) {
   if (!win) {
@@ -683,4 +830,81 @@ int mvwvline(WINDOW *win, int y, int x, chtype ch, int n) {
     return -1;
   }
   return wvline(win, ch, n);
+}
+
+/* Missing functions implementation */
+
+char *unctrl(chtype c) {
+  static char buf[3];
+  c &= 0x7F;
+  if (c >= 0 && c < 32) {
+    buf[0] = '^';
+    buf[1] = c + '@';
+    buf[2] = '\0';
+  } else if (c == 127) {
+    buf[0] = '^';
+    buf[1] = '?';
+    buf[2] = '\0';
+  } else {
+    buf[0] = (char)c;
+    buf[1] = '\0';
+  }
+  return buf;
+}
+
+chtype winch(WINDOW *win) {
+  if (!win)
+    return (chtype)ERR;
+  return mvwinch(win, win->_cury, win->_curx);
+}
+
+chtype inch(void) { return winch(stdscr); }
+
+int keypad(WINDOW *win, bool bf) {
+  if (!win)
+    return ERR;
+  win->_use_keypad = bf;
+  return 0;
+}
+
+int mvcur(int oldrow, int oldcol, int newrow, int newcol) {
+  /* Stub: just move the physical cursor */
+  (void)oldrow;
+  (void)oldcol;
+  printf(ESC "[%d;%dH", newrow + 1, newcol + 1);
+  return 0;
+}
+
+char erasechar(void) { return '\b'; }
+
+char killchar(void) { return 0x15; /* Ctrl-U */ }
+
+int wgetnstr(WINDOW *win, char *str, int n) {
+  if (!win || !str || n < 1)
+    return ERR;
+  int i = 0;
+  int ch;
+
+  while (i < n - 1) {
+    ch = wgetch(win);
+    if (ch == ERR)
+      return ERR;
+
+    if (ch == '\n' || ch == '\r') {
+      break;
+    } else if (ch == '\b' || ch == 127) {
+      if (i > 0) {
+        i--;
+        /* Simple visual backspace if echo is on */
+        if (_echo) {
+          waddstr(win, "\b \b");
+          wrefresh(win);
+        }
+      }
+    } else {
+      str[i++] = (char)ch;
+    }
+  }
+  str[i] = '\0';
+  return 0;
 }

@@ -1,8 +1,22 @@
 @echo off
+rem Build libc
+cd libc
+call build.bat
+cd ..
+
 rem Build User Apps
 cd userapp
 cargo build --release --bin rogue
 cargo build --release --bin shell
+cd ..
+cd rogue
+call build.bat
+cd ..
+cd crogue
+call build.bat
+cd ..
+cd c_hello
+call build.bat
 cd ..
 
 rem Copy binaries
