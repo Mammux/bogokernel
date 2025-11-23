@@ -518,53 +518,56 @@ fn load_program(tf: &mut TrapFrame, name: &str, argv: &[&str]) {
         let _ = writeln!(crate::uart::Uart::new(), "load_program: WARNING - FD_TABLE is locked at start!");
     }
     
-    // Find file
-    let file = fs::FILES.iter().find(|f| f.name == name);
-    if let Some(f) = file {
-        let envp = ["PATH=/"];
-
-        // Reuse stack constants from main.rs (should be shared)
-        let user_stack_top_va: usize = 0x4000_8000;
-        let user_stack_bytes: usize = 16 * 1024;
-
-        let _ = writeln!(crate::uart::Uart::new(), "load_program: calling load_user_elf");
-        match crate::elf::load_user_elf(f.data, user_stack_top_va, user_stack_bytes, argv, &envp) {
-            Ok(img) => {
-                let _ = writeln!(crate::uart::Uart::new(), "load_program: load_user_elf succeeded");
-                
-                // Flush TLB to ensure old mappings are invalidated
-                riscv::asm::sfence_vma_all();
-
-                // Update TrapFrame to start new program
-                tf.sepc = img.entry_va;
-                tf.sp = img.user_sp;
-                tf.a0 = img.argc;
-                tf.a1 = img.argv_va;
-                tf.a2 = img.envp_va;
-
-                unsafe {
-                    USER_BRK = img.brk;
-                }
-
-                let _ = writeln!(crate::uart::Uart::new(), "load_program: TrapFrame updated");
-                
-                // Check if FD_TABLE is locked before returning
-                if FD_TABLE.is_locked() {
-                    let _ = writeln!(crate::uart::Uart::new(), "load_program: WARNING - FD_TABLE is locked before return!");
-                }
-                
-                // Success: do NOT increment sepc, just return to new entry
-            }
-            Err(e) => {
-                let _ = writeln!(crate::uart::Uart::new(), "exec failed: {:?}", e);
-                tf.a0 = usize::MAX;
-                tf.sepc = tf.sepc.wrapping_add(4);
-            }
+    // Find file in writable filesystem
+    let file_data = match fs::get_file_data(name) {
+        Some(data) => data,
+        None => {
+            let _ = writeln!(crate::uart::Uart::new(), "exec: file not found '{}'", name);
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
         }
-    } else {
-        let _ = writeln!(crate::uart::Uart::new(), "exec: file not found '{}'", name);
-        tf.a0 = usize::MAX;
-        tf.sepc = tf.sepc.wrapping_add(4);
+    };
+    
+    let envp = ["PATH=/"];
+
+    // Reuse stack constants from main.rs (should be shared)
+    let user_stack_top_va: usize = 0x4000_8000;
+    let user_stack_bytes: usize = 16 * 1024;
+
+    let _ = writeln!(crate::uart::Uart::new(), "load_program: calling load_user_elf");
+    match crate::elf::load_user_elf(&file_data, user_stack_top_va, user_stack_bytes, argv, &envp) {
+        Ok(img) => {
+            let _ = writeln!(crate::uart::Uart::new(), "load_program: load_user_elf succeeded");
+            
+            // Flush TLB to ensure old mappings are invalidated
+            riscv::asm::sfence_vma_all();
+
+            // Update TrapFrame to start new program
+            tf.sepc = img.entry_va;
+            tf.sp = img.user_sp;
+            tf.a0 = img.argc;
+            tf.a1 = img.argv_va;
+            tf.a2 = img.envp_va;
+
+            unsafe {
+                USER_BRK = img.brk;
+            }
+
+            let _ = writeln!(crate::uart::Uart::new(), "load_program: TrapFrame updated");
+            
+            // Check if FD_TABLE is locked before returning
+            if FD_TABLE.is_locked() {
+                let _ = writeln!(crate::uart::Uart::new(), "load_program: WARNING - FD_TABLE is locked before return!");
+            }
+            
+            // Success: do NOT increment sepc, just return to new entry
+        }
+        Err(e) => {
+            let _ = writeln!(crate::uart::Uart::new(), "exec failed: {:?}", e);
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+        }
     }
     
     let _ = writeln!(crate::uart::Uart::new(), "load_program: returning");

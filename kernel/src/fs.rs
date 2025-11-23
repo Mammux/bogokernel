@@ -241,3 +241,25 @@ pub fn list_writable_files(buf: &mut [u8]) -> usize {
     
     count
 }
+
+/// Initialize writable filesystem with embedded files
+/// This moves all files from the read-only RAMFS to the writable filesystem
+pub fn init_writable_fs() {
+    let mut files = WRITABLE_FILES.lock();
+    
+    // Copy all embedded files to writable filesystem
+    for file in FILES {
+        files.push(WritableFile {
+            name: String::from(file.name),
+            data: Vec::from(file.data),
+            mode: if file.name.ends_with(".elf") { 0o755 } else { 0o644 },
+        });
+    }
+}
+
+/// Lookup a file by name in the writable filesystem
+/// Returns a reference to the file data if found
+pub fn get_file_data(name: &str) -> Option<Vec<u8>> {
+    let files = WRITABLE_FILES.lock();
+    files.iter().find(|f| f.name == name).map(|f| f.data.clone())
+}

@@ -11,7 +11,7 @@ pub extern "C" fn _start(_argc: usize, _argv: *const *const u8, _envp: *const *c
 
 fn main() {
     println!("Welcome to BogoShell!");
-    println!("Commands: hello, rogue, crogue, bigrogue, curses_test, fstest, mkfiles, ls, shutdown, help");
+    println!("Type 'help' for available commands, 'ls' to list programs");
 
     let mut buf = [0u8; 64];
     loop {
@@ -57,8 +57,13 @@ fn main() {
         
         let cmd = tokens[0];
         
+        // Check for built-in commands first
         match cmd {
-            "help" => println!("Available commands: hello, rogue, crogue, bigrogue, curses_test, fstest, mkfiles, ls, shutdown"),
+            "help" => {
+                println!("Built-in commands: ls, help, shutdown");
+                println!("To run a program, type its name without the .elf extension");
+                println!("Example: hello, rogue, crogue, bigrogue, curses_test, fstest, mkfiles");
+            },
             "ls" => {
                 // List files in writable filesystem
                 let mut buf = [0u8; 4096];
@@ -100,68 +105,64 @@ fn main() {
                 println!("Shutting down...");
                 usys::poweroff();
             },
-            "hello" => {
-                println!("Executing hello...");
+            _ => {
+                // Try to execute as a program from the filesystem
+                // Append .elf if not already present
+                let mut filename_buf = [0u8; 64];
+                let filename = if cmd.ends_with(".elf") {
+                    cmd
+                } else {
+                    // Build filename with .elf extension
+                    let mut len = 0;
+                    for (i, &b) in cmd.as_bytes().iter().enumerate() {
+                        if i >= filename_buf.len() - 5 {
+                            break;
+                        }
+                        filename_buf[i] = b;
+                        len = i + 1;
+                    }
+                    // Add .elf extension
+                    if len + 4 < filename_buf.len() {
+                        filename_buf[len] = b'.';
+                        filename_buf[len + 1] = b'e';
+                        filename_buf[len + 2] = b'l';
+                        filename_buf[len + 3] = b'f';
+                        len += 4;
+                    }
+                    core::str::from_utf8(&filename_buf[..len]).unwrap_or(cmd)
+                };
+                
                 // Build argv array with command line arguments
                 let mut argv_cstrs: [usys::CStrBuf<64>; 16] = Default::default();
                 
                 // First arg is program name
-                argv_cstrs[0] = usys::CStrBuf::from_str("hello.elf").unwrap();
-                let mut argv_count = 1;
-                
-                // Add remaining arguments
-                for i in 1..token_count {
-                    if let Ok(cstr) = usys::CStrBuf::from_str(tokens[i]) {
-                        argv_cstrs[argv_count] = cstr;
-                        argv_count += 1;
+                if let Ok(cstr) = usys::CStrBuf::<64>::from_str(filename) {
+                    argv_cstrs[0] = cstr;
+                    let mut argv_count = 1;
+                    
+                    // Add remaining arguments
+                    for i in 1..token_count {
+                        if argv_count >= 16 {
+                            break;
+                        }
+                        if let Ok(cstr) = usys::CStrBuf::<64>::from_str(tokens[i]) {
+                            argv_cstrs[argv_count] = cstr;
+                            argv_count += 1;
+                        }
                     }
+                    
+                    // Build references array
+                    let mut argv_refs: [&core::ffi::CStr; 16] = [usys::cstr!(""); 16];
+                    for i in 0..argv_count {
+                        argv_refs[i] = argv_cstrs[i].as_cstr();
+                    }
+                    
+                    // Execute the program
+                    usys::execv(argv_cstrs[0].as_cstr(), &argv_refs[..argv_count]);
+                } else {
+                    println!("Error: Invalid filename '{}'", filename);
                 }
-                
-                // Build references array
-                let mut argv_refs: [&core::ffi::CStr; 16] = [usys::cstr!(""); 16];
-                for i in 0..argv_count {
-                    argv_refs[i] = argv_cstrs[i].as_cstr();
-                }
-                
-                usys::execv(usys::cstr!("hello.elf"), &argv_refs[..argv_count]);
-            },
-            "rogue" => {
-                println!("Executing rogue...");
-                let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("rogue.elf").unwrap()];
-                let argv_refs = [argv_cstrs[0].as_cstr()];
-                usys::execv(usys::cstr!("rogue.elf"), &argv_refs);
-            },
-            "crogue" => {
-                println!("Executing crogue...");
-                let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("crogue.elf").unwrap()];
-                let argv_refs = [argv_cstrs[0].as_cstr()];
-                usys::execv(usys::cstr!("crogue.elf"), &argv_refs);
-            },
-            "bigrogue" => {
-                println!("Executing bigrogue...");
-                let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("bigrogue.elf").unwrap()];
-                let argv_refs = [argv_cstrs[0].as_cstr()];
-                usys::execv(usys::cstr!("bigrogue.elf"), &argv_refs);
-            },
-            "curses_test" => {
-                println!("Executing curses_test...");
-                let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("curses_test.elf").unwrap()];
-                let argv_refs = [argv_cstrs[0].as_cstr()];
-                usys::execv(usys::cstr!("curses_test.elf"), &argv_refs);
-            },
-            "fstest" => {
-                println!("Executing fstest...");
-                let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("fstest.elf").unwrap()];
-                let argv_refs = [argv_cstrs[0].as_cstr()];
-                usys::execv(usys::cstr!("fstest.elf"), &argv_refs);
-            },            
-            "mkfiles" => {
-                println!("Executing mkfiles...");
-                let argv_cstrs: [usys::CStrBuf<64>; 1] = [usys::CStrBuf::from_str("mkfiles.elf").unwrap()];
-                let argv_refs = [argv_cstrs[0].as_cstr()];
-                usys::execv(usys::cstr!("mkfiles.elf"), &argv_refs);
-            },
-            _ => println!("Unknown command: {}", cmd),
+            }
         }
     }
 }
