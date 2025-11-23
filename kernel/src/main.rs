@@ -189,12 +189,15 @@ extern "C" fn after_user() -> ! {
 }
 
 use riscv::register::sstatus;
+/*
 unsafe fn read_user_usize(va: usize) -> usize {
     sstatus::set_sum();
     let v = core::ptr::read(va as *const usize);
     sstatus::clear_sum();
     v
 }
+*/
+
 unsafe fn _peek_user_bytes(va: usize, n: usize) {
     use core::fmt::Write;
     let mut uart = crate::uart::Uart::new();

@@ -67,11 +67,10 @@ fn main() {
                 println!("Executing hello...");
                 // Build argv array with command line arguments
                 let mut argv_cstrs: [usys::CStrBuf<64>; 16] = Default::default();
-                let mut argv_count = 0;
                 
                 // First arg is program name
                 argv_cstrs[0] = usys::CStrBuf::from_str("hello.elf").unwrap();
-                argv_count = 1;
+                let mut argv_count = 1;
                 
                 // Add remaining arguments
                 for i in 1..token_count {
