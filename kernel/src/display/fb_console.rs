@@ -166,8 +166,8 @@ fn draw_char(fb: &dyn crate::display::Framebuffer, state: &ConsoleState, c: u8) 
                     break;
                 }
                 
-                // Check if pixel is set (MSB is leftmost pixel)
-                let pixel_set = (bitmap_row & (1 << (7 - col))) != 0;
+                // Check if pixel is set (bit 0 is leftmost pixel)
+                let pixel_set = (bitmap_row & (1 << col)) != 0;
                 let color = if pixel_set {
                     state.fg_color
                 } else {

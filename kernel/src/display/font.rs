@@ -1,6 +1,6 @@
 /// Simple 8x8 bitmap font for console rendering
 /// Each character is represented by 8 bytes, one per row
-/// Bit 7 (MSB) is the leftmost pixel
+/// Bit 0 (LSB) is the leftmost pixel
 
 /// Basic ASCII font (characters 32-126)
 /// This is a minimal fixed-width font for console text
