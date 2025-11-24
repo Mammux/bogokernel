@@ -45,6 +45,9 @@ const DRAM_SIZE: usize = 128 * 1024 * 1024; // 128 MiB
 const USER_VA_BASE: usize = 0x4000_0000;
 
 const UART0: usize = 0x1000_0000;
+const VIRTIO_MMIO_BASE: usize = 0x10001000;
+const VIRTIO_MMIO_SIZE: usize = 0x8000;  // 8 VirtIO devices × 0x1000 each
+
 
 // User space
 pub const USER_CODE_PA: usize = DRAM_BASE + 0x0040_0000;
@@ -280,6 +283,9 @@ pub unsafe fn enable_sv39() {
 
     // Map UART MMIO as RW (no exec). One 4K page is enough.
     map_4k(root, UART0, UART0, RW);
+    
+    // Map VirtIO MMIO region (0x10001000 - 0x10009000) for GPU and other devices
+    id_map_region(root, VIRTIO_MMIO_BASE, VIRTIO_MMIO_SIZE, RW, RW);
 
     map_4k(root, USER_CODE_VA, USER_CODE_PA, URX);
     map_4k(root, USER_STACK_VA, USER_STACK_PA, URW);
