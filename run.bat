@@ -34,4 +34,4 @@ rem Build Kernel with GPU feature
 cargo build -Z build-std=core,alloc --target riscv64gc-unknown-none-elf -p kernel --features gpu
 
 rem Run with virtio-gpu device
-qemu-system-riscv64 -machine virt -m 512M -nographic -bios default -kernel target\riscv64gc-unknown-none-elf\debug\kernel -device virtio-gpu-pci -serial stdio
+qemu-system-riscv64 -machine virt -m 512M -bios default -kernel target\riscv64gc-unknown-none-elf\debug\kernel -device virtio-gpu-device
