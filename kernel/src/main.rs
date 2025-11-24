@@ -15,6 +15,9 @@ mod user;
 // mod user_blob;
 mod elf;
 mod stack;
+mod display;
+mod boot;
+mod console;
 
 use alloc::boxed::Box;
 use alloc::vec::Vec;
@@ -105,6 +108,17 @@ extern "C" fn rust_start() -> ! {
     // --- Initialize writable filesystem with embedded files ---
     fs::init_writable_fs();
     let _ = writeln!(uart, "Writable filesystem initialized with embedded files");
+
+    // --- Parse cmdline and initialize console/display ---
+    // For testing, support compile-time display mode selection via feature flag
+    // In a real implementation, this would come from bootloader/device tree /chosen/bootargs
+    #[cfg(not(feature = "gpu"))]
+    let cmdline = "";  // Empty by default, meaning display=ansi
+    #[cfg(feature = "gpu")]
+    let cmdline = "display=gpu";  // GPU mode for testing
+    
+    boot::cmdline::parse_cmdline(cmdline);
+    console::init_console();
 
     // 3) User code
     /*
