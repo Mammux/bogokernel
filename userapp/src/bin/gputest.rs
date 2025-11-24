@@ -4,7 +4,12 @@
 use usys::{exit, get_fb_info, println, FbInfo};
 
 #[no_mangle]
-fn main(_argc: isize, _argv: *const *const u8, _envp: *const *const u8) -> isize {
+pub extern "C" fn _start(_argc: usize, _argv: *const *const u8, _envp: *const *const u8) -> ! {
+    main();
+    exit();
+}
+
+fn main() {
     println!("GPU Test Application");
     println!("====================");
     
