@@ -167,7 +167,7 @@ fn draw_char(fb: &dyn crate::display::Framebuffer, state: &ConsoleState, c: u8) 
                 }
                 
                 // Check if pixel is set (bit position matches column)
-                // This un-flips the horizontally mirrored characters
+                // This corrects the horizontally mirrored characters
                 let pixel_set = (bitmap_row & (1 << col)) != 0;
                 let color = if pixel_set {
                     state.fg_color
