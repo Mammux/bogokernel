@@ -17,6 +17,7 @@ const VIRTIO_MMIO_GUEST_PAGE_SIZE: usize = 0x028;
 const VIRTIO_MMIO_QUEUE_SEL: usize = 0x030;
 const VIRTIO_MMIO_QUEUE_NUM_MAX: usize = 0x034;
 const VIRTIO_MMIO_QUEUE_NUM: usize = 0x038;
+const VIRTIO_MMIO_QUEUE_ALIGN: usize = 0x03c;
 const VIRTIO_MMIO_QUEUE_PFN: usize = 0x040;
 const VIRTIO_MMIO_QUEUE_NOTIFY: usize = 0x050;
 const VIRTIO_MMIO_STATUS: usize = 0x070;
@@ -359,6 +360,14 @@ impl VirtioGpu {
             let _ = writeln!(uart, "[VirtIO-GPU]   Setting guest page size to {} bytes", PAGE_SIZE);
             core::ptr::write_volatile(
                 (mmio_base + VIRTIO_MMIO_GUEST_PAGE_SIZE) as *mut u32,
+                PAGE_SIZE as u32,
+            );
+
+            // Set queue alignment (must be set before QUEUE_PFN for VirtIO v1)
+            // The alignment value is the page size (4096 bytes = 0x1000)
+            let _ = writeln!(uart, "[VirtIO-GPU]   Setting queue alignment to {} bytes", PAGE_SIZE);
+            core::ptr::write_volatile(
+                (mmio_base + VIRTIO_MMIO_QUEUE_ALIGN) as *mut u32,
                 PAGE_SIZE as u32,
             );
 
