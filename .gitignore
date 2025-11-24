@@ -33,6 +33,7 @@ curses_test/curses_test
 
 # Build artifacts - kernel
 kernel.map
+libc.a
 
 # Test outputs
 test_output.txt
