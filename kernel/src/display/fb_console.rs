@@ -37,7 +37,8 @@ pub fn init_fb_console() -> Result<(), ()> {
         // Store console state
         *CONSOLE_STATE.lock() = Some(state);
         
-        fb.present();
+        // Flush framebuffer to display device (GPU)
+        crate::display::flush_framebuffer();
         Ok(())
     } else { 
         Err(()) 
@@ -120,7 +121,8 @@ pub fn write_char(c: u8) {
         }
     }
     
-    fb.present();
+    // Flush framebuffer to display device (GPU)
+    crate::display::flush_framebuffer();
 }
 
 /// Write a string to the console
