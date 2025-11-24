@@ -88,10 +88,9 @@ fn main(_argc: isize, _argv: *const *const u8, _envp: *const *const u8) -> isize
 
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
-    if let Some(s) = info.payload().downcast_ref::<&str>() {
-        println!("panic: {}", s);
-    } else {
-        println!("panic occurred");
+    if let Some(location) = info.location() {
+        println!("panic at {}:{}:{}", location.file(), location.line(), location.column());
     }
+    println!("{}", info.message());
     exit();
 }
