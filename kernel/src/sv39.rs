@@ -308,3 +308,27 @@ pub unsafe fn enable_sv39() {
     // Flush TLBs
     riscv::asm::sfence_vma_all();
 }
+
+/// Map framebuffer memory into user space
+/// Maps the physical framebuffer at fb_pa to a virtual address in user space
+/// Returns the user VA where the framebuffer was mapped
+pub unsafe fn map_framebuffer_to_user(fb_pa: usize, fb_size: usize) -> usize {
+    let root = root_pt();
+    if root.is_null() {
+        return 0;
+    }
+    
+    // Choose a virtual address high in user space (but below kernel space)
+    // User space goes up to 0x40000000, so let's use 0x30000000 for framebuffer
+    const FB_VA_BASE: usize = 0x30000000;
+    
+    // Map each page of the framebuffer
+    let num_pages = (fb_size + PAGE_SIZE - 1) / PAGE_SIZE;
+    for i in 0..num_pages {
+        let va = FB_VA_BASE + i * PAGE_SIZE;
+        let pa = fb_pa + i * PAGE_SIZE;
+        map_4k(root, va, pa, URW); // User read-write
+    }
+    
+    FB_VA_BASE
+}

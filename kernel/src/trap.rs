@@ -88,6 +88,7 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
                 nr::STAT => sys_stat(tf),             // stat(path, buf)
                 nr::CHMOD => sys_chmod(tf),           // chmod(path, mode)
                 nr::READDIR => sys_readdir(tf),       // readdir(buf, len)
+                nr::GET_FB_INFO => sys_get_fb_info(tf), // get_fb_info(buf)
                 nr => {
                     let mut uart = crate::uart::Uart::new();
                     let _ = writeln!(uart, "\r\nunknown syscall: {}", nr);
@@ -1046,5 +1047,66 @@ fn sys_readdir(tf: &mut TrapFrame) {
         tf.a0 = 0;
     }
 
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_get_fb_info(tf: &mut TrapFrame) {
+    // a0 = pointer to FbInfo struct in user space
+    let info_va = tf.a0;
+    
+    if info_va == 0 {
+        tf.a0 = usize::MAX;
+        tf.sepc = tf.sepc.wrapping_add(4);
+        return;
+    }
+    
+    // Get framebuffer info from display subsystem
+    if let Some(fb) = crate::display::get_framebuffer() {
+        let fb_info = fb.info();
+        
+        // Map the framebuffer into user space
+        let user_fb_va = unsafe { 
+            crate::sv39::map_framebuffer_to_user(fb_info.phys_addr, fb_info.size) 
+        };
+        
+        if user_fb_va == 0 {
+            tf.a0 = usize::MAX;
+            tf.sepc = tf.sepc.wrapping_add(4);
+            return;
+        }
+        
+        // Struct to write to user space (must match usys::FbInfo)
+        #[repr(C)]
+        struct FbInfoReply {
+            width: usize,
+            height: usize,
+            stride: usize,
+            addr: usize,
+        }
+        
+        let reply = FbInfoReply {
+            width: fb_info.width,
+            height: fb_info.height,
+            stride: fb_info.stride,
+            addr: user_fb_va, // Return user VA, not physical address
+        };
+        
+        // Copy to user space
+        unsafe {
+            with_sum(|| {
+                let reply_bytes = core::slice::from_raw_parts(
+                    &reply as *const _ as *const u8,
+                    core::mem::size_of::<FbInfoReply>()
+                );
+                let user_ptr = info_va as *mut u8;
+                core::ptr::copy_nonoverlapping(reply_bytes.as_ptr(), user_ptr, reply_bytes.len());
+            });
+        }
+        
+        tf.a0 = 0; // Success
+    } else {
+        tf.a0 = usize::MAX; // No framebuffer available
+    }
+    
     tf.sepc = tf.sepc.wrapping_add(4);
 }
