@@ -31,7 +31,9 @@ fn main(_argc: isize, _argv: *const *const u8, _envp: *const *const u8) -> isize
             
             // Access the framebuffer
             let fb_ptr = fb_info.addr as *mut u32;
-            let pixel_count = fb_info.width * fb_info.height;
+            // Calculate pixel count using stride (stride is in bytes, divide by 4 for u32)
+            let pixels_per_row = fb_info.stride / 4;
+            let pixel_count = pixels_per_row * fb_info.height;
             
             println!("\nDrawing test pattern...");
             
@@ -56,7 +58,8 @@ fn main(_argc: isize, _argv: *const *const u8, _envp: *const *const u8) -> isize
                     let color = colors[color_idx];
                     
                     for x in 0..fb_info.width {
-                        let idx = y * fb_info.width + x;
+                        // Use stride-aware indexing
+                        let idx = y * pixels_per_row + x;
                         fb_slice[idx] = color;
                     }
                 }
@@ -65,10 +68,20 @@ fn main(_argc: isize, _argv: *const *const u8, _envp: *const *const u8) -> isize
                 let square_size = 100;
                 let start_x = (fb_info.width - square_size) / 2;
                 let start_y = (fb_info.height - square_size) / 2;
+                let end_x = start_x + square_size;
+                let end_y = start_y + square_size;
                 
-                for y in start_y..(start_y + square_size) {
-                    for x in start_x..(start_x + square_size) {
-                        let idx = y * fb_info.width + x;
+                for y in start_y..end_y {
+                    // Bounds check
+                    if y >= fb_info.height {
+                        break;
+                    }
+                    for x in start_x..end_x {
+                        // Bounds check
+                        if x >= fb_info.width {
+                            break;
+                        }
+                        let idx = y * pixels_per_row + x;
                         fb_slice[idx] = 0x00FFFFFF; // White
                     }
                 }

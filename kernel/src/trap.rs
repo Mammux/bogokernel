@@ -1099,9 +1099,7 @@ fn sys_get_fb_info(tf: &mut TrapFrame) {
                     core::mem::size_of::<FbInfoReply>()
                 );
                 let user_ptr = info_va as *mut u8;
-                for (i, &b) in reply_bytes.iter().enumerate() {
-                    core::ptr::write(user_ptr.add(i), b);
-                }
+                core::ptr::copy_nonoverlapping(reply_bytes.as_ptr(), user_ptr, reply_bytes.len());
             });
         }
         
