@@ -58,9 +58,11 @@ impl VirtioGpu {
                 continue;
             }
             
-            // Check version (should be 2 for modern VirtIO)
+            // Check version (should be 1 or 2)
+            // Note: QEMU on Windows may report version 1, while Linux typically reports version 2.
+            // Both versions are compatible for basic GPU device initialization.
             let version = unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_VERSION) as *const u32) };
-            if version != 2 {
+            if version != 1 && version != 2 {
                 continue;
             }
             
