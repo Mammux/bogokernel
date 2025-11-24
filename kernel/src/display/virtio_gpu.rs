@@ -263,11 +263,16 @@ impl VirtioGpu {
         // This is required for VirtIO MMIO version 1
         // Layout: descriptors (128 bytes) + avail (20 bytes) + padding + used (68 bytes)
         // Total needs to fit in one page (4096 bytes) for simplicity
+        const DESC_SIZE: usize = size_of::<VirtqDesc>() * QUEUE_SIZE; // 128
+        const AVAIL_SIZE: usize = size_of::<VirtqAvail>(); // 20
+        const USED_SIZE: usize = size_of::<VirtqUsed>(); // 68
+        const PADDING_SIZE: usize = 4096 - DESC_SIZE - AVAIL_SIZE - USED_SIZE; // 3880
+        
         #[repr(C, align(4096))]
         struct VirtqueueMemory {
             desc: [VirtqDesc; QUEUE_SIZE],
             avail: VirtqAvail,
-            _padding: [u8; 4096 - 128 - 20 - 68], // Align used ring to page boundary
+            _padding: [u8; PADDING_SIZE], // Align used ring to page boundary
             used: VirtqUsed,
         }
         
@@ -283,7 +288,7 @@ impl VirtioGpu {
                 idx: 0,
                 ring: [0; QUEUE_SIZE],
             },
-            _padding: [0; 4096 - 128 - 20 - 68],
+            _padding: [0; PADDING_SIZE],
             used: VirtqUsed {
                 flags: 0,
                 idx: 0,
