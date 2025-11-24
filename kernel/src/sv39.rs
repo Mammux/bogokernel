@@ -9,6 +9,11 @@ use core::mem::MaybeUninit;
 const PAGE_SIZE: usize = 4096;
 const ENTRIES: usize = 512;
 
+// PTE constants
+const PTE_PPN_SHIFT: usize = 10;
+const PTE_PPN_MASK_BITS: usize = 44;
+const PAGE_OFFSET_BITS: usize = 12; // 4 KiB = 2^12 bytes
+
 // PTE flag bits
 pub const PTE_V: u64 = 1 << 0;
 pub const PTE_R: u64 = 1 << 1;
@@ -85,14 +90,110 @@ fn vpn_indices(va: usize) -> [usize; 3] {
 // ---- very simple user-phys page bump allocator ----
 // Reserve a small chunk near the *top* of DRAM for user pages so we don't race the kernel heap.
 // Top of DRAM is 0x8000_0000 + 128 MiB = 0x8800_0000. Keep 64 KiB for the kernel stack headroom.
-static mut USER_NEXT_PA: usize = 0x8800_0000 - 0x0100_000 - 0x10000; // start 1 MiB below top - 64 KiB
+const USER_PA_POOL_START: usize = 0x8800_0000 - 0x0100_000 - 0x10000; // start 1 MiB below top - 64 KiB
+const USER_PA_POOL_END: usize = 0x8800_0000 - 0x10000; // 1 MiB pool
+static mut USER_NEXT_PA: usize = USER_PA_POOL_START;
 
 pub unsafe fn alloc_user_page() -> usize {
     let pa = USER_NEXT_PA;
-    USER_NEXT_PA += 4096;
+    let next_pa = pa + PAGE_SIZE;
+    
+    // Check if we're out of space in the user page pool
+    if next_pa > USER_PA_POOL_END {
+        panic!(
+            "Out of user pages! Pool exhausted at address 0x{:x}, limit 0x{:x}",
+            pa, USER_PA_POOL_END
+        );
+    }
+    
+    USER_NEXT_PA = next_pa;
     // Zero the page to avoid stale data from previous programs
-    core::ptr::write_bytes(pa as *mut u8, 0, 4096);
+    core::ptr::write_bytes(pa as *mut u8, 0, PAGE_SIZE);
     pa
+}
+
+/// Reset the user page allocator to the initial state, effectively freeing all user pages
+pub unsafe fn reset_user_pages() {
+    USER_NEXT_PA = USER_PA_POOL_START;
+}
+
+/// Helper to extract physical address from a PTE
+#[inline]
+fn pte_to_pa(pte: u64) -> usize {
+    (((pte >> PTE_PPN_SHIFT) & ((1 << PTE_PPN_MASK_BITS) - 1)) as usize) << PAGE_OFFSET_BITS
+}
+
+/// Clear all user mappings in the page table (VAs with U=1 flag)
+/// This unmaps all user-space pages but preserves kernel mappings
+pub unsafe fn clear_user_mappings() {
+    let root = PT_ROOT;
+    if root.is_null() {
+        return;
+    }
+    
+    // Walk through all L2 entries (covers entire VA space)
+    for i2 in 0..ENTRIES {
+        let pte2 = root.add(i2);
+        let entry2 = *pte2;
+        
+        // Skip invalid entries
+        if (entry2 & PTE_V) == 0 {
+            continue;
+        }
+        
+        // Check if this is a leaf (unlikely at L2, but possible)
+        if (entry2 & (PTE_R | PTE_W | PTE_X)) != 0 {
+            // Leaf at L2 (1 GiB page)
+            if (entry2 & PTE_U) != 0 {
+                // User page - clear it
+                *pte2 = 0;
+            }
+            continue;
+        }
+        
+        // Non-leaf, walk to L1
+        let l1_pa = pte_to_pa(entry2);
+        // Validate PA is in valid DRAM range
+        if l1_pa < DRAM_BASE || l1_pa >= DRAM_BASE + DRAM_SIZE {
+            continue;
+        }
+        let l1 = l1_pa as *mut u64;
+        
+        for i1 in 0..ENTRIES {
+            let pte1 = l1.add(i1);
+            let entry1 = *pte1;
+            
+            if (entry1 & PTE_V) == 0 {
+                continue;
+            }
+            
+            // Check if this is a leaf at L1 (2 MiB page)
+            if (entry1 & (PTE_R | PTE_W | PTE_X)) != 0 {
+                if (entry1 & PTE_U) != 0 {
+                    *pte1 = 0;
+                }
+                continue;
+            }
+            
+            // Non-leaf, walk to L0
+            let l0_pa = pte_to_pa(entry1);
+            // Validate PA is in valid DRAM range
+            if l0_pa < DRAM_BASE || l0_pa >= DRAM_BASE + DRAM_SIZE {
+                continue;
+            }
+            let l0 = l0_pa as *mut u64;
+            
+            for i0 in 0..ENTRIES {
+                let pte0 = l0.add(i0);
+                let entry0 = *pte0;
+                
+                // Clear if it's a valid user page
+                if (entry0 & PTE_V) != 0 && (entry0 & PTE_U) != 0 {
+                    *pte0 = 0;
+                }
+            }
+        }
+    }
 }
 
 // ----- Mapping helpers -----

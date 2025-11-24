@@ -535,6 +535,13 @@ fn load_program(tf: &mut TrapFrame, name: &str, argv: &[&str]) {
     let user_stack_top_va: usize = 0x4000_8000;
     let user_stack_bytes: usize = 16 * 1024;
 
+    // CRITICAL: Clear old user mappings and reset allocator before loading new program
+    let _ = writeln!(crate::uart::Uart::new(), "load_program: clearing user pages");
+    unsafe {
+        crate::sv39::reset_user_pages();
+        crate::sv39::clear_user_mappings();
+    }
+
     let _ = writeln!(crate::uart::Uart::new(), "load_program: calling load_user_elf");
     match crate::elf::load_user_elf(&file_data, user_stack_top_va, user_stack_bytes, argv, &envp) {
         Ok(img) => {
