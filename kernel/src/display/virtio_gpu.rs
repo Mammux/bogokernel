@@ -178,6 +178,22 @@ struct GpuCtrlResponse {
 static mut GPU_CMD_BUF: [u8; GPU_COMMAND_BUFFER_SIZE] = [0; GPU_COMMAND_BUFFER_SIZE];
 static mut GPU_RESP_BUF: [u8; GPU_RESPONSE_BUFFER_SIZE] = [0; GPU_RESPONSE_BUFFER_SIZE];
 
+// Global GPU instance
+static mut GLOBAL_GPU: Option<VirtioGpu> = None;
+
+/// Flush framebuffer changes to the GPU display
+/// Returns true if successful, false if no GPU or flush failed
+pub fn flush_gpu() -> bool {
+    unsafe {
+        if let Some(ref mut gpu) = GLOBAL_GPU {
+            gpu.flush_display();
+            true
+        } else {
+            false
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct VirtioGpu {
     info: FramebufferInfo,
@@ -430,8 +446,7 @@ impl VirtioGpu {
                 last_used_idx: 0,
             };
 
-            static mut VG: Option<VirtioGpu> = None;
-            VG = Some(VirtioGpu {
+            GLOBAL_GPU = Some(VirtioGpu {
                 info: fb_info,
                 back: BUF.as_mut_ptr(),
                 mmio_base,
@@ -440,12 +455,12 @@ impl VirtioGpu {
             });
 
             // Initialize display first (mutable access)
-            if let Some(v) = VG.as_mut() {
+            if let Some(v) = GLOBAL_GPU.as_mut() {
                 v.init_display();
             }
 
             // Then register framebuffer (immutable access for 'static)
-            VG.as_ref().map(|v| {
+            GLOBAL_GPU.as_ref().map(|v| {
                 register_framebuffer(v);
                 v
             })

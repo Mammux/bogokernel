@@ -224,6 +224,15 @@ pub fn get_fb_info(info: &mut FbInfo) -> SysResult<()> {
     }
 }
 
+pub fn fb_flush() -> SysResult<()> {
+    let r = unsafe { sys_ecall0(nr::FB_FLUSH) };
+    if is_err_sentinel(r) {
+        Err(SysErr::Fail)
+    } else {
+        Ok(())
+    }
+}
+
 /* ---------- tiny io traits ---------- */
 
 pub trait IoWrite {

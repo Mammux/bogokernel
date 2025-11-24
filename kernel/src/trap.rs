@@ -89,6 +89,7 @@ extern "C" fn rust_trap(tf: &mut TrapFrame) {
                 nr::CHMOD => sys_chmod(tf),           // chmod(path, mode)
                 nr::READDIR => sys_readdir(tf),       // readdir(buf, len)
                 nr::GET_FB_INFO => sys_get_fb_info(tf), // get_fb_info(buf)
+                nr::FB_FLUSH => sys_fb_flush(tf),     // fb_flush()
                 nr => {
                     let mut uart = crate::uart::Uart::new();
                     let _ = writeln!(uart, "\r\nunknown syscall: {}", nr);
@@ -1106,6 +1107,17 @@ fn sys_get_fb_info(tf: &mut TrapFrame) {
         tf.a0 = 0; // Success
     } else {
         tf.a0 = usize::MAX; // No framebuffer available
+    }
+    
+    tf.sepc = tf.sepc.wrapping_add(4);
+}
+
+fn sys_fb_flush(tf: &mut TrapFrame) {
+    // Flush framebuffer changes to the display device
+    if crate::display::flush_framebuffer() {
+        tf.a0 = 0; // Success
+    } else {
+        tf.a0 = usize::MAX; // No framebuffer or flush failed
     }
     
     tf.sepc = tf.sepc.wrapping_add(4);

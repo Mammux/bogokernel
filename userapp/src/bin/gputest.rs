@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use usys::{exit, get_fb_info, println, FbInfo};
+use usys::{exit, fb_flush, get_fb_info, println, FbInfo};
 
 #[no_mangle]
 pub extern "C" fn _start(_argc: usize, _argv: *const *const u8, _envp: *const *const u8) -> ! {
@@ -93,7 +93,17 @@ fn main() {
             }
             
             println!("Test pattern drawn successfully!");
-            println!("You should see 8 colored horizontal bars with a white square in the center.");
+            
+            // Flush the framebuffer to the GPU
+            println!("Flushing framebuffer to display...");
+            match fb_flush() {
+                Ok(()) => {
+                    println!("Framebuffer flushed! You should see 8 colored horizontal bars with a white square in the center.");
+                }
+                Err(_) => {
+                    println!("Warning: Failed to flush framebuffer. Display may not update.");
+                }
+            }
         }
         Err(_) => {
             println!("Error: Failed to get framebuffer info");
