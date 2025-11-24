@@ -17,6 +17,7 @@ mod elf;
 mod stack;
 mod display;
 mod boot;
+mod console;
 
 use alloc::boxed::Box;
 use alloc::vec::Vec;
@@ -65,36 +66,6 @@ extern "C" {
     static __user_blob_end: u8;
 }
 
-// Console initialization - choose between UART (ansi) and framebuffer (gpu)
-fn init_console(uart: &mut Uart) {
-    // For now, we'll parse a hardcoded cmdline string
-    // TODO: In a real implementation, this would come from bootloader/device tree
-    let cmdline = "";  // Empty by default, meaning display=ansi
-    
-    boot::cmdline::parse_cmdline(cmdline);
-    
-    match boot::cmdline::display_mode() {
-        display::DisplayMode::Gpu => {
-            let _ = writeln!(uart, "Attempting to initialize GPU display...");
-            if let Some(_vg) = display::virtio_gpu::VirtioGpu::probe() {
-                match display::fb_console::init_fb_console() {
-                    Ok(()) => {
-                        let _ = writeln!(uart, "GPU framebuffer console initialized");
-                    }
-                    Err(()) => {
-                        let _ = writeln!(uart, "Failed to initialize framebuffer console, falling back to UART");
-                    }
-                }
-            } else {
-                let _ = writeln!(uart, "virtio-gpu not found, falling back to UART console");
-            }
-        }
-        display::DisplayMode::Ansi => {
-            let _ = writeln!(uart, "Using UART (ANSI) console");
-        }
-    }
-}
-
 // Main entry point for the rust code
 
 #[no_mangle]
@@ -138,8 +109,12 @@ extern "C" fn rust_start() -> ! {
     fs::init_writable_fs();
     let _ = writeln!(uart, "Writable filesystem initialized with embedded files");
 
-    // --- Initialize console/display ---
-    init_console(&mut uart);
+    // --- Parse cmdline and initialize console/display ---
+    // For now, we'll parse a hardcoded cmdline string
+    // TODO: In a real implementation, this would come from bootloader/device tree
+    let cmdline = "";  // Empty by default, meaning display=ansi
+    boot::cmdline::parse_cmdline(cmdline);
+    console::init_console();
 
     // 3) User code
     /*
