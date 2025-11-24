@@ -2,6 +2,9 @@ use crate::display::DisplayMode;
 
 static mut DISPLAY_MODE: DisplayMode = DisplayMode::Ansi;
 
+/// Parse kernel command line arguments
+/// In a full implementation, this would read from device tree /chosen/bootargs
+/// For this scaffold, we support testing via cmdline string parameter
 pub fn parse_cmdline(s: &str) {
     for param in s.split_whitespace() {
         if let Some(v) = param.strip_prefix("display=") {
@@ -17,4 +20,10 @@ pub fn parse_cmdline(s: &str) {
 
 pub fn display_mode() -> DisplayMode {
     unsafe { DISPLAY_MODE }
+}
+
+/// Set display mode directly (for testing)
+#[allow(dead_code)]
+pub fn set_display_mode(mode: DisplayMode) {
+    unsafe { DISPLAY_MODE = mode; }
 }

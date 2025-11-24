@@ -110,9 +110,13 @@ extern "C" fn rust_start() -> ! {
     let _ = writeln!(uart, "Writable filesystem initialized with embedded files");
 
     // --- Parse cmdline and initialize console/display ---
-    // For now, we'll parse a hardcoded cmdline string
-    // TODO: In a real implementation, this would come from bootloader/device tree
+    // For testing, support compile-time display mode selection via DISPLAY_MODE env var
+    // In a real implementation, this would come from bootloader/device tree /chosen/bootargs
+    #[cfg(not(feature = "gpu"))]
     let cmdline = "";  // Empty by default, meaning display=ansi
+    #[cfg(feature = "gpu")]
+    let cmdline = "display=gpu";  // GPU mode for testing
+    
     boot::cmdline::parse_cmdline(cmdline);
     console::init_console();
 
