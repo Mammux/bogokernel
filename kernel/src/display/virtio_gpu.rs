@@ -260,20 +260,24 @@ impl VirtioGpu {
         // Allocate static framebuffer
         static mut BUF: [u8; SIZE] = [0; SIZE];
 
-        // Allocate virtqueue memory in a single contiguous block
+        // Allocate virtqueue memory in a contiguous block
         // This is required for VirtIO MMIO version 1
-        // Layout: descriptors (128 bytes) + avail (20 bytes) + padding + used (68 bytes)
-        // Total needs to fit in one page (4096 bytes) for simplicity
+        // Layout per VirtIO spec:
+        //   - Descriptor table: offset 0, size 128 bytes (16 * QUEUE_SIZE)
+        //   - Available ring: offset 128, size 20 bytes (6 + 2 * QUEUE_SIZE)
+        //   - Padding to align Used ring to page boundary
+        //   - Used ring: offset 4096 (PAGE_SIZE), size 68 bytes (6 + 8 * QUEUE_SIZE)
         const DESC_SIZE: usize = size_of::<VirtqDesc>() * QUEUE_SIZE; // 128
         const AVAIL_SIZE: usize = size_of::<VirtqAvail>(); // 20
         const USED_SIZE: usize = size_of::<VirtqUsed>(); // 68
-        const PADDING_SIZE: usize = 4096 - DESC_SIZE - AVAIL_SIZE - USED_SIZE; // 3880
+        // Padding from end of avail (128+20=148) to start of next page (4096)
+        const PADDING_SIZE: usize = PAGE_SIZE - DESC_SIZE - AVAIL_SIZE; // 3948
         
         #[repr(C, align(4096))]
         struct VirtqueueMemory {
             desc: [VirtqDesc; QUEUE_SIZE],
             avail: VirtqAvail,
-            _padding: [u8; PADDING_SIZE], // Align used ring to page boundary
+            _padding: [u8; PADDING_SIZE], // Align used ring to page boundary (4096)
             used: VirtqUsed,
         }
         
