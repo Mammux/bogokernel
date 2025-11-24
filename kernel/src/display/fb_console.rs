@@ -37,7 +37,8 @@ pub fn init_fb_console() -> Result<(), ()> {
         // Store console state
         *CONSOLE_STATE.lock() = Some(state);
         
-        fb.present();
+        // Flush framebuffer to display device (GPU)
+        crate::display::flush_framebuffer();
         Ok(())
     } else { 
         Err(()) 
@@ -56,8 +57,8 @@ fn clear_screen(fb: &dyn crate::display::Framebuffer, color: u32) {
     }
 }
 
-/// Write a single character at the current cursor position
-pub fn write_char(c: u8) {
+/// Internal function to write a single character without flushing
+fn write_char_internal(c: u8) {
     let fb = match get_framebuffer() {
         Some(fb) => fb,
         None => return,
@@ -119,15 +120,23 @@ pub fn write_char(c: u8) {
             // Ignore other control characters
         }
     }
-    
-    fb.present();
+}
+
+/// Write a single character at the current cursor position
+#[allow(dead_code)]
+pub fn write_char(c: u8) {
+    write_char_internal(c);
+    // Flush framebuffer to display device (GPU)
+    crate::display::flush_framebuffer();
 }
 
 /// Write a string to the console
 pub fn write_str(s: &str) {
     for byte in s.bytes() {
-        write_char(byte);
+        write_char_internal(byte);
     }
+    // Flush once after writing all characters for better performance
+    crate::display::flush_framebuffer();
 }
 
 /// Draw a character at the current cursor position
