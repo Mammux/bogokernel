@@ -206,6 +206,24 @@ pub fn readdir(buf: &mut [u8]) -> SysResult<usize> {
     }
 }
 
+// Framebuffer info structure (must match kernel side)
+#[repr(C)]
+pub struct FbInfo {
+    pub width: usize,
+    pub height: usize,
+    pub stride: usize,
+    pub addr: usize,
+}
+
+pub fn get_fb_info(info: &mut FbInfo) -> SysResult<()> {
+    let r = unsafe { sys_ecall1(nr::GET_FB_INFO, info as *mut _ as usize) };
+    if is_err_sentinel(r) {
+        Err(SysErr::Fail)
+    } else {
+        Ok(())
+    }
+}
+
 /* ---------- tiny io traits ---------- */
 
 pub trait IoWrite {
