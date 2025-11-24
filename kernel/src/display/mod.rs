@@ -1,5 +1,6 @@
 pub mod virtio_gpu;
 pub mod fb_console;
+pub mod font;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum DisplayMode {

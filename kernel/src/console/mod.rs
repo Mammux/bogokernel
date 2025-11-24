@@ -12,6 +12,10 @@ pub fn init_console() {
                 match fb_console::init_fb_console() {
                     Ok(()) => {
                         let _ = writeln!(uart, "GPU framebuffer console initialized");
+                        // Write a test message to the framebuffer console
+                        fb_console::write_str("BogoKernel GPU Console\n");
+                        fb_console::write_str("=====================\n");
+                        fb_console::write_str("Text rendering active!\n\n");
                     }
                     Err(()) => {
                         let _ = writeln!(uart, "Failed to initialize framebuffer console, falling back to UART");
