@@ -1,6 +1,6 @@
-pub mod virtio_gpu;
 pub mod fb_console;
 pub mod font;
+pub mod virtio_gpu;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum DisplayMode {
@@ -8,6 +8,7 @@ pub enum DisplayMode {
     Gpu,
 }
 
+#[derive(Debug)]
 pub struct FramebufferInfo {
     pub width: usize,
     pub height: usize,
@@ -28,7 +29,9 @@ pub trait Framebuffer {
 static mut GLOBAL_FB: Option<&'static dyn Framebuffer> = None;
 
 pub fn register_framebuffer(fb: &'static dyn Framebuffer) {
-    unsafe { GLOBAL_FB = Some(fb); }
+    unsafe {
+        GLOBAL_FB = Some(fb);
+    }
 }
 
 pub fn get_framebuffer() -> Option<&'static dyn Framebuffer> {

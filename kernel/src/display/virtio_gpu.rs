@@ -1,8 +1,8 @@
-use crate::display::{Framebuffer, FramebufferInfo, register_framebuffer};
+use crate::display::{register_framebuffer, Framebuffer, FramebufferInfo};
 use core::mem::size_of;
 
 // VirtIO GPU device constants
-const VIRTIO_GPU_DEVICE_ID: u32 = 16;  // VirtIO GPU device type
+const VIRTIO_GPU_DEVICE_ID: u32 = 16; // VirtIO GPU device type
 const VIRTIO_VENDOR_ID: u32 = 0x1AF4;
 
 // VirtIO MMIO register offsets (version 1)
@@ -52,7 +52,7 @@ const PAGE_SIZE: usize = 4096;
 
 // Virtqueue descriptor
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 struct VirtqDesc {
     addr: u64,
     len: u32,
@@ -62,6 +62,7 @@ struct VirtqDesc {
 
 // Available ring
 #[repr(C)]
+#[derive(Debug)]
 struct VirtqAvail {
     flags: u16,
     idx: u16,
@@ -70,7 +71,7 @@ struct VirtqAvail {
 
 // Used ring element
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 struct VirtqUsedElem {
     id: u32,
     len: u32,
@@ -78,6 +79,7 @@ struct VirtqUsedElem {
 
 // Used ring
 #[repr(C)]
+#[derive(Debug)]
 struct VirtqUsed {
     flags: u16,
     idx: u16,
@@ -85,6 +87,7 @@ struct VirtqUsed {
 }
 
 // Virtqueue structure
+#[derive(Debug)]
 struct Virtqueue {
     desc: &'static mut [VirtqDesc; QUEUE_SIZE],
     avail: &'static mut VirtqAvail,
@@ -173,6 +176,7 @@ struct GpuCtrlResponse {
 static mut GPU_CMD_BUF: [u8; GPU_COMMAND_BUFFER_SIZE] = [0; GPU_COMMAND_BUFFER_SIZE];
 static mut GPU_RESP_BUF: [u8; GPU_RESPONSE_BUFFER_SIZE] = [0; GPU_RESPONSE_BUFFER_SIZE];
 
+#[derive(Debug)]
 pub struct VirtioGpu {
     info: FramebufferInfo,
     back: *mut u8,
@@ -188,27 +192,30 @@ impl VirtioGpu {
         const VIRTIO_MMIO_BASE: usize = 0x10001000;
         const VIRTIO_MMIO_SIZE: usize = 0x1000;
         const VIRTIO_MMIO_COUNT: usize = 8;
-        
+
         for i in 0..VIRTIO_MMIO_COUNT {
             let base = VIRTIO_MMIO_BASE + i * VIRTIO_MMIO_SIZE;
-            
+
             // Check magic value (should be 0x74726976 = "virt")
-            let magic = unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_MAGIC_VALUE) as *const u32) };
+            let magic =
+                unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_MAGIC_VALUE) as *const u32) };
             if magic != 0x74726976 {
                 continue;
             }
-            
+
             // Check version (should be 1 or 2)
             // Note: QEMU on Windows may report version 1, while Linux typically reports version 2.
             // Both versions are compatible for basic GPU device initialization.
-            let version = unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_VERSION) as *const u32) };
+            let version =
+                unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_VERSION) as *const u32) };
             if version != 1 && version != 2 {
                 continue;
             }
-            
+
             // Check if this is a GPU device
             // Device ID 0 indicates an empty/invalid slot, so continue scanning
-            let device_id = unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_DEVICE_ID) as *const u32) };
+            let device_id =
+                unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_DEVICE_ID) as *const u32) };
             if device_id == 0 {
                 // Empty slot, skip to next
                 continue;
@@ -217,77 +224,102 @@ impl VirtioGpu {
                 // Valid device but not GPU, skip to next
                 continue;
             }
-            
+
             // Found a VirtIO GPU device! Initialize it
             return Self::init_device(base);
         }
-        
+
         None
     }
-    
+
     fn init_device(mmio_base: usize) -> Option<&'static Self> {
         const W: usize = 1024;
         const H: usize = 768;
         const SIZE: usize = W * H * 4;
-        
+
         // Allocate static framebuffer
         static mut BUF: [u8; SIZE] = [0; SIZE];
-        
+
         // Allocate virtqueue memory (statically for simplicity)
-        static mut QUEUE_DESC: [VirtqDesc; QUEUE_SIZE] = [VirtqDesc { addr: 0, len: 0, flags: 0, next: 0 }; QUEUE_SIZE];
-        static mut QUEUE_AVAIL: VirtqAvail = VirtqAvail { flags: 0, idx: 0, ring: [0; QUEUE_SIZE] };
-        static mut QUEUE_USED: VirtqUsed = VirtqUsed { flags: 0, idx: 0, ring: [VirtqUsedElem { id: 0, len: 0 }; QUEUE_SIZE] };
-        
+        static mut QUEUE_DESC: [VirtqDesc; QUEUE_SIZE] = [VirtqDesc {
+            addr: 0,
+            len: 0,
+            flags: 0,
+            next: 0,
+        }; QUEUE_SIZE];
+        static mut QUEUE_AVAIL: VirtqAvail = VirtqAvail {
+            flags: 0,
+            idx: 0,
+            ring: [0; QUEUE_SIZE],
+        };
+        static mut QUEUE_USED: VirtqUsed = VirtqUsed {
+            flags: 0,
+            idx: 0,
+            ring: [VirtqUsedElem { id: 0, len: 0 }; QUEUE_SIZE],
+        };
+
         unsafe {
             // Reset device
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, 0);
-            
+
             // Acknowledge device
             let mut status = VIRTIO_STATUS_ACKNOWLEDGE;
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, status);
-            
+
             // Set driver bit
             status |= VIRTIO_STATUS_DRIVER;
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, status);
-            
+
             // Read device features
-            let _device_features = core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_DEVICE_FEATURES) as *const u32);
-            
+            let _device_features =
+                core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_DEVICE_FEATURES) as *const u32);
+
             // Write driver features (we accept minimal features)
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_DRIVER_FEATURES) as *mut u32, 0);
-            
+
             // Features OK
             status |= VIRTIO_STATUS_FEATURES_OK;
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, status);
-            
+
             // Verify features OK
-            let status_check = core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *const u32);
+            let status_check =
+                core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *const u32);
             if (status_check & VIRTIO_STATUS_FEATURES_OK) == 0 {
-                return None;  // Device doesn't support our features
+                return None; // Device doesn't support our features
             }
-            
+
             // Set up controlq (queue 0)
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_QUEUE_SEL) as *mut u32, 0);
-            let queue_max = core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_QUEUE_NUM_MAX) as *const u32);
+            let queue_max =
+                core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_QUEUE_NUM_MAX) as *const u32);
             if queue_max < QUEUE_SIZE as u32 {
-                return None;  // Queue too small
+                return None; // Queue too small
             }
-            
+
             // Set queue size
-            core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_QUEUE_NUM) as *mut u32, QUEUE_SIZE as u32);
-            
+            core::ptr::write_volatile(
+                (mmio_base + VIRTIO_MMIO_QUEUE_NUM) as *mut u32,
+                QUEUE_SIZE as u32,
+            );
+
             // Set guest page size (4KB)
-            core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_GUEST_PAGE_SIZE) as *mut u32, PAGE_SIZE as u32);
-            
+            core::ptr::write_volatile(
+                (mmio_base + VIRTIO_MMIO_GUEST_PAGE_SIZE) as *mut u32,
+                PAGE_SIZE as u32,
+            );
+
             // Calculate queue physical address
             // For version 1, the queue PFN register expects the physical address divided by page size
             let queue_pfn = (QUEUE_DESC.as_ptr() as usize) / PAGE_SIZE;
-            core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_QUEUE_PFN) as *mut u32, queue_pfn as u32);
-            
+            core::ptr::write_volatile(
+                (mmio_base + VIRTIO_MMIO_QUEUE_PFN) as *mut u32,
+                queue_pfn as u32,
+            );
+
             // Driver OK - device is ready
             status |= VIRTIO_STATUS_DRIVER_OK;
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, status);
-            
+
             // Create VirtioGpu instance
             let fb_info = FramebufferInfo {
                 width: W,
@@ -296,7 +328,7 @@ impl VirtioGpu {
                 phys_addr: BUF.as_ptr() as usize,
                 size: SIZE,
             };
-            
+
             let queue = Virtqueue {
                 desc: &mut QUEUE_DESC,
                 avail: &mut QUEUE_AVAIL,
@@ -304,21 +336,21 @@ impl VirtioGpu {
                 next_desc: 0,
                 last_used_idx: 0,
             };
-            
+
             static mut VG: Option<VirtioGpu> = None;
             VG = Some(VirtioGpu {
                 info: fb_info,
                 back: BUF.as_mut_ptr(),
                 mmio_base,
-                resource_id: 1,  // Resource ID for our framebuffer
+                resource_id: 1, // Resource ID for our framebuffer
                 queue: Some(queue),
             });
-            
+
             // Initialize display first (mutable access)
             if let Some(v) = VG.as_mut() {
                 v.init_display();
             }
-            
+
             // Then register framebuffer (immutable access for 'static)
             VG.as_ref().map(|v| {
                 register_framebuffer(v);
@@ -326,14 +358,14 @@ impl VirtioGpu {
             })
         }
     }
-    
+
     // Send a GPU command and wait for response
     fn send_command(&mut self, req: &[u8], resp: &mut [u8]) -> bool {
         let queue = match self.queue.as_mut() {
             Some(q) => q,
             None => return false,
         };
-        
+
         unsafe {
             // Set up descriptor chain: request -> response
             let req_desc_idx = queue.next_desc;
@@ -341,21 +373,21 @@ impl VirtioGpu {
             queue.desc[req_desc_idx as usize].len = req.len() as u32;
             queue.desc[req_desc_idx as usize].flags = VIRTQ_DESC_F_NEXT;
             queue.desc[req_desc_idx as usize].next = (req_desc_idx + 1) % QUEUE_SIZE as u16;
-            
+
             let resp_desc_idx = (req_desc_idx + 1) % QUEUE_SIZE as u16;
             queue.desc[resp_desc_idx as usize].addr = resp.as_mut_ptr() as u64;
             queue.desc[resp_desc_idx as usize].len = resp.len() as u32;
             queue.desc[resp_desc_idx as usize].flags = VIRTQ_DESC_F_WRITE;
             queue.desc[resp_desc_idx as usize].next = 0;
-            
+
             // Add to available ring
             let avail_idx = queue.avail.idx;
             queue.avail.ring[avail_idx as usize % QUEUE_SIZE] = req_desc_idx;
             queue.avail.idx = avail_idx.wrapping_add(1);
-            
+
             // Notify device (write queue index to notify register)
             core::ptr::write_volatile((self.mmio_base + VIRTIO_MMIO_QUEUE_NOTIFY) as *mut u32, 0);
-            
+
             // Wait for response (simple busy wait)
             for _ in 0..COMMAND_TIMEOUT_ITERATIONS {
                 if queue.used.idx != queue.last_used_idx {
@@ -364,18 +396,18 @@ impl VirtioGpu {
                     return true;
                 }
             }
-            
+
             false
         }
     }
-    
+
     // Initialize display by sending GPU commands
     fn init_display(&mut self) {
         let resource_id = self.resource_id;
         let fb_addr = self.back as usize;
         let width = self.info.width as u32;
         let height = self.info.height as u32;
-        
+
         unsafe {
             // 1. Create 2D resource
             let create_cmd = GpuResourceCreate2D {
@@ -391,18 +423,18 @@ impl VirtioGpu {
                 width,
                 height,
             };
-            
+
             core::ptr::copy_nonoverlapping(
                 &create_cmd as *const _ as *const u8,
                 GPU_CMD_BUF.as_mut_ptr(),
                 size_of::<GpuResourceCreate2D>(),
             );
-            
+
             self.send_command(
                 &GPU_CMD_BUF[..size_of::<GpuResourceCreate2D>()],
                 &mut GPU_RESP_BUF[..size_of::<GpuCtrlResponse>()],
             );
-            
+
             // 2. Attach backing storage
             let attach_cmd = GpuResourceAttachBacking {
                 hdr: GpuCtrlHdr {
@@ -415,13 +447,13 @@ impl VirtioGpu {
                 resource_id,
                 nr_entries: 1,
             };
-            
+
             let mem_entry = GpuMemEntry {
                 addr: fb_addr as u64,
                 length: self.info.size as u32,
                 padding: 0,
             };
-            
+
             core::ptr::copy_nonoverlapping(
                 &attach_cmd as *const _ as *const u8,
                 GPU_CMD_BUF.as_mut_ptr(),
@@ -429,15 +461,17 @@ impl VirtioGpu {
             );
             core::ptr::copy_nonoverlapping(
                 &mem_entry as *const _ as *const u8,
-                GPU_CMD_BUF.as_mut_ptr().add(size_of::<GpuResourceAttachBacking>()),
+                GPU_CMD_BUF
+                    .as_mut_ptr()
+                    .add(size_of::<GpuResourceAttachBacking>()),
                 size_of::<GpuMemEntry>(),
             );
-            
+
             self.send_command(
                 &GPU_CMD_BUF[..size_of::<GpuResourceAttachBacking>() + size_of::<GpuMemEntry>()],
                 &mut GPU_RESP_BUF[..size_of::<GpuCtrlResponse>()],
             );
-            
+
             // 3. Set scanout
             let scanout_cmd = GpuSetScanout {
                 hdr: GpuCtrlHdr {
@@ -456,29 +490,29 @@ impl VirtioGpu {
                 scanout_id: 0,
                 resource_id,
             };
-            
+
             core::ptr::copy_nonoverlapping(
                 &scanout_cmd as *const _ as *const u8,
                 GPU_CMD_BUF.as_mut_ptr(),
                 size_of::<GpuSetScanout>(),
             );
-            
+
             self.send_command(
                 &GPU_CMD_BUF[..size_of::<GpuSetScanout>()],
                 &mut GPU_RESP_BUF[..size_of::<GpuCtrlResponse>()],
             );
-            
+
             // 4. Initial transfer and flush to activate display
             self.flush_display();
         }
     }
-    
+
     // Flush framebuffer to display
     fn flush_display(&mut self) {
         let resource_id = self.resource_id;
         let width = self.info.width as u32;
         let height = self.info.height as u32;
-        
+
         unsafe {
             // Transfer to host
             let transfer_cmd = GpuTransferToHost2D {
@@ -499,18 +533,18 @@ impl VirtioGpu {
                 resource_id,
                 padding: 0,
             };
-            
+
             core::ptr::copy_nonoverlapping(
                 &transfer_cmd as *const _ as *const u8,
                 GPU_CMD_BUF.as_mut_ptr(),
                 size_of::<GpuTransferToHost2D>(),
             );
-            
+
             self.send_command(
                 &GPU_CMD_BUF[..size_of::<GpuTransferToHost2D>()],
                 &mut GPU_RESP_BUF[..size_of::<GpuCtrlResponse>()],
             );
-            
+
             // Flush resource
             let flush_cmd = GpuResourceFlush {
                 hdr: GpuCtrlHdr {
@@ -529,13 +563,13 @@ impl VirtioGpu {
                 resource_id,
                 padding: 0,
             };
-            
+
             core::ptr::copy_nonoverlapping(
                 &flush_cmd as *const _ as *const u8,
                 GPU_CMD_BUF.as_mut_ptr(),
                 size_of::<GpuResourceFlush>(),
             );
-            
+
             self.send_command(
                 &GPU_CMD_BUF[..size_of::<GpuResourceFlush>()],
                 &mut GPU_RESP_BUF[..size_of::<GpuCtrlResponse>()],
@@ -545,8 +579,12 @@ impl VirtioGpu {
 }
 
 impl Framebuffer for VirtioGpu {
-    fn info(&self) -> &FramebufferInfo { &self.info }
-    fn back_buffer(&self) -> *mut u8 { self.back }
+    fn info(&self) -> &FramebufferInfo {
+        &self.info
+    }
+    fn back_buffer(&self) -> *mut u8 {
+        self.back
+    }
     fn present(&self) {
         // NOTE: We can't call flush_display here because self is immutable
         // and flush_display needs &mut self. The display is already initialized
@@ -555,4 +593,3 @@ impl Framebuffer for VirtioGpu {
         // For now, the initial display activation is sufficient to show the framebuffer.
     }
 }
-
