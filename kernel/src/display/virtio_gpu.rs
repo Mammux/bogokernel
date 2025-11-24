@@ -67,8 +67,14 @@ impl VirtioGpu {
             }
             
             // Check if this is a GPU device
+            // Device ID 0 indicates an empty/invalid slot, so continue scanning
             let device_id = unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_DEVICE_ID) as *const u32) };
+            if device_id == 0 {
+                // Empty slot, skip to next
+                continue;
+            }
             if device_id != VIRTIO_GPU_DEVICE_ID {
+                // Valid device but not GPU, skip to next
                 continue;
             }
             
