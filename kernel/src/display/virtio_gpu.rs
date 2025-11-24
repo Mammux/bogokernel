@@ -1,6 +1,6 @@
 use crate::display::{register_framebuffer, Framebuffer, FramebufferInfo};
-use core::mem::size_of;
 use core::fmt::Write;
+use core::mem::size_of;
 
 // VirtIO GPU device constants
 const VIRTIO_GPU_DEVICE_ID: u32 = 16; // VirtIO GPU device type
@@ -207,7 +207,7 @@ impl VirtioGpu {
     pub fn probe() -> Option<&'static Self> {
         let mut uart = crate::uart::Uart::new();
         let _ = writeln!(uart, "[VirtIO-GPU] Starting device probe...");
-        
+
         // Scan for VirtIO MMIO devices in QEMU virt machine
         // QEMU virt typically has VirtIO devices at 0x10001000 - 0x10008000
         const VIRTIO_MMIO_BASE: usize = 0x10001000;
@@ -216,12 +216,20 @@ impl VirtioGpu {
 
         for i in 0..VIRTIO_MMIO_COUNT {
             let base = VIRTIO_MMIO_BASE + i * VIRTIO_MMIO_SIZE;
-            let _ = writeln!(uart, "[VirtIO-GPU] Scanning slot {}: base=0x{:08x}", i, base);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU] Scanning slot {}: base=0x{:08x}",
+                i, base
+            );
 
             // Check magic value (should be 0x74726976 = "virt")
             let magic =
                 unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_MAGIC_VALUE) as *const u32) };
-            let _ = writeln!(uart, "[VirtIO-GPU]   Magic: 0x{:08x} (expected 0x74726976)", magic);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Magic: 0x{:08x} (expected 0x74726976)",
+                magic
+            );
             if magic != 0x74726976 {
                 let _ = writeln!(uart, "[VirtIO-GPU]   -> Magic mismatch, skipping");
                 continue;
@@ -254,24 +262,40 @@ impl VirtioGpu {
                 continue;
             }
 
-            let _ = writeln!(uart, "[VirtIO-GPU] *** Found GPU device at 0x{:08x}! ***", base);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU] *** Found GPU device at 0x{:08x}! ***",
+                base
+            );
             // Found a VirtIO GPU device! Initialize it
             return Self::init_device(base);
         }
 
-        let _ = writeln!(uart, "[VirtIO-GPU] No GPU device found after scanning {} slots", VIRTIO_MMIO_COUNT);
+        let _ = writeln!(
+            uart,
+            "[VirtIO-GPU] No GPU device found after scanning {} slots",
+            VIRTIO_MMIO_COUNT
+        );
         None
     }
 
     fn init_device(mmio_base: usize) -> Option<&'static Self> {
         let mut uart = crate::uart::Uart::new();
-        let _ = writeln!(uart, "[VirtIO-GPU] Initializing device at 0x{:08x}", mmio_base);
-        
+        let _ = writeln!(
+            uart,
+            "[VirtIO-GPU] Initializing device at 0x{:08x}",
+            mmio_base
+        );
+
         const W: usize = 1024;
         const H: usize = 768;
         const SIZE: usize = W * H * 4;
 
-        let _ = writeln!(uart, "[VirtIO-GPU] Framebuffer: {}x{} = {} bytes", W, H, SIZE);
+        let _ = writeln!(
+            uart,
+            "[VirtIO-GPU] Framebuffer: {}x{} = {} bytes",
+            W, H, SIZE
+        );
 
         // Allocate static framebuffer
         static mut BUF: [u8; SIZE] = [0; SIZE];
@@ -286,9 +310,9 @@ impl VirtioGpu {
         const DESC_SIZE: usize = size_of::<VirtqDesc>() * QUEUE_SIZE; // 128
         const AVAIL_SIZE: usize = size_of::<VirtqAvail>(); // 20
         const USED_SIZE: usize = size_of::<VirtqUsed>(); // 68
-        // Padding from end of avail to start of next page boundary
+                                                         // Padding from end of avail to start of next page boundary
         const PADDING_SIZE: usize = PAGE_SIZE - DESC_SIZE - AVAIL_SIZE;
-        
+
         #[repr(C, align(4096))]
         struct VirtqueueMemory {
             desc: [VirtqDesc; QUEUE_SIZE],
@@ -296,7 +320,7 @@ impl VirtioGpu {
             _padding: [u8; PADDING_SIZE], // Align used ring to PAGE_SIZE boundary
             used: VirtqUsed,
         }
-        
+
         static mut QUEUE_MEM: VirtqueueMemory = VirtqueueMemory {
             desc: [VirtqDesc {
                 addr: 0,
@@ -319,39 +343,62 @@ impl VirtioGpu {
 
         unsafe {
             let _ = writeln!(uart, "[VirtIO-GPU] Starting device negotiation sequence...");
-            
+
             // Reset device
             let _ = writeln!(uart, "[VirtIO-GPU]   Step 1: Reset device (status=0)");
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, 0);
 
             // Acknowledge device
             let mut status = VIRTIO_STATUS_ACKNOWLEDGE;
-            let _ = writeln!(uart, "[VirtIO-GPU]   Step 2: Acknowledge device (status={})", status);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Step 2: Acknowledge device (status={})",
+                status
+            );
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, status);
 
             // Set driver bit
             status |= VIRTIO_STATUS_DRIVER;
-            let _ = writeln!(uart, "[VirtIO-GPU]   Step 3: Driver ready (status={})", status);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Step 3: Driver ready (status={})",
+                status
+            );
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, status);
 
             // Read device features
             let device_features =
                 core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_DEVICE_FEATURES) as *const u32);
-            let _ = writeln!(uart, "[VirtIO-GPU]   Device features: 0x{:08x}", device_features);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Device features: 0x{:08x}",
+                device_features
+            );
 
             // Write driver features (we accept minimal features)
-            let _ = writeln!(uart, "[VirtIO-GPU]   Step 4: Negotiate features (driver_features=0)");
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Step 4: Negotiate features (driver_features=0)"
+            );
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_DRIVER_FEATURES) as *mut u32, 0);
 
             // Features OK
             status |= VIRTIO_STATUS_FEATURES_OK;
-            let _ = writeln!(uart, "[VirtIO-GPU]   Step 5: Set FEATURES_OK (status={})", status);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Step 5: Set FEATURES_OK (status={})",
+                status
+            );
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, status);
 
             // Verify features OK
             let status_check =
                 core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *const u32);
-            let _ = writeln!(uart, "[VirtIO-GPU]   Status readback: 0x{:08x}", status_check);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Status readback: 0x{:08x}",
+                status_check
+            );
             if (status_check & VIRTIO_STATUS_FEATURES_OK) == 0 {
                 let _ = writeln!(uart, "[VirtIO-GPU]   ERROR: Device rejected features!");
                 return None; // Device doesn't support our features
@@ -365,7 +412,11 @@ impl VirtioGpu {
                 core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_QUEUE_NUM_MAX) as *const u32);
             let _ = writeln!(uart, "[VirtIO-GPU]   Queue max size: {}", queue_max);
             if queue_max < QUEUE_SIZE as u32 {
-                let _ = writeln!(uart, "[VirtIO-GPU]   ERROR: Queue too small! max={}, need={}", queue_max, QUEUE_SIZE);
+                let _ = writeln!(
+                    uart,
+                    "[VirtIO-GPU]   ERROR: Queue too small! max={}, need={}",
+                    queue_max, QUEUE_SIZE
+                );
                 return None; // Queue too small
             }
 
@@ -377,7 +428,11 @@ impl VirtioGpu {
             );
 
             // Set guest page size (4KB)
-            let _ = writeln!(uart, "[VirtIO-GPU]   Setting guest page size to {} bytes", PAGE_SIZE);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Setting guest page size to {} bytes",
+                PAGE_SIZE
+            );
             core::ptr::write_volatile(
                 (mmio_base + VIRTIO_MMIO_GUEST_PAGE_SIZE) as *mut u32,
                 PAGE_SIZE as u32,
@@ -385,7 +440,11 @@ impl VirtioGpu {
 
             // Set queue alignment (must be set before QUEUE_PFN for VirtIO v1)
             // The alignment value is the page size (4096 bytes = 0x1000)
-            let _ = writeln!(uart, "[VirtIO-GPU]   Setting queue alignment to {} bytes", PAGE_SIZE);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Setting queue alignment to {} bytes",
+                PAGE_SIZE
+            );
             core::ptr::write_volatile(
                 (mmio_base + VIRTIO_MMIO_QUEUE_ALIGN) as *mut u32,
                 PAGE_SIZE as u32,
@@ -394,26 +453,51 @@ impl VirtioGpu {
             // Calculate queue physical address
             // For version 1, the queue PFN register expects the physical address divided by page size
             let queue_pfn = (&QUEUE_MEM as *const _ as usize) / PAGE_SIZE;
-            let _ = writeln!(uart, "[VirtIO-GPU]   Queue memory base: 0x{:08x}", &QUEUE_MEM as *const _ as usize);
-            let _ = writeln!(uart, "[VirtIO-GPU]   Queue descriptor addr: 0x{:08x}", QUEUE_MEM.desc.as_ptr() as usize);
-            let _ = writeln!(uart, "[VirtIO-GPU]   Queue avail addr: 0x{:08x}", &QUEUE_MEM.avail as *const _ as usize);
-            let _ = writeln!(uart, "[VirtIO-GPU]   Queue used addr: 0x{:08x}", &QUEUE_MEM.used as *const _ as usize);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Queue memory base: 0x{:08x}",
+                &QUEUE_MEM as *const _ as usize
+            );
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Queue descriptor addr: 0x{:08x}",
+                QUEUE_MEM.desc.as_ptr() as usize
+            );
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Queue avail addr: 0x{:08x}",
+                &QUEUE_MEM.avail as *const _ as usize
+            );
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Queue used addr: 0x{:08x}",
+                &QUEUE_MEM.used as *const _ as usize
+            );
             let _ = writeln!(uart, "[VirtIO-GPU]   Queue PFN: 0x{:08x}", queue_pfn);
-            
+
             // Check if memory layout is correct for VirtIO v1
             let desc_size = core::mem::size_of::<[VirtqDesc; QUEUE_SIZE]>();
             let avail_size = core::mem::size_of::<VirtqAvail>();
             let used_size = core::mem::size_of::<VirtqUsed>();
-            let _ = writeln!(uart, "[VirtIO-GPU]   Sizes: desc={}, avail={}, used={}", 
-                           desc_size, avail_size, used_size);
-            
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Sizes: desc={}, avail={}, used={}",
+                desc_size, avail_size, used_size
+            );
+
             // Verify contiguous layout
-            let desc_offset = &QUEUE_MEM.desc as *const _ as usize - &QUEUE_MEM as *const _ as usize;
-            let avail_offset = &QUEUE_MEM.avail as *const _ as usize - &QUEUE_MEM as *const _ as usize;
-            let used_offset = &QUEUE_MEM.used as *const _ as usize - &QUEUE_MEM as *const _ as usize;
-            let _ = writeln!(uart, "[VirtIO-GPU]   Offsets: desc={}, avail={}, used={}", 
-                           desc_offset, avail_offset, used_offset);
-            
+            let desc_offset =
+                &QUEUE_MEM.desc as *const _ as usize - &QUEUE_MEM as *const _ as usize;
+            let avail_offset =
+                &QUEUE_MEM.avail as *const _ as usize - &QUEUE_MEM as *const _ as usize;
+            let used_offset =
+                &QUEUE_MEM.used as *const _ as usize - &QUEUE_MEM as *const _ as usize;
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Offsets: desc={}, avail={}, used={}",
+                desc_offset, avail_offset, used_offset
+            );
+
             core::ptr::write_volatile(
                 (mmio_base + VIRTIO_MMIO_QUEUE_PFN) as *mut u32,
                 queue_pfn as u32,
@@ -421,9 +505,13 @@ impl VirtioGpu {
 
             // Driver OK - device is ready
             status |= VIRTIO_STATUS_DRIVER_OK;
-            let _ = writeln!(uart, "[VirtIO-GPU]   Step 6: Set DRIVER_OK (status={})", status);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Step 6: Set DRIVER_OK (status={})",
+                status
+            );
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, status);
-            
+
             let _ = writeln!(uart, "[VirtIO-GPU] Device negotiation complete!");
 
             // Create VirtioGpu instance
@@ -434,9 +522,12 @@ impl VirtioGpu {
                 phys_addr: BUF.as_ptr() as usize,
                 size: SIZE,
             };
-            
-            let _ = writeln!(uart, "[VirtIO-GPU] Framebuffer info: phys_addr=0x{:08x}, size={}", 
-                           fb_info.phys_addr, fb_info.size);
+
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU] Framebuffer info: phys_addr=0x{:08x}, size={}",
+                fb_info.phys_addr, fb_info.size
+            );
 
             let queue = Virtqueue {
                 desc: &mut QUEUE_MEM.desc,
@@ -470,11 +561,15 @@ impl VirtioGpu {
     // Send a GPU command and wait for response
     fn send_command(&mut self, req: &[u8], resp: &mut [u8]) -> bool {
         let mut uart = crate::uart::Uart::new();
-        
+
         // Log buffer addresses
-        let _ = writeln!(uart, "[VirtIO-GPU] Buffer check: req ptr=0x{:08x}, resp ptr=0x{:08x}",
-                       req.as_ptr() as usize, resp.as_mut_ptr() as usize);
-        
+        let _ = writeln!(
+            uart,
+            "[VirtIO-GPU] Buffer check: req ptr=0x{:08x}, resp ptr=0x{:08x}",
+            req.as_ptr() as usize,
+            resp.as_mut_ptr() as usize
+        );
+
         let queue = match self.queue.as_mut() {
             Some(q) => q,
             None => {
@@ -490,9 +585,14 @@ impl VirtioGpu {
             } else {
                 0
             };
-            let _ = writeln!(uart, "[VirtIO-GPU] Sending command: type=0x{:04x}, req_len={}, resp_len={}", 
-                           cmd_type, req.len(), resp.len());
-            
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU] Sending command: type=0x{:04x}, req_len={}, resp_len={}",
+                cmd_type,
+                req.len(),
+                resp.len()
+            );
+
             // Set up descriptor chain: request -> response
             let req_desc_idx = queue.next_desc;
             queue.desc[req_desc_idx as usize].addr = req.as_ptr() as u64;
@@ -506,17 +606,26 @@ impl VirtioGpu {
             queue.desc[resp_desc_idx as usize].flags = VIRTQ_DESC_F_WRITE;
             queue.desc[resp_desc_idx as usize].next = 0;
 
-            let _ = writeln!(uart, "[VirtIO-GPU]   Descriptors: req_idx={}, resp_idx={}", 
-                           req_desc_idx, resp_desc_idx);
-            let _ = writeln!(uart, "[VirtIO-GPU]   Request descriptor: addr=0x{:08x}, len={}, flags=0x{:x}", 
-                           queue.desc[req_desc_idx as usize].addr, 
-                           queue.desc[req_desc_idx as usize].len,
-                           queue.desc[req_desc_idx as usize].flags);
-            let _ = writeln!(uart, "[VirtIO-GPU]   Response descriptor: addr=0x{:08x}, len={}, flags=0x{:x}", 
-                           queue.desc[resp_desc_idx as usize].addr, 
-                           queue.desc[resp_desc_idx as usize].len,
-                           queue.desc[resp_desc_idx as usize].flags);
-                           
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Descriptors: req_idx={}, resp_idx={}",
+                req_desc_idx, resp_desc_idx
+            );
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Request descriptor: addr=0x{:08x}, len={}, flags=0x{:x}",
+                queue.desc[req_desc_idx as usize].addr,
+                queue.desc[req_desc_idx as usize].len,
+                queue.desc[req_desc_idx as usize].flags
+            );
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Response descriptor: addr=0x{:08x}, len={}, flags=0x{:x}",
+                queue.desc[resp_desc_idx as usize].addr,
+                queue.desc[resp_desc_idx as usize].len,
+                queue.desc[resp_desc_idx as usize].flags
+            );
+
             // Dump first few bytes of request for debugging
             let _ = writeln!(uart, "[VirtIO-GPU]   Request data (first 16 bytes):");
             for i in 0..core::cmp::min(16, req.len()) {
@@ -530,67 +639,107 @@ impl VirtioGpu {
             // Add to available ring
             let avail_idx = queue.avail.idx;
             queue.avail.ring[avail_idx as usize % QUEUE_SIZE] = req_desc_idx;
-            let _ = writeln!(uart, "[VirtIO-GPU]   Updating avail ring: idx={} -> {}", 
-                           avail_idx, avail_idx.wrapping_add(1));
-            let _ = writeln!(uart, "[VirtIO-GPU]   Avail ring[{}] = {}", 
-                           avail_idx as usize % QUEUE_SIZE, req_desc_idx);
-            
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Updating avail ring: idx={} -> {}",
+                avail_idx,
+                avail_idx.wrapping_add(1)
+            );
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Avail ring[{}] = {}",
+                avail_idx as usize % QUEUE_SIZE,
+                req_desc_idx
+            );
+
             // Memory barrier before updating index
             core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst);
             queue.avail.idx = avail_idx.wrapping_add(1);
-            
+
             // Memory barrier after updating index
             core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst);
-            
+
             // Verify the write
-            let _ = writeln!(uart, "[VirtIO-GPU]   Avail idx after update: {}", queue.avail.idx);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Avail idx after update: {}",
+                queue.avail.idx
+            );
 
             // Notify device (write queue index to notify register)
-            let _ = writeln!(uart, "[VirtIO-GPU]   Notifying device (writing 0 to QUEUE_NOTIFY)");
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Notifying device (writing 0 to QUEUE_NOTIFY)"
+            );
             core::ptr::write_volatile((self.mmio_base + VIRTIO_MMIO_QUEUE_NOTIFY) as *mut u32, 0);
-            
+
             // Read back the notify register to ensure write completed
-            let notify_readback = core::ptr::read_volatile((self.mmio_base + VIRTIO_MMIO_QUEUE_NOTIFY) as *const u32);
-            let _ = writeln!(uart, "[VirtIO-GPU]   Notify register readback: {}", notify_readback);
+            let notify_readback =
+                core::ptr::read_volatile((self.mmio_base + VIRTIO_MMIO_QUEUE_NOTIFY) as *const u32);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Notify register readback: {}",
+                notify_readback
+            );
 
             // Wait for response (simple busy wait)
-            let _ = writeln!(uart, "[VirtIO-GPU]   Waiting for response (last_used_idx={})...", 
-                           queue.last_used_idx);
-            
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Waiting for response (last_used_idx={})...",
+                queue.last_used_idx
+            );
+
             let mut sample_count = 0;
             for i in 0..COMMAND_TIMEOUT_ITERATIONS {
                 // Memory barrier before reading used ring
                 core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst);
                 let current_used_idx = queue.used.idx;
-                
+
                 // Log used idx periodically
                 if i % 20000 == 0 && sample_count < 3 {
-                    let _ = writeln!(uart, "[VirtIO-GPU]   ... still waiting at iteration {}, used_idx={}", 
-                                   i, current_used_idx);
+                    let _ = writeln!(
+                        uart,
+                        "[VirtIO-GPU]   ... still waiting at iteration {}, used_idx={}",
+                        i, current_used_idx
+                    );
                     sample_count += 1;
                 }
-                
+
                 if current_used_idx != queue.last_used_idx {
-                    let _ = writeln!(uart, "[VirtIO-GPU]   Response received after {} iterations!", i);
-                    let _ = writeln!(uart, "[VirtIO-GPU]   Used idx: {} -> {}", 
-                                   queue.last_used_idx, current_used_idx);
-                    
+                    let _ = writeln!(
+                        uart,
+                        "[VirtIO-GPU]   Response received after {} iterations!",
+                        i
+                    );
+                    let _ = writeln!(
+                        uart,
+                        "[VirtIO-GPU]   Used idx: {} -> {}",
+                        queue.last_used_idx, current_used_idx
+                    );
+
                     // Read response type
                     let resp_type = if resp.len() >= 4 {
                         core::ptr::read_volatile(resp.as_ptr() as *const u32)
                     } else {
                         0
                     };
-                    let _ = writeln!(uart, "[VirtIO-GPU]   Response type: 0x{:04x} (OK_NODATA=0x1100)", resp_type);
-                    
+                    let _ = writeln!(
+                        uart,
+                        "[VirtIO-GPU]   Response type: 0x{:04x} (OK_NODATA=0x1100)",
+                        resp_type
+                    );
+
                     queue.last_used_idx = current_used_idx;
                     queue.next_desc = (resp_desc_idx + 1) % QUEUE_SIZE as u16;
                     return true;
                 }
             }
 
-            let _ = writeln!(uart, "[VirtIO-GPU]   ERROR: Command timed out after {} iterations!", 
-                           COMMAND_TIMEOUT_ITERATIONS);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   ERROR: Command timed out after {} iterations!",
+                COMMAND_TIMEOUT_ITERATIONS
+            );
             false
         }
     }
@@ -598,10 +747,16 @@ impl VirtioGpu {
     // Initialize display by sending GPU commands
     fn init_display(&mut self) {
         let mut uart = crate::uart::Uart::new();
-        let _ = writeln!(uart, "[VirtIO-GPU] ========================================");
+        let _ = writeln!(
+            uart,
+            "[VirtIO-GPU] ========================================"
+        );
         let _ = writeln!(uart, "[VirtIO-GPU] Starting display initialization...");
-        let _ = writeln!(uart, "[VirtIO-GPU] ========================================");
-        
+        let _ = writeln!(
+            uart,
+            "[VirtIO-GPU] ========================================"
+        );
+
         let resource_id = self.resource_id;
         let fb_addr = self.back as usize;
         let width = self.info.width as u32;
@@ -664,9 +819,12 @@ impl VirtioGpu {
                 length: self.info.size as u32,
                 padding: 0,
             };
-            
-            let _ = writeln!(uart, "[VirtIO-GPU]   Memory entry: addr=0x{:08x}, len={}", 
-                           mem_entry.addr, mem_entry.length);
+
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   Memory entry: addr=0x{:08x}, len={}",
+                mem_entry.addr, mem_entry.length
+            );
 
             core::ptr::copy_nonoverlapping(
                 &attach_cmd as *const _ as *const u8,
@@ -730,9 +888,15 @@ impl VirtioGpu {
             // 4. Initial transfer and flush to activate display
             let _ = writeln!(uart, "[VirtIO-GPU] Commands 4-5: TRANSFER + FLUSH...");
             self.flush_display();
-            let _ = writeln!(uart, "[VirtIO-GPU] ========================================");
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU] ========================================"
+            );
             let _ = writeln!(uart, "[VirtIO-GPU] Display initialization complete!");
-            let _ = writeln!(uart, "[VirtIO-GPU] ========================================");
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU] ========================================"
+            );
         }
     }
 
@@ -745,7 +909,11 @@ impl VirtioGpu {
 
         unsafe {
             // Transfer to host
-            let _ = writeln!(uart, "[VirtIO-GPU]   TRANSFER_TO_HOST_2D: {}x{}", width, height);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   TRANSFER_TO_HOST_2D: {}x{}",
+                width, height
+            );
             let transfer_cmd = GpuTransferToHost2D {
                 hdr: GpuCtrlHdr {
                     hdr_type: VIRTIO_GPU_CMD_TRANSFER_TO_HOST_2D,
@@ -782,7 +950,11 @@ impl VirtioGpu {
             }
 
             // Flush resource
-            let _ = writeln!(uart, "[VirtIO-GPU]   RESOURCE_FLUSH: resource_id={}", resource_id);
+            let _ = writeln!(
+                uart,
+                "[VirtIO-GPU]   RESOURCE_FLUSH: resource_id={}",
+                resource_id
+            );
             let flush_cmd = GpuResourceFlush {
                 hdr: GpuCtrlHdr {
                     hdr_type: VIRTIO_GPU_CMD_RESOURCE_FLUSH,
