@@ -20,6 +20,7 @@ pub mod nr {
     pub const CHMOD: usize = 17; // chmod(path, mode) -> 0 or usize::MAX
     pub const READDIR: usize = 18; // readdir(buf, len) -> n or usize::MAX
     pub const GET_FB_INFO: usize = 19; // get_fb_info(buf) -> 0 or usize::MAX
+    pub const FB_FLUSH: usize = 20; // fb_flush() -> 0 or usize::MAX
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

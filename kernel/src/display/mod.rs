@@ -37,3 +37,7 @@ pub fn register_framebuffer(fb: &'static dyn Framebuffer) {
 pub fn get_framebuffer() -> Option<&'static dyn Framebuffer> {
     unsafe { GLOBAL_FB }
 }
+
+pub fn flush_framebuffer() -> bool {
+    virtio_gpu::flush_gpu()
+}
