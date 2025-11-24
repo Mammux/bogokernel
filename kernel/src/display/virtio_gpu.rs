@@ -44,6 +44,12 @@ const VIRTIO_GPU_RESP_OK_NODATA: u32 = 0x1100;
 // Virtqueue size
 const QUEUE_SIZE: usize = 8;
 
+// Timeouts and buffer sizes
+const COMMAND_TIMEOUT_ITERATIONS: usize = 100000;
+const GPU_COMMAND_BUFFER_SIZE: usize = 512;
+const GPU_RESPONSE_BUFFER_SIZE: usize = 128;
+const PAGE_SIZE: usize = 4096;
+
 // Virtqueue descriptor
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -162,6 +168,11 @@ struct GpuCtrlResponse {
     padding: u32,
 }
 
+// Static buffers for GPU command submission
+// These are reused across multiple commands to avoid stack allocation
+static mut GPU_CMD_BUF: [u8; GPU_COMMAND_BUFFER_SIZE] = [0; GPU_COMMAND_BUFFER_SIZE];
+static mut GPU_RESP_BUF: [u8; GPU_RESPONSE_BUFFER_SIZE] = [0; GPU_RESPONSE_BUFFER_SIZE];
+
 pub struct VirtioGpu {
     info: FramebufferInfo,
     back: *mut u8,
@@ -266,11 +277,11 @@ impl VirtioGpu {
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_QUEUE_NUM) as *mut u32, QUEUE_SIZE as u32);
             
             // Set guest page size (4KB)
-            core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_GUEST_PAGE_SIZE) as *mut u32, 4096);
+            core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_GUEST_PAGE_SIZE) as *mut u32, PAGE_SIZE as u32);
             
             // Calculate queue physical address
             // For version 1, the queue PFN register expects the physical address divided by page size
-            let queue_pfn = (QUEUE_DESC.as_ptr() as usize) / 4096;
+            let queue_pfn = (QUEUE_DESC.as_ptr() as usize) / PAGE_SIZE;
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_QUEUE_PFN) as *mut u32, queue_pfn as u32);
             
             // Driver OK - device is ready
@@ -346,7 +357,7 @@ impl VirtioGpu {
             core::ptr::write_volatile((self.mmio_base + VIRTIO_MMIO_QUEUE_NOTIFY) as *mut u32, 0);
             
             // Wait for response (simple busy wait)
-            for _ in 0..100000 {
+            for _ in 0..COMMAND_TIMEOUT_ITERATIONS {
                 if queue.used.idx != queue.last_used_idx {
                     queue.last_used_idx = queue.used.idx;
                     queue.next_desc = (resp_desc_idx + 1) % QUEUE_SIZE as u16;
@@ -364,10 +375,6 @@ impl VirtioGpu {
         let fb_addr = self.back as usize;
         let width = self.info.width as u32;
         let height = self.info.height as u32;
-        
-        // Allocate static buffers for commands and responses
-        static mut CMD_BUF: [u8; 512] = [0; 512];
-        static mut RESP_BUF: [u8; 128] = [0; 128];
         
         unsafe {
             // 1. Create 2D resource
@@ -387,13 +394,13 @@ impl VirtioGpu {
             
             core::ptr::copy_nonoverlapping(
                 &create_cmd as *const _ as *const u8,
-                CMD_BUF.as_mut_ptr(),
+                GPU_CMD_BUF.as_mut_ptr(),
                 size_of::<GpuResourceCreate2D>(),
             );
             
             self.send_command(
-                &CMD_BUF[..size_of::<GpuResourceCreate2D>()],
-                &mut RESP_BUF[..size_of::<GpuCtrlResponse>()],
+                &GPU_CMD_BUF[..size_of::<GpuResourceCreate2D>()],
+                &mut GPU_RESP_BUF[..size_of::<GpuCtrlResponse>()],
             );
             
             // 2. Attach backing storage
@@ -417,18 +424,18 @@ impl VirtioGpu {
             
             core::ptr::copy_nonoverlapping(
                 &attach_cmd as *const _ as *const u8,
-                CMD_BUF.as_mut_ptr(),
+                GPU_CMD_BUF.as_mut_ptr(),
                 size_of::<GpuResourceAttachBacking>(),
             );
             core::ptr::copy_nonoverlapping(
                 &mem_entry as *const _ as *const u8,
-                CMD_BUF.as_mut_ptr().add(size_of::<GpuResourceAttachBacking>()),
+                GPU_CMD_BUF.as_mut_ptr().add(size_of::<GpuResourceAttachBacking>()),
                 size_of::<GpuMemEntry>(),
             );
             
             self.send_command(
-                &CMD_BUF[..size_of::<GpuResourceAttachBacking>() + size_of::<GpuMemEntry>()],
-                &mut RESP_BUF[..size_of::<GpuCtrlResponse>()],
+                &GPU_CMD_BUF[..size_of::<GpuResourceAttachBacking>() + size_of::<GpuMemEntry>()],
+                &mut GPU_RESP_BUF[..size_of::<GpuCtrlResponse>()],
             );
             
             // 3. Set scanout
@@ -452,13 +459,13 @@ impl VirtioGpu {
             
             core::ptr::copy_nonoverlapping(
                 &scanout_cmd as *const _ as *const u8,
-                CMD_BUF.as_mut_ptr(),
+                GPU_CMD_BUF.as_mut_ptr(),
                 size_of::<GpuSetScanout>(),
             );
             
             self.send_command(
-                &CMD_BUF[..size_of::<GpuSetScanout>()],
-                &mut RESP_BUF[..size_of::<GpuCtrlResponse>()],
+                &GPU_CMD_BUF[..size_of::<GpuSetScanout>()],
+                &mut GPU_RESP_BUF[..size_of::<GpuCtrlResponse>()],
             );
             
             // 4. Initial transfer and flush to activate display
@@ -471,9 +478,6 @@ impl VirtioGpu {
         let resource_id = self.resource_id;
         let width = self.info.width as u32;
         let height = self.info.height as u32;
-        
-        static mut CMD_BUF: [u8; 512] = [0; 512];
-        static mut RESP_BUF: [u8; 128] = [0; 128];
         
         unsafe {
             // Transfer to host
@@ -498,13 +502,13 @@ impl VirtioGpu {
             
             core::ptr::copy_nonoverlapping(
                 &transfer_cmd as *const _ as *const u8,
-                CMD_BUF.as_mut_ptr(),
+                GPU_CMD_BUF.as_mut_ptr(),
                 size_of::<GpuTransferToHost2D>(),
             );
             
             self.send_command(
-                &CMD_BUF[..size_of::<GpuTransferToHost2D>()],
-                &mut RESP_BUF[..size_of::<GpuCtrlResponse>()],
+                &GPU_CMD_BUF[..size_of::<GpuTransferToHost2D>()],
+                &mut GPU_RESP_BUF[..size_of::<GpuCtrlResponse>()],
             );
             
             // Flush resource
@@ -528,13 +532,13 @@ impl VirtioGpu {
             
             core::ptr::copy_nonoverlapping(
                 &flush_cmd as *const _ as *const u8,
-                CMD_BUF.as_mut_ptr(),
+                GPU_CMD_BUF.as_mut_ptr(),
                 size_of::<GpuResourceFlush>(),
             );
             
             self.send_command(
-                &CMD_BUF[..size_of::<GpuResourceFlush>()],
-                &mut RESP_BUF[..size_of::<GpuCtrlResponse>()],
+                &GPU_CMD_BUF[..size_of::<GpuResourceFlush>()],
+                &mut GPU_RESP_BUF[..size_of::<GpuCtrlResponse>()],
             );
         }
     }
