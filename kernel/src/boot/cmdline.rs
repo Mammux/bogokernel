@@ -1,5 +1,8 @@
 use crate::display::DisplayMode;
 
+// Global display mode configuration
+// SAFETY: This is only accessed during single-threaded kernel initialization.
+// In a multi-threaded environment, this should use AtomicU8 or similar.
 static mut DISPLAY_MODE: DisplayMode = DisplayMode::Ansi;
 
 /// Parse kernel command line arguments

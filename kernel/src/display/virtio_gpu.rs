@@ -14,15 +14,17 @@ impl VirtioGpu {
         const W: usize = 1024;
         const H: usize = 768;
         const SIZE: usize = W * H * 4;
-        // SAFETY: use a static boxed slice to simulate guest RAM backing
-        static mut BUF: [u8; 1024*768*4] = [0; 1024*768*4];
+        // SAFETY: use a static buffer to simulate guest RAM backing
+        static mut BUF: [u8; SIZE] = [0; SIZE];
         let fb_info = FramebufferInfo { width: W, height: H, stride: W * 4, phys_addr: 0, size: SIZE };
         static mut VG: Option<VirtioGpu> = None;
         unsafe {
             VG = Some(VirtioGpu { info: fb_info, back: BUF.as_mut_ptr() });
-            if let Some(v) = &VG { register_framebuffer(v); return Some(v); }
+            VG.as_ref().map(|v| {
+                register_framebuffer(v);
+                v
+            })
         }
-        None
     }
 }
 

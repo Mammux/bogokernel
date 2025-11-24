@@ -21,6 +21,9 @@ pub trait Framebuffer {
     fn present(&self);
 }
 
+// Global framebuffer registration
+// SAFETY: This is only accessed during single-threaded kernel initialization.
+// In a multi-threaded environment, this should use proper synchronization (Mutex/RwLock).
 static mut GLOBAL_FB: Option<&'static dyn Framebuffer> = None;
 
 pub fn register_framebuffer(fb: &'static dyn Framebuffer) {
