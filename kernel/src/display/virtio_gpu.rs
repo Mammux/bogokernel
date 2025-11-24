@@ -17,6 +17,7 @@ const VIRTIO_MMIO_GUEST_PAGE_SIZE: usize = 0x028;
 const VIRTIO_MMIO_QUEUE_SEL: usize = 0x030;
 const VIRTIO_MMIO_QUEUE_NUM_MAX: usize = 0x034;
 const VIRTIO_MMIO_QUEUE_NUM: usize = 0x038;
+const VIRTIO_MMIO_QUEUE_ALIGN: usize = 0x03c;
 const VIRTIO_MMIO_QUEUE_PFN: usize = 0x040;
 const VIRTIO_MMIO_QUEUE_NOTIFY: usize = 0x050;
 const VIRTIO_MMIO_STATUS: usize = 0x070;
@@ -259,20 +260,24 @@ impl VirtioGpu {
         // Allocate static framebuffer
         static mut BUF: [u8; SIZE] = [0; SIZE];
 
-        // Allocate virtqueue memory in a single contiguous block
+        // Allocate virtqueue memory in a contiguous block
         // This is required for VirtIO MMIO version 1
-        // Layout: descriptors (128 bytes) + avail (20 bytes) + padding + used (68 bytes)
-        // Total needs to fit in one page (4096 bytes) for simplicity
+        // Layout per VirtIO spec:
+        //   - Descriptor table: offset 0, size 128 bytes (16 * QUEUE_SIZE)
+        //   - Available ring: offset 128, size 20 bytes (6 + 2 * QUEUE_SIZE)
+        //   - Padding to align Used ring to page boundary
+        //   - Used ring: offset PAGE_SIZE, size 68 bytes (6 + 8 * QUEUE_SIZE)
         const DESC_SIZE: usize = size_of::<VirtqDesc>() * QUEUE_SIZE; // 128
         const AVAIL_SIZE: usize = size_of::<VirtqAvail>(); // 20
         const USED_SIZE: usize = size_of::<VirtqUsed>(); // 68
-        const PADDING_SIZE: usize = 4096 - DESC_SIZE - AVAIL_SIZE - USED_SIZE; // 3880
+        // Padding from end of avail to start of next page boundary
+        const PADDING_SIZE: usize = PAGE_SIZE - DESC_SIZE - AVAIL_SIZE;
         
         #[repr(C, align(4096))]
         struct VirtqueueMemory {
             desc: [VirtqDesc; QUEUE_SIZE],
             avail: VirtqAvail,
-            _padding: [u8; PADDING_SIZE], // Align used ring to page boundary
+            _padding: [u8; PADDING_SIZE], // Align used ring to PAGE_SIZE boundary
             used: VirtqUsed,
         }
         
@@ -359,6 +364,14 @@ impl VirtioGpu {
             let _ = writeln!(uart, "[VirtIO-GPU]   Setting guest page size to {} bytes", PAGE_SIZE);
             core::ptr::write_volatile(
                 (mmio_base + VIRTIO_MMIO_GUEST_PAGE_SIZE) as *mut u32,
+                PAGE_SIZE as u32,
+            );
+
+            // Set queue alignment (must be set before QUEUE_PFN for VirtIO v1)
+            // The alignment value is the page size (4096 bytes = 0x1000)
+            let _ = writeln!(uart, "[VirtIO-GPU]   Setting queue alignment to {} bytes", PAGE_SIZE);
+            core::ptr::write_volatile(
+                (mmio_base + VIRTIO_MMIO_QUEUE_ALIGN) as *mut u32,
                 PAGE_SIZE as u32,
             );
 
