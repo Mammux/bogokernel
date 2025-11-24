@@ -259,22 +259,36 @@ impl VirtioGpu {
         // Allocate static framebuffer
         static mut BUF: [u8; SIZE] = [0; SIZE];
 
-        // Allocate virtqueue memory (statically for simplicity)
-        static mut QUEUE_DESC: [VirtqDesc; QUEUE_SIZE] = [VirtqDesc {
-            addr: 0,
-            len: 0,
-            flags: 0,
-            next: 0,
-        }; QUEUE_SIZE];
-        static mut QUEUE_AVAIL: VirtqAvail = VirtqAvail {
-            flags: 0,
-            idx: 0,
-            ring: [0; QUEUE_SIZE],
-        };
-        static mut QUEUE_USED: VirtqUsed = VirtqUsed {
-            flags: 0,
-            idx: 0,
-            ring: [VirtqUsedElem { id: 0, len: 0 }; QUEUE_SIZE],
+        // Allocate virtqueue memory in a single contiguous block
+        // This is required for VirtIO MMIO version 1
+        // Layout: descriptors (128 bytes) + avail (20 bytes) + padding + used (68 bytes)
+        // Total needs to fit in one page (4096 bytes) for simplicity
+        #[repr(C, align(4096))]
+        struct VirtqueueMemory {
+            desc: [VirtqDesc; QUEUE_SIZE],
+            avail: VirtqAvail,
+            _padding: [u8; 4096 - 128 - 20 - 68], // Align used ring to page boundary
+            used: VirtqUsed,
+        }
+        
+        static mut QUEUE_MEM: VirtqueueMemory = VirtqueueMemory {
+            desc: [VirtqDesc {
+                addr: 0,
+                len: 0,
+                flags: 0,
+                next: 0,
+            }; QUEUE_SIZE],
+            avail: VirtqAvail {
+                flags: 0,
+                idx: 0,
+                ring: [0; QUEUE_SIZE],
+            },
+            _padding: [0; 4096 - 128 - 20 - 68],
+            used: VirtqUsed {
+                flags: 0,
+                idx: 0,
+                ring: [VirtqUsedElem { id: 0, len: 0 }; QUEUE_SIZE],
+            },
         };
 
         unsafe {
@@ -345,9 +359,27 @@ impl VirtioGpu {
 
             // Calculate queue physical address
             // For version 1, the queue PFN register expects the physical address divided by page size
-            let queue_pfn = (QUEUE_DESC.as_ptr() as usize) / PAGE_SIZE;
-            let _ = writeln!(uart, "[VirtIO-GPU]   Queue descriptor addr: 0x{:08x}", QUEUE_DESC.as_ptr() as usize);
+            let queue_pfn = (&QUEUE_MEM as *const _ as usize) / PAGE_SIZE;
+            let _ = writeln!(uart, "[VirtIO-GPU]   Queue memory base: 0x{:08x}", &QUEUE_MEM as *const _ as usize);
+            let _ = writeln!(uart, "[VirtIO-GPU]   Queue descriptor addr: 0x{:08x}", QUEUE_MEM.desc.as_ptr() as usize);
+            let _ = writeln!(uart, "[VirtIO-GPU]   Queue avail addr: 0x{:08x}", &QUEUE_MEM.avail as *const _ as usize);
+            let _ = writeln!(uart, "[VirtIO-GPU]   Queue used addr: 0x{:08x}", &QUEUE_MEM.used as *const _ as usize);
             let _ = writeln!(uart, "[VirtIO-GPU]   Queue PFN: 0x{:08x}", queue_pfn);
+            
+            // Check if memory layout is correct for VirtIO v1
+            let desc_size = core::mem::size_of::<[VirtqDesc; QUEUE_SIZE]>();
+            let avail_size = core::mem::size_of::<VirtqAvail>();
+            let used_size = core::mem::size_of::<VirtqUsed>();
+            let _ = writeln!(uart, "[VirtIO-GPU]   Sizes: desc={}, avail={}, used={}", 
+                           desc_size, avail_size, used_size);
+            
+            // Verify contiguous layout
+            let desc_offset = &QUEUE_MEM.desc as *const _ as usize - &QUEUE_MEM as *const _ as usize;
+            let avail_offset = &QUEUE_MEM.avail as *const _ as usize - &QUEUE_MEM as *const _ as usize;
+            let used_offset = &QUEUE_MEM.used as *const _ as usize - &QUEUE_MEM as *const _ as usize;
+            let _ = writeln!(uart, "[VirtIO-GPU]   Offsets: desc={}, avail={}, used={}", 
+                           desc_offset, avail_offset, used_offset);
+            
             core::ptr::write_volatile(
                 (mmio_base + VIRTIO_MMIO_QUEUE_PFN) as *mut u32,
                 queue_pfn as u32,
@@ -373,9 +405,9 @@ impl VirtioGpu {
                            fb_info.phys_addr, fb_info.size);
 
             let queue = Virtqueue {
-                desc: &mut QUEUE_DESC,
-                avail: &mut QUEUE_AVAIL,
-                used: &mut QUEUE_USED,
+                desc: &mut QUEUE_MEM.desc,
+                avail: &mut QUEUE_MEM.avail,
+                used: &mut QUEUE_MEM.used,
                 next_desc: 0,
                 last_used_idx: 0,
             };
@@ -451,7 +483,13 @@ impl VirtioGpu {
             queue.avail.ring[avail_idx as usize % QUEUE_SIZE] = req_desc_idx;
             let _ = writeln!(uart, "[VirtIO-GPU]   Updating avail ring: idx={} -> {}", 
                            avail_idx, avail_idx.wrapping_add(1));
+            
+            // Memory barrier before updating index
+            core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst);
             queue.avail.idx = avail_idx.wrapping_add(1);
+            
+            // Memory barrier after updating index
+            core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst);
 
             // Notify device (write queue index to notify register)
             let _ = writeln!(uart, "[VirtIO-GPU]   Notifying device (writing 0 to QUEUE_NOTIFY)");
@@ -460,8 +498,20 @@ impl VirtioGpu {
             // Wait for response (simple busy wait)
             let _ = writeln!(uart, "[VirtIO-GPU]   Waiting for response (last_used_idx={})...", 
                            queue.last_used_idx);
+            
+            let mut sample_count = 0;
             for i in 0..COMMAND_TIMEOUT_ITERATIONS {
+                // Memory barrier before reading used ring
+                core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst);
                 let current_used_idx = queue.used.idx;
+                
+                // Log used idx periodically
+                if i % 20000 == 0 && sample_count < 3 {
+                    let _ = writeln!(uart, "[VirtIO-GPU]   ... still waiting at iteration {}, used_idx={}", 
+                                   i, current_used_idx);
+                    sample_count += 1;
+                }
+                
                 if current_used_idx != queue.last_used_idx {
                     let _ = writeln!(uart, "[VirtIO-GPU]   Response received after {} iterations!", i);
                     let _ = writeln!(uart, "[VirtIO-GPU]   Used idx: {} -> {}", 
