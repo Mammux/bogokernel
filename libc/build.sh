@@ -7,7 +7,13 @@ CC=riscv64-linux-gnu-gcc
 AR=riscv64-linux-gnu-ar
 CFLAGS="-march=rv64gc -mabi=lp64d -ffreestanding -nostdlib -Iinclude"
 
-echo "Building libc..."
+# Check for GPU feature flag
+if [ "$1" = "--gpu" ] || [ "$GPU" = "1" ]; then
+    echo "Building libc with GPU support..."
+    CFLAGS="$CFLAGS -DGPU_ENABLED"
+else
+    echo "Building libc (ANSI mode)..."
+fi
 
 # Compile source files
 $CC $CFLAGS -c src/crt0.s -o src/crt0.o
