@@ -484,23 +484,28 @@ static void _gpu_draw_char(int screen_x, int screen_y, unsigned char c,
     int pixel_y = screen_y * FONT_HEIGHT;
     
     unsigned long fb_width = _fb_info.width;
+    unsigned long fb_height = _fb_info.height;
+    unsigned long fb_size = fb_width * fb_height;
     
     for (int row = 0; row < FONT_HEIGHT; row++) {
         unsigned char bitmap_row = bitmap[row];
         int y = pixel_y + row;
         
-        if ((unsigned long)y >= _fb_info.height) break;
+        if ((unsigned long)y >= fb_height) break;
         
         for (int col = 0; col < FONT_WIDTH; col++) {
             int x = pixel_x + col;
             
             if ((unsigned long)x >= fb_width) break;
             
+            /* Calculate offset with bounds check */
+            unsigned long offset = (unsigned long)y * fb_width + (unsigned long)x;
+            if (offset >= fb_size) continue;  /* Safety bounds check */
+            
             /* Check if pixel is set (bit 0 is leftmost in our rendering) */
             bool pixel_set = (bitmap_row & (1 << col)) != 0;
             unsigned int color = pixel_set ? fg : bg;
             
-            unsigned long offset = y * fb_width + x;
             _framebuffer[offset] = color;
         }
     }
@@ -522,10 +527,12 @@ static bool _gpu_init(void) {
         return false;
     }
     
-    _framebuffer = (unsigned int *)_fb_info.addr;
-    if (!_framebuffer) {
+    /* Validate framebuffer address - must be non-zero and reasonably sized */
+    if (_fb_info.addr == 0 || _fb_info.width == 0 || _fb_info.height == 0) {
         return false;
     }
+    
+    _framebuffer = (unsigned int *)_fb_info.addr;
     
     _gpu_mode = true;
     _gpu_clear_screen();

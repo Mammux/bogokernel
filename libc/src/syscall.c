@@ -82,13 +82,8 @@ long syscall3(long nr, long a0, long a1, long a2) {
     return ret;
 }
 
-/* Framebuffer info structure (must match kernel side) */
-struct fb_info {
-    unsigned long width;
-    unsigned long height;
-    unsigned long stride;
-    unsigned long addr;
-};
+/* Include gpu.h for struct fb_info definition */
+#include <gpu.h>
 
 /* Get framebuffer information - returns 0 on success, -1 on failure */
 int get_fb_info(struct fb_info *info) {
