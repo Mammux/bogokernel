@@ -13,11 +13,11 @@ mod trap_entry;
 mod uart;
 mod user;
 // mod user_blob;
-mod elf;
-mod stack;
-mod display;
 mod boot;
 mod console;
+mod display;
+mod elf;
+mod stack;
 
 use alloc::boxed::Box;
 use alloc::vec::Vec;
@@ -81,8 +81,8 @@ extern "C" fn rust_start() -> ! {
     trap::init(); // set stvec + enable SIE/STIE
     let _ = writeln!(uart, "traps enabled");
 
-    timer::init(); // arm first tick
-    let _ = writeln!(uart, "timers initialized");
+    // timer::init(); // arm first tick
+    // let _ = writeln!(uart, "timers initialized");
 
     unsafe {
         sv39::enable_sv39();
@@ -113,10 +113,10 @@ extern "C" fn rust_start() -> ! {
     // For testing, support compile-time display mode selection via feature flag
     // In a real implementation, this would come from bootloader/device tree /chosen/bootargs
     #[cfg(not(feature = "gpu"))]
-    let cmdline = "";  // Empty by default, meaning display=ansi
+    let cmdline = ""; // Empty by default, meaning display=ansi
     #[cfg(feature = "gpu")]
-    let cmdline = "display=gpu";  // GPU mode for testing
-    
+    let cmdline = "display=gpu"; // GPU mode for testing
+
     boot::cmdline::parse_cmdline(cmdline);
     console::init_console();
 
@@ -143,7 +143,7 @@ extern "C" fn rust_start() -> ! {
     // --- Load the shell ---
     // Now get shell from writable filesystem
     let shell_data = fs::get_file_data("shell.elf").expect("shell.elf not found in writable fs");
-    
+
     // Example argv/envp
     let argv = ["shell"];
     let envp = ["PATH=/"];
@@ -151,7 +151,13 @@ extern "C" fn rust_start() -> ! {
     let user_stack_top_va: usize = 0x4000_8000;
     let user_stack_bytes: usize = 16 * 1024;
 
-    match elf::load_user_elf(&shell_data, user_stack_top_va, user_stack_bytes, &argv, &envp) {
+    match elf::load_user_elf(
+        &shell_data,
+        user_stack_top_va,
+        user_stack_bytes,
+        &argv,
+        &envp,
+    ) {
         Ok(img) => {
             use core::fmt::Write;
             let mut uart = crate::uart::Uart::new();
@@ -161,7 +167,9 @@ extern "C" fn rust_start() -> ! {
                 img.entry_va, img.user_sp
             );
 
-            unsafe { crate::trap::USER_BRK = img.brk; }
+            unsafe {
+                crate::trap::USER_BRK = img.brk;
+            }
 
             enter_user_with(
                 img.entry_va,
