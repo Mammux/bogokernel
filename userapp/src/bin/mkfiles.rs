@@ -2,7 +2,7 @@
 #![no_main]
 
 use core::ffi::CStr;
-use usys::{creat, IoWrite};
+use usys::creat;
 
 #[panic_handler]
 fn on_panic(_info: &core::panic::PanicInfo) -> ! {
