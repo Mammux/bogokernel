@@ -8,16 +8,6 @@ name = "cat"
 test = false
 bench = false
 
-[profile.dev]
-panic = "abort"
-
-[profile.release]
-panic = "abort"
-lto = "off"
-opt-level = "s"
-codegen-units = 1
-strip = "none"
-
 [package.metadata.cargo-xbuild]
 target = "riscv64gc-unknown-none-elf"
 

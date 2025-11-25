@@ -20,6 +20,7 @@ pub struct FramebufferInfo {
 pub trait Framebuffer {
     fn info(&self) -> &FramebufferInfo;
     fn back_buffer(&self) -> *mut u8; // unsafe pointer to back buffer
+    #[allow(dead_code)]
     fn present(&self);
 }
 

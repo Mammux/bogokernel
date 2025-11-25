@@ -4,13 +4,13 @@ use core::mem::size_of;
 
 // VirtIO GPU device constants
 const VIRTIO_GPU_DEVICE_ID: u32 = 16; // VirtIO GPU device type
-const VIRTIO_VENDOR_ID: u32 = 0x1AF4;
+const _VIRTIO_VENDOR_ID: u32 = 0x1AF4;
 
 // VirtIO MMIO register offsets (version 1)
 const VIRTIO_MMIO_MAGIC_VALUE: usize = 0x000;
 const VIRTIO_MMIO_VERSION: usize = 0x004;
 const VIRTIO_MMIO_DEVICE_ID: usize = 0x008;
-const VIRTIO_MMIO_VENDOR_ID: usize = 0x00c;
+const _VIRTIO_MMIO_VENDOR_ID: usize = 0x00c;
 const VIRTIO_MMIO_DEVICE_FEATURES: usize = 0x010;
 const VIRTIO_MMIO_DRIVER_FEATURES: usize = 0x020;
 const VIRTIO_MMIO_GUEST_PAGE_SIZE: usize = 0x028;
@@ -33,7 +33,7 @@ const VIRTQ_DESC_F_NEXT: u16 = 1;
 const VIRTQ_DESC_F_WRITE: u16 = 2;
 
 // VirtIO-GPU specific constants
-const VIRTIO_GPU_CMD_GET_DISPLAY_INFO: u32 = 0x0100;
+const _VIRTIO_GPU_CMD_GET_DISPLAY_INFO: u32 = 0x0100;
 const VIRTIO_GPU_CMD_RESOURCE_CREATE_2D: u32 = 0x0101;
 const VIRTIO_GPU_CMD_RESOURCE_ATTACH_BACKING: u32 = 0x0106;
 const VIRTIO_GPU_CMD_SET_SCANOUT: u32 = 0x0103;
@@ -41,7 +41,7 @@ const VIRTIO_GPU_CMD_TRANSFER_TO_HOST_2D: u32 = 0x0105;
 const VIRTIO_GPU_CMD_RESOURCE_FLUSH: u32 = 0x0104;
 
 const VIRTIO_GPU_FORMAT_B8G8R8X8_UNORM: u32 = 2;
-const VIRTIO_GPU_RESP_OK_NODATA: u32 = 0x1100;
+const _VIRTIO_GPU_RESP_OK_NODATA: u32 = 0x1100;
 
 // Virtqueue size
 const QUEUE_SIZE: usize = 8;
@@ -183,6 +183,7 @@ static mut GLOBAL_GPU: Option<VirtioGpu> = None;
 
 /// Flush framebuffer changes to the GPU display
 /// Returns true if successful, false if no GPU or flush failed
+#[allow(static_mut_refs)]
 pub fn flush_gpu() -> bool {
     unsafe {
         if let Some(ref mut gpu) = GLOBAL_GPU {
@@ -279,6 +280,7 @@ impl VirtioGpu {
         None
     }
 
+    #[allow(static_mut_refs)]
     fn init_device(mmio_base: usize) -> Option<&'static Self> {
         let mut uart = crate::uart::Uart::new();
         let _ = writeln!(
@@ -309,7 +311,7 @@ impl VirtioGpu {
         //   - Used ring: offset PAGE_SIZE, size 68 bytes (6 + 8 * QUEUE_SIZE)
         const DESC_SIZE: usize = size_of::<VirtqDesc>() * QUEUE_SIZE; // 128
         const AVAIL_SIZE: usize = size_of::<VirtqAvail>(); // 20
-        const USED_SIZE: usize = size_of::<VirtqUsed>(); // 68
+        const _USED_SIZE: usize = size_of::<VirtqUsed>(); // 68
                                                          // Padding from end of avail to start of next page boundary
         const PADDING_SIZE: usize = PAGE_SIZE - DESC_SIZE - AVAIL_SIZE;
 
@@ -452,26 +454,26 @@ impl VirtioGpu {
 
             // Calculate queue physical address
             // For version 1, the queue PFN register expects the physical address divided by page size
-            let queue_pfn = (&QUEUE_MEM as *const _ as usize) / PAGE_SIZE;
+            let queue_pfn = (&raw const QUEUE_MEM as usize) / PAGE_SIZE;
             let _ = writeln!(
                 uart,
                 "[VirtIO-GPU]   Queue memory base: 0x{:08x}",
-                &QUEUE_MEM as *const _ as usize
+                &raw const QUEUE_MEM as usize
             );
             let _ = writeln!(
                 uart,
                 "[VirtIO-GPU]   Queue descriptor addr: 0x{:08x}",
-                QUEUE_MEM.desc.as_ptr() as usize
+                (&raw const QUEUE_MEM.desc) as usize
             );
             let _ = writeln!(
                 uart,
                 "[VirtIO-GPU]   Queue avail addr: 0x{:08x}",
-                &QUEUE_MEM.avail as *const _ as usize
+                &raw const QUEUE_MEM.avail as usize
             );
             let _ = writeln!(
                 uart,
                 "[VirtIO-GPU]   Queue used addr: 0x{:08x}",
-                &QUEUE_MEM.used as *const _ as usize
+                &raw const QUEUE_MEM.used as usize
             );
             let _ = writeln!(uart, "[VirtIO-GPU]   Queue PFN: 0x{:08x}", queue_pfn);
 
@@ -487,11 +489,11 @@ impl VirtioGpu {
 
             // Verify contiguous layout
             let desc_offset =
-                &QUEUE_MEM.desc as *const _ as usize - &QUEUE_MEM as *const _ as usize;
+                &raw const QUEUE_MEM.desc as usize - &raw const QUEUE_MEM as usize;
             let avail_offset =
-                &QUEUE_MEM.avail as *const _ as usize - &QUEUE_MEM as *const _ as usize;
+                &raw const QUEUE_MEM.avail as usize - &raw const QUEUE_MEM as usize;
             let used_offset =
-                &QUEUE_MEM.used as *const _ as usize - &QUEUE_MEM as *const _ as usize;
+                &raw const QUEUE_MEM.used as usize - &raw const QUEUE_MEM as usize;
             let _ = writeln!(
                 uart,
                 "[VirtIO-GPU]   Offsets: desc={}, avail={}, used={}",
@@ -745,6 +747,7 @@ impl VirtioGpu {
     }
 
     // Initialize display by sending GPU commands
+    #[allow(static_mut_refs)]
     fn init_display(&mut self) {
         let mut uart = crate::uart::Uart::new();
         let _ = writeln!(
@@ -901,6 +904,7 @@ impl VirtioGpu {
     }
 
     // Flush framebuffer to display
+    #[allow(static_mut_refs)]
     fn flush_display(&mut self) {
         let mut uart = crate::uart::Uart::new();
         let resource_id = self.resource_id;

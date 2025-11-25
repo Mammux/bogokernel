@@ -10,6 +10,7 @@ pub static TICKS: AtomicU64 = AtomicU64::new(0);
 // 10 MHz. We use 100_000 cycles ≈ 10ms. Adjust if you want faster/slower.
 const TICK_INTERVAL: u64 = 100_000;
 
+#[allow(dead_code)]
 pub fn init() {
     // Arm first tick
     // let now: u64 = time::read().try_into().unwrap(); // allowed in S-mode on QEMU virt (OpenSBI delegates time)
@@ -21,7 +22,7 @@ pub fn on_timer() {
     let now: u64 = time::read().try_into().unwrap();
     sbi::set_timer(now + TICK_INTERVAL);
 
-    let t = TICKS.fetch_add(1, Ordering::Relaxed) + 1;
+    let _t = TICKS.fetch_add(1, Ordering::Relaxed) + 1;
 
     // light logging every 50 ticks to avoid spamming
     /* if t.is_multiple_of(50) {
