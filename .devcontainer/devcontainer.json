@@ -1,0 +1,18 @@
+{
+    "name": "BogoKernel Development",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/devcontainers/features/rust:1": {
+            "version": "nightly",
+            "targets": "riscv64gc-unknown-none-elf"
+        }
+    },
+    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y gcc-riscv64-linux-gnu qemu-system-riscv64",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rust-lang.rust-analyzer"
+            ]
+        }
+    }
+}
