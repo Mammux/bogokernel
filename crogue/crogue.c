@@ -1,3 +1,4 @@
+#include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,7 +49,7 @@ int random_int(int max) {
 }
 
 void clear_screen() {
-    printf("\033[2J\033[H");
+    clear();
 }
 
 void init_game(GameState *game) {
@@ -143,23 +144,23 @@ void render(GameState *game) {
                 }
             }
             
-            putchar(ch);
+            addch(ch);
         }
-        putchar('\n');
+        addch('\n');
     }
     
     // Draw stats
-    printf("\nHP: %d/%d  Attack: %d  Enemies: %d\n", 
+    printw("\nHP: %d/%d  Attack: %d  Enemies: %d\n", 
            game->player.hp, game->player.max_hp, game->player.attack,
            game->num_enemies);
-    printf("%s\n", game->message);
-    printf("\n[W/A/S/D] Move  [Q] Quit\n");
+    printw("%s\n", game->message);
+    printw("\n[W/A/S/D] Move  [Q] Quit\n");
+    
+    refresh();
 }
 
 char read_input() {
-    char c;
-    read(0, &c, 1);
-    return c;
+    return (char)getch();
 }
 
 void combat(GameState *game, Enemy *enemy) {
@@ -255,30 +256,37 @@ void process_input(GameState *game, char cmd) {
 
 void show_game_over(GameState *game) {
     clear_screen();
-    printf("\n");
-    printf("  +==============================+\n");
-    printf("  |       GAME OVER              |\n");
-    printf("  +==============================+\n");
-    printf("\n");
+    printw("\n");
+    printw("  +==============================+\n");
+    printw("  |       GAME OVER              |\n");
+    printw("  +==============================+\n");
+    printw("\n");
     
     if (game->won) {
-        printf("  *** VICTORY! ***\n");
-        printf("  You escaped the dungeon!\n");
+        printw("  *** VICTORY! ***\n");
+        printw("  You escaped the dungeon!\n");
     } else if (game->player.hp <= 0) {
-        printf("  *** DEFEAT ***\n");
-        printf("  You were slain in the dungeon.\n");
+        printw("  *** DEFEAT ***\n");
+        printw("  You were slain in the dungeon.\n");
     } else {
-        printf("  Thanks for playing!\n");
+        printw("  Thanks for playing!\n");
     }
     
-    printf("\n  Final Stats:\n");
-    printf("  HP: %d/%d\n", game->player.hp, game->player.max_hp);
-    printf("  Enemies Defeated: %d\n", MAX_ENEMIES - game->num_enemies);
-    printf("\n");
+    printw("\n  Final Stats:\n");
+    printw("  HP: %d/%d\n", game->player.hp, game->player.max_hp);
+    printw("  Enemies Defeated: %d\n", MAX_ENEMIES - game->num_enemies);
+    printw("\n");
+    
+    refresh();
 }
 
 int main(int argc, char **argv, char **envp) {
     GameState game;
+    
+    // Initialize curses
+    initscr();
+    cbreak();
+    noecho();
     
     // Use time-based seed if available
     seed = 12345;
@@ -293,6 +301,9 @@ int main(int argc, char **argv, char **envp) {
     
     render(&game);
     show_game_over(&game);
+    
+    // Clean up curses
+    endwin();
     
     return 0;
 }
