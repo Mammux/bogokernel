@@ -21,6 +21,9 @@ cd ..
 cd c_hello
 call build.bat
 cd ..
+cd curses_test
+call build.bat
+cd ..
 
 rem Copy binaries
 copy target\riscv64gc-unknown-none-elf\release\shell kernel\shell.elf
@@ -28,6 +31,7 @@ copy target\riscv64gc-unknown-none-elf\release\rogue kernel\rogue.elf
 copy target\riscv64gc-unknown-none-elf\release\fstest kernel\fstest.elf
 copy target\riscv64gc-unknown-none-elf\release\mkfiles kernel\mkfiles.elf
 copy target\riscv64gc-unknown-none-elf\release\gputest kernel\gputest.elf
+copy target\riscv64gc-unknown-none-elf\release\curses_test kernel\curses_test.elf
 
 rem Build C App (if compiler exists, otherwise assume hello.elf exists or skip)
 if exist c_hello\hello.elf copy c_hello\hello.elf kernel\hello.elf
