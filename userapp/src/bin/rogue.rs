@@ -1,7 +1,36 @@
 #![no_std]
 #![no_main]
 
-use usys::{cstr, println, print, IoRead};
+use usys::{cstr, println, print, IoRead, FbInfo};
+
+/// Clear screen by filling framebuffer with black pixels if GPU mode is available,
+/// otherwise use ANSI escape codes.
+fn clear_screen() {
+    let mut info = FbInfo {
+        width: 0,
+        height: 0,
+        stride: 0,
+        addr: 0,
+    };
+    
+    if usys::get_fb_info(&mut info).is_ok() && info.addr != 0 && info.width > 0 && info.height > 0 {
+        // GPU mode: clear framebuffer directly by filling with black pixels
+        let fb = info.addr as *mut u32;
+        let total_pixels = info.width * info.height;
+        
+        unsafe {
+            for i in 0..total_pixels {
+                *fb.add(i) = 0x00000000; // Black
+            }
+        }
+        
+        // Flush the framebuffer to display
+        let _ = usys::fb_flush();
+    } else {
+        // ANSI mode: use escape codes
+        print!("\x1b[2J\x1b[H");
+    }
+}
 
 #[no_mangle]
 pub extern "C" fn _start(_argc: usize, _argv: *const *const u8, _envp: *const *const u8) -> ! {
@@ -68,8 +97,8 @@ fn main() {
 
     // Game Loop
     loop {
-        // ANSI Clear Screen and Home
-        print!("\x1b[2J\x1b[H");
+        // Clear screen (works with both ANSI and GPU framebuffer)
+        clear_screen();
         
         // Draw Map
         for (y, line) in map_str.lines().enumerate() {
