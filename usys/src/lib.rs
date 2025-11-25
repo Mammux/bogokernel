@@ -4,6 +4,9 @@ use core::ffi::CStr;
 use core::fmt::{self, Write};
 use uapi::{is_err_sentinel, nr, SysErr, SysResult};
 
+// Re-export LogLevel for user applications
+pub use uapi::LogLevel;
+
 #[repr(transparent)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Fd(pub i32);
@@ -303,6 +306,65 @@ macro_rules! eprintln {
     () => { $crate::eprint!("\n") };
     ($fmt:literal $(, $($arg:tt)+)?) => {{
         $crate::eprint!(concat!($fmt, "\n") $(, $($arg)+)?);
+    }}
+}
+
+/* ---------- debug/logging macros ---------- */
+
+/// Debug output macros that always write to stderr (serial port).
+/// These are useful for debugging when GPU mode is enabled,
+/// since stderr always goes to serial regardless of display mode.
+///
+/// Log levels follow log4j convention:
+/// - trace!: Fine-grained debugging information
+/// - debug!: Debugging information
+/// - info!: Informational messages (note: not to be confused with println!)
+/// - warn!: Warning messages
+/// - error!: Error messages
+
+/// Write a trace-level debug message to stderr (serial port).
+#[macro_export]
+macro_rules! trace {
+    ($($arg:tt)*) => {{
+        $crate::eprint!("[TRACE] ");
+        $crate::eprintln!($($arg)*);
+    }}
+}
+
+/// Write a debug-level message to stderr (serial port).
+#[macro_export]
+macro_rules! debug {
+    ($($arg:tt)*) => {{
+        $crate::eprint!("[DEBUG] ");
+        $crate::eprintln!($($arg)*);
+    }}
+}
+
+/// Write an info-level message to stderr (serial port).
+/// Note: This goes to serial for debugging, not to stdout.
+#[macro_export]
+macro_rules! info {
+    ($($arg:tt)*) => {{
+        $crate::eprint!("[INFO]  ");
+        $crate::eprintln!($($arg)*);
+    }}
+}
+
+/// Write a warning message to stderr (serial port).
+#[macro_export]
+macro_rules! warn {
+    ($($arg:tt)*) => {{
+        $crate::eprint!("[WARN]  ");
+        $crate::eprintln!($($arg)*);
+    }}
+}
+
+/// Write an error message to stderr (serial port).
+#[macro_export]
+macro_rules! error {
+    ($($arg:tt)*) => {{
+        $crate::eprint!("[ERROR] ");
+        $crate::eprintln!($($arg)*);
     }}
 }
 

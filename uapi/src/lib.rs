@@ -23,6 +23,22 @@ pub mod nr {
     pub const FB_FLUSH: usize = 20; // fb_flush() -> 0 or usize::MAX
 }
 
+/// Log levels similar to log4j, ordered from least to most severe.
+/// - TRACE: Fine-grained debugging information
+/// - DEBUG: Debugging information  
+/// - INFO: Informational messages
+/// - WARN: Warning messages
+/// - ERROR: Error messages
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[repr(u8)]
+pub enum LogLevel {
+    Trace = 0,
+    Debug = 1,
+    Info = 2,
+    Warn = 3,
+    Error = 4,
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum SysErr {
     Fail,
