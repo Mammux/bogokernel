@@ -8,14 +8,14 @@
 #define LINES 24
 #define COLS 80
 
-/* Character attributes - stored in higher bits to avoid conflicting with character value */
-#define A_NORMAL    0x00000000UL
-#define A_STANDOUT  0x00010000UL
-#define A_UNDERLINE 0x00020000UL
-#define A_REVERSE   0x00040000UL
-#define A_BLINK     0x00080000UL
-#define A_BOLD      0x00100000UL
-#define A_CHARTEXT  0x000000FFUL
+/* Character attributes */
+#define A_NORMAL 0x00
+#define A_STANDOUT 0x01
+#define A_UNDERLINE 0x02
+#define A_REVERSE 0x04
+#define A_BLINK 0x08
+#define A_BOLD 0x10
+#define A_CHARTEXT 0xFF
 
 /* ACS (Alternative Character Set) for line drawing */
 #define ACS_ULCORNER '+' /* upper left corner */
