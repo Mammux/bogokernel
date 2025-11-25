@@ -209,3 +209,31 @@ pub fn get_char_bitmap(c: u8) -> Option<&'static [u8; 8]> {
 
 pub const FONT_WIDTH: usize = 8;
 pub const FONT_HEIGHT: usize = 8;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_char_bitmap() {
+        // Test space (ASCII 32)
+        let space = get_char_bitmap(b' ');
+        assert!(space.is_some());
+        assert_eq!(space.unwrap(), &[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+
+        // Test exclamation mark (ASCII 33)
+        let exclaim = get_char_bitmap(b'!');
+        assert!(exclaim.is_some());
+        assert_eq!(exclaim.unwrap(), &[0x18, 0x3C, 0x3C, 0x18, 0x18, 0x00, 0x18, 0x00]);
+
+        // Test out of range
+        assert!(get_char_bitmap(0).is_none());
+        assert!(get_char_bitmap(127).is_none());
+    }
+
+    #[test]
+    fn test_font_dimensions() {
+        assert_eq!(FONT_WIDTH, 8);
+        assert_eq!(FONT_HEIGHT, 8);
+    }
+}
