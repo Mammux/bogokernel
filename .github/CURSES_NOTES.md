@@ -5,12 +5,29 @@ This document describes the curses/ncurses implementation in BogoKernel for deve
 ## Location
 
 - **Header**: `libc/include/curses.h`
+- **GPU Header**: `libc/include/gpu.h` (framebuffer syscall interface)
 - **Implementation**: `libc/src/curses.c`
 - **Build**: Part of `libc/libc.a`
 
 ## Architecture
 
 The curses implementation uses a **screen buffering** approach with dirty flag tracking for efficient terminal updates.
+
+### Display Modes
+
+The library supports two display modes:
+
+1. **ANSI Mode** (default): Uses ANSI escape sequences for cursor positioning and text attributes. Output goes through stdout/printf.
+
+2. **GPU Mode** (compile with `-DGPU_ENABLED`): Renders characters directly to the framebuffer using 8x8 bitmap fonts. Uses `get_fb_info()` and `fb_flush()` syscalls.
+
+To build with GPU support:
+```bash
+cd libc
+bash build.sh --gpu
+# OR
+GPU=1 bash build.sh
+```
 
 ### Key Data Structures
 
@@ -301,3 +318,78 @@ Call before/after key operations to visualize dirty flag state.
 - See `rogue/things.c` for `add_line()` function that displays inventory
 - See main `README.md` for overall project documentation
 - See `BUILD_GUIDE.md` for build instructions
+
+## GPU Mode Details
+
+### Building with GPU Support
+
+```bash
+# Method 1: Command line flag
+cd libc && bash build.sh --gpu
+
+# Method 2: Environment variable
+GPU=1 bash build.sh
+```
+
+### GPU Mode Architecture
+
+When `GPU_ENABLED` is defined at compile time, the curses library includes:
+
+1. **Font Data**: Two embedded 8x8 bitmap fonts (normal and bold) for all printable ASCII characters (32-126)
+
+2. **Framebuffer Interface**: Uses syscalls to get framebuffer information and flush updates:
+   - `get_fb_info(&fb_info)` - Gets framebuffer dimensions and memory address
+   - `fb_flush()` - Flushes framebuffer changes to the GPU
+
+3. **Direct Rendering**: Characters are rendered pixel-by-pixel directly to the framebuffer memory
+
+### GPU Mode Initialization
+
+```c
+// In initscr(), GPU mode is attempted first:
+#ifdef GPU_ENABLED
+if (_gpu_init()) {
+    // GPU mode active
+    return stdscr;
+}
+// Falls back to ANSI mode if GPU unavailable
+#endif
+```
+
+### Font Rendering
+
+- **Normal text**: Uses 8x8 bitmap font
+- **Bold text (A_BOLD)**: Uses separate bold font with thicker strokes
+- **Reverse video (A_REVERSE/A_STANDOUT)**: Swaps foreground and background colors
+- **Colors**: White text on black background (or inverted for reverse)
+
+### GPU Mode Syscalls
+
+The following syscalls must be available in the kernel:
+
+| Syscall | Number | Description |
+|---------|--------|-------------|
+| GET_FB_INFO | 19 | Returns framebuffer width, height, stride, and address |
+| FB_FLUSH | 20 | Flushes framebuffer to GPU display |
+
+### Framebuffer Structure
+
+```c
+struct fb_info {
+    unsigned long width;   // Framebuffer width in pixels
+    unsigned long height;  // Framebuffer height in pixels
+    unsigned long stride;  // Bytes per row
+    unsigned long addr;    // Memory address of framebuffer
+};
+```
+
+### Testing GPU Mode
+
+To test GPU mode:
+
+1. Build libc with GPU support: `GPU=1 bash build.sh`
+2. Rebuild C applications (crogue, curses_test, etc.)
+3. Build kernel with GPU feature: `cargo build -p kernel --features gpu`
+4. Run kernel: `cargo run -p kernel --features gpu`
+
+Note: GPU mode requires QEMU to be run with virtio-gpu device support.
