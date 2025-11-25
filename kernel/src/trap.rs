@@ -12,6 +12,8 @@ use riscv::{
 };
 pub use scause::Trap;
 
+use crate::boot::cmdline;
+use crate::display::{fb_console, DisplayMode};
 use crate::fs;
 
 #[repr(C)]
@@ -128,24 +130,75 @@ where
     r
 }
 
+/// Write a single byte to the console output.
+/// When GPU feature is enabled and display mode is GPU, stdout goes to framebuffer.
+/// Stderr (debug output) always goes to serial port.
+/// When GPU is disabled, all output goes to serial.
+fn console_write_byte(b: u8, is_stderr: bool) {
+    #[cfg(feature = "gpu")]
+    {
+        // In GPU mode: stdout -> framebuffer, stderr -> serial
+        if is_stderr || cmdline::display_mode() != DisplayMode::Gpu {
+            // Debug/stderr output always goes to UART (serial)
+            let mut uart = crate::uart::Uart::new();
+            if b == b'\n' {
+                uart.write_byte(b'\r');
+            }
+            uart.write_byte(b);
+        } else {
+            // Stdout goes to framebuffer when GPU is active
+            fb_console::write_char(b);
+        }
+    }
+    
+    #[cfg(not(feature = "gpu"))]
+    {
+        // Without GPU feature: everything goes to UART
+        let _ = is_stderr; // unused warning suppression
+        let mut uart = crate::uart::Uart::new();
+        if b == b'\n' {
+            uart.write_byte(b'\r');
+        }
+        uart.write_byte(b);
+    }
+}
+
+/// Write a string to the console output.
+/// When GPU feature is enabled and display mode is GPU, stdout goes to framebuffer.
+/// Stderr (debug output) always goes to serial port.
+fn console_write_str(s: &str, is_stderr: bool) {
+    #[cfg(feature = "gpu")]
+    {
+        if is_stderr || cmdline::display_mode() != DisplayMode::Gpu {
+            // Debug/stderr output always goes to UART
+            use core::fmt::Write;
+            let mut uart = crate::uart::Uart::new();
+            let _ = uart.write_str(s);
+        } else {
+            // Stdout goes to framebuffer when GPU is active
+            fb_console::write_str(s);
+        }
+    }
+    
+    #[cfg(not(feature = "gpu"))]
+    {
+        let _ = is_stderr;
+        use core::fmt::Write;
+        let mut uart = crate::uart::Uart::new();
+        let _ = uart.write_str(s);
+    }
+}
+
 fn sys_write_ptrlen(tf: &mut super::trap::TrapFrame) {
     let uptr = tf.a0 as *const u8; // user VA
     let len = tf.a1 as usize;
-    let mut uart = crate::uart::Uart::new();
+    
+    // sys_write_ptrlen is used for stdout, route based on GPU mode
     unsafe {
         with_sum(|| {
             for i in 0..len {
                 let b = core::ptr::read(uptr.add(i));
-                // raw byte out; keep it simple
-                if b == b'\n' {
-                    let _ = Write::write_str(&mut uart, "\r\n");
-                } else {
-                    // single byte write
-                    let _ = Write::write_str(
-                        &mut uart,
-                        core::str::from_utf8_unchecked(core::slice::from_ref(&b)),
-                    );
-                }
+                console_write_byte(b, false); // false = stdout
             }
         });
     }
@@ -157,7 +210,6 @@ fn sys_write_ptrlen(tf: &mut super::trap::TrapFrame) {
 fn sys_write_cstr(tf: &mut super::trap::TrapFrame) {
     let uptr = tf.a0 as *const u8;
     let mut wrote = 0usize;
-    let mut uart = crate::uart::Uart::new();
 
     unsafe {
         with_sum(|| {
@@ -169,10 +221,7 @@ fn sys_write_cstr(tf: &mut super::trap::TrapFrame) {
                 if b == 0 {
                     break;
                 }
-                if b == b'\n' {
-                    uart.write_byte(b'\r');
-                }
-                uart.write_byte(b);
+                console_write_byte(b, false); // false = stdout
                 wrote += 1;
                 p = p.add(1);
             }
@@ -700,17 +749,16 @@ fn sys_write_fd(tf: &mut TrapFrame) {
     }
     len = cap_to_page(buf, len);
 
-    // Check if this is stdout/stderr - write to UART
+    // Check if this is stdout/stderr
+    // stdout (fd 1) -> console (framebuffer or serial based on GPU mode)
+    // stderr (fd 2) -> always serial (for debugging)
     if fd == 1 || fd == 2 {
-        let mut uart = crate::uart::Uart::new();
+        let is_stderr = fd == 2;
         unsafe {
             with_sum_no_timer(|| {
                 for i in 0..len {
                     let b = core::ptr::read((buf + i) as *const u8);
-                    if b == b'\n' {
-                        uart.write_byte(b'\r');
-                    }
-                    uart.write_byte(b);
+                    console_write_byte(b, is_stderr);
                 }
             });
         }

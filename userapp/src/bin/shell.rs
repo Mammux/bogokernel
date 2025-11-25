@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use usys::{print, println, IoRead};
+use usys::{print, println, debug, IoRead};
 
 // Maximum number of command-line arguments
 const MAX_ARGS: usize = 16;
@@ -13,6 +13,9 @@ pub extern "C" fn _start(_argc: usize, _argv: *const *const u8, _envp: *const *c
 }
 
 fn main() {
+    // Debug output goes to serial port, console output goes to framebuffer (when GPU enabled)
+    debug!("BogoShell starting up");
+    
     println!("Welcome to BogoShell!");
     println!("Type 'help' for available commands, 'ls' to list programs");
 
@@ -141,6 +144,8 @@ fn main() {
                     match usys::stat(filename_cstr.as_cstr(), &mut stat_buf) {
                         Ok(_) => {
                             // File exists, proceed with execution
+                            debug!("Executing: {}", filename);
+                            
                             // Build argv array with command line arguments
                             let mut argv_cstrs: [usys::CStrBuf<64>; MAX_ARGS] = Default::default();
                             

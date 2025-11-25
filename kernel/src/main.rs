@@ -5,6 +5,7 @@ extern crate alloc;
 mod entry;
 mod fs;
 mod kalloc;
+mod logging;
 mod sbi;
 mod sv39;
 mod timer;
