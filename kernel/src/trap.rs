@@ -12,7 +12,9 @@ use riscv::{
 };
 pub use scause::Trap;
 
+#[cfg(feature = "gpu")]
 use crate::boot::cmdline;
+#[cfg(feature = "gpu")]
 use crate::display::{fb_console, DisplayMode};
 use crate::fs;
 
@@ -130,6 +132,24 @@ where
     r
 }
 
+/// Helper to write a byte to UART with CR/LF handling.
+#[inline(always)]
+fn uart_write_byte(b: u8) {
+    let mut uart = crate::uart::Uart::new();
+    if b == b'\n' {
+        uart.write_byte(b'\r');
+    }
+    uart.write_byte(b);
+}
+
+/// Helper to check if output should go to framebuffer.
+/// Returns true if GPU mode is active and this is stdout (not stderr).
+#[cfg(feature = "gpu")]
+#[inline]
+fn should_use_framebuffer(is_stderr: bool) -> bool {
+    !is_stderr && cmdline::display_mode() == DisplayMode::Gpu
+}
+
 /// Write a single byte to the console output.
 /// When GPU feature is enabled and display mode is GPU, stdout goes to framebuffer.
 /// Stderr (debug output) always goes to serial port.
@@ -137,46 +157,33 @@ where
 fn console_write_byte(b: u8, is_stderr: bool) {
     #[cfg(feature = "gpu")]
     {
-        // In GPU mode: stdout -> framebuffer, stderr -> serial
-        if is_stderr || cmdline::display_mode() != DisplayMode::Gpu {
-            // Debug/stderr output always goes to UART (serial)
-            let mut uart = crate::uart::Uart::new();
-            if b == b'\n' {
-                uart.write_byte(b'\r');
-            }
-            uart.write_byte(b);
-        } else {
-            // Stdout goes to framebuffer when GPU is active
+        if should_use_framebuffer(is_stderr) {
             fb_console::write_char(b);
+        } else {
+            uart_write_byte(b);
         }
     }
     
     #[cfg(not(feature = "gpu"))]
     {
-        // Without GPU feature: everything goes to UART
         let _ = is_stderr; // unused warning suppression
-        let mut uart = crate::uart::Uart::new();
-        if b == b'\n' {
-            uart.write_byte(b'\r');
-        }
-        uart.write_byte(b);
+        uart_write_byte(b);
     }
 }
 
 /// Write a string to the console output.
 /// When GPU feature is enabled and display mode is GPU, stdout goes to framebuffer.
 /// Stderr (debug output) always goes to serial port.
+#[allow(dead_code)]
 fn console_write_str(s: &str, is_stderr: bool) {
     #[cfg(feature = "gpu")]
     {
-        if is_stderr || cmdline::display_mode() != DisplayMode::Gpu {
-            // Debug/stderr output always goes to UART
+        if should_use_framebuffer(is_stderr) {
+            fb_console::write_str(s);
+        } else {
             use core::fmt::Write;
             let mut uart = crate::uart::Uart::new();
             let _ = uart.write_str(s);
-        } else {
-            // Stdout goes to framebuffer when GPU is active
-            fb_console::write_str(s);
         }
     }
     

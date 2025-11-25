@@ -11,6 +11,8 @@
 //! - WARN: Warning messages
 //! - ERROR: Error messages
 
+#![allow(dead_code)]
+
 use core::sync::atomic::{AtomicU8, Ordering};
 use uapi::LogLevel;
 
