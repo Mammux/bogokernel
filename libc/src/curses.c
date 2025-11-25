@@ -54,7 +54,7 @@ static unsigned int *_framebuffer = NULL;
 static bool _gpu_mode = false;
 
 /* Colors (XRGB8888 format) */
-#define COLOR_WHITE 0x00FFFFFF
+#define COLOR_WHITE 0x00F0F0F0
 #define COLOR_BLACK 0x00000000
 #define COLOR_BRIGHT_WHITE 0x00FFFFFF
 
@@ -456,128 +456,137 @@ static const unsigned char FONT_8X8_BOLD[95][8] = {
 
 /* Get font bitmap for a character (normal or bold) */
 static const unsigned char *_gpu_get_font(unsigned char c, bool bold) {
-    if (c < 32 || c > 126) {
-        return bold ? FONT_8X8_BOLD[0] : FONT_8X8_NORMAL[0]; /* Return space */
-    }
-    return bold ? FONT_8X8_BOLD[c - 32] : FONT_8X8_NORMAL[c - 32];
+  if (c < 32 || c > 126) {
+    return bold ? FONT_8X8_BOLD[0] : FONT_8X8_NORMAL[0]; /* Return space */
+  }
+  return bold ? FONT_8X8_BOLD[c - 32] : FONT_8X8_NORMAL[c - 32];
 }
 
 /* Draw a character directly to the framebuffer */
-static void _gpu_draw_char(int screen_x, int screen_y, unsigned char c, 
+static void _gpu_draw_char(int screen_x, int screen_y, unsigned char c,
                            chtype attrs) {
-    if (!_framebuffer) return;
-    
-    bool bold = (attrs & A_BOLD) != 0;
-    bool reverse = (attrs & (A_STANDOUT | A_REVERSE)) != 0;
-    
-    const unsigned char *bitmap = _gpu_get_font(c, bold);
-    
-    unsigned int fg = reverse ? COLOR_BLACK : COLOR_WHITE;
-    unsigned int bg = reverse ? COLOR_WHITE : COLOR_BLACK;
-    
-    /* Use brighter white for bold text */
-    if (bold && !reverse) {
-        fg = COLOR_BRIGHT_WHITE;
+  if (!_framebuffer)
+    return;
+
+  bool bold = (attrs & A_BOLD) != 0;
+  bool reverse = (attrs & (A_STANDOUT | A_REVERSE)) != 0;
+
+  const unsigned char *bitmap = _gpu_get_font(c, bold);
+
+  unsigned int fg = reverse ? COLOR_BLACK : COLOR_WHITE;
+  unsigned int bg = reverse ? COLOR_WHITE : COLOR_BLACK;
+
+  /* Use brighter white for bold text */
+  if (bold && !reverse) {
+    fg = COLOR_BRIGHT_WHITE;
+  }
+
+  int pixel_x = screen_x * FONT_WIDTH;
+  int pixel_y = screen_y * FONT_HEIGHT;
+
+  unsigned long fb_width = _fb_info.width;
+  unsigned long fb_height = _fb_info.height;
+  unsigned long fb_size = fb_width * fb_height;
+
+  for (int row = 0; row < FONT_HEIGHT; row++) {
+    unsigned char bitmap_row = bitmap[row];
+    int y = pixel_y + row;
+
+    if ((unsigned long)y >= fb_height)
+      break;
+
+    for (int col = 0; col < FONT_WIDTH; col++) {
+      int x = pixel_x + col;
+
+      if ((unsigned long)x >= fb_width)
+        break;
+
+      /* Calculate offset with bounds check */
+      unsigned long offset = (unsigned long)y * fb_width + (unsigned long)x;
+      if (offset >= fb_size)
+        continue; /* Safety bounds check */
+
+      /* Check if pixel is set (bit 0 is leftmost in our rendering) */
+      bool pixel_set = (bitmap_row & (1 << col)) != 0;
+      unsigned int color = pixel_set ? fg : bg;
+
+      _framebuffer[offset] = color;
     }
-    
-    int pixel_x = screen_x * FONT_WIDTH;
-    int pixel_y = screen_y * FONT_HEIGHT;
-    
-    unsigned long fb_width = _fb_info.width;
-    unsigned long fb_height = _fb_info.height;
-    unsigned long fb_size = fb_width * fb_height;
-    
-    for (int row = 0; row < FONT_HEIGHT; row++) {
-        unsigned char bitmap_row = bitmap[row];
-        int y = pixel_y + row;
-        
-        if ((unsigned long)y >= fb_height) break;
-        
-        for (int col = 0; col < FONT_WIDTH; col++) {
-            int x = pixel_x + col;
-            
-            if ((unsigned long)x >= fb_width) break;
-            
-            /* Calculate offset with bounds check */
-            unsigned long offset = (unsigned long)y * fb_width + (unsigned long)x;
-            if (offset >= fb_size) continue;  /* Safety bounds check */
-            
-            /* Check if pixel is set (bit 0 is leftmost in our rendering) */
-            bool pixel_set = (bitmap_row & (1 << col)) != 0;
-            unsigned int color = pixel_set ? fg : bg;
-            
-            _framebuffer[offset] = color;
-        }
-    }
+  }
 }
 
 /* Clear the framebuffer screen */
 static void _gpu_clear_screen(void) {
-    if (!_framebuffer) return;
-    
-    unsigned long total_pixels = _fb_info.width * _fb_info.height;
-    for (unsigned long i = 0; i < total_pixels; i++) {
-        _framebuffer[i] = COLOR_BLACK;
-    }
+  if (!_framebuffer)
+    return;
+
+  unsigned long total_pixels = _fb_info.width * _fb_info.height;
+  for (unsigned long i = 0; i < total_pixels; i++) {
+    _framebuffer[i] = COLOR_BLACK;
+  }
 }
 
 /* Initialize GPU mode */
 static bool _gpu_init(void) {
-    if (get_fb_info(&_fb_info) != 0) {
-        return false;
-    }
-    
-    /* Validate framebuffer address - must be non-zero and reasonably sized */
-    if (_fb_info.addr == 0 || _fb_info.width == 0 || _fb_info.height == 0) {
-        return false;
-    }
-    
-    _framebuffer = (unsigned int *)_fb_info.addr;
-    
-    _gpu_mode = true;
-    _gpu_clear_screen();
-    fb_flush();
-    return true;
+  if (get_fb_info(&_fb_info) != 0) {
+    return false;
+  }
+
+  /* Validate framebuffer address - must be non-zero and reasonably sized */
+  if (_fb_info.addr == 0 || _fb_info.width == 0 || _fb_info.height == 0) {
+    return false;
+  }
+
+  _framebuffer = (unsigned int *)_fb_info.addr;
+
+  _gpu_mode = true;
+  _gpu_clear_screen();
+  fb_flush();
+  return true;
 }
 
 /* GPU mode refresh - render entire window to framebuffer */
 static int _gpu_wrefresh(WINDOW *win) {
-    if (!_gpu_mode || !_framebuffer) return -1;
-    
-    int win_top = win->_begy;
-    int win_left = win->_begx;
-    
-    bool force_redraw = win->_clear || (curscr && curscr->_clear);
-    
-    for (int y = 0; y < win->_maxy; y++) {
-        int screen_y = win_top + y;
-        if (screen_y >= LINES) break;
-        
-        for (int x = 0; x < win->_maxx; x++) {
-            int screen_x = win_left + x;
-            if (screen_x >= COLS) break;
-            
-            chtype ch = win->_y[y][x];
-            
-            /* Only update if different from physical screen or force redraw */
-            if (ch != curscr->_y[screen_y][screen_x] || force_redraw) {
-                unsigned char c = (unsigned char)(ch & A_CHARTEXT);
-                chtype attrs = ch & ~A_CHARTEXT;
-                
-                _gpu_draw_char(screen_x, screen_y, c, attrs);
-                
-                curscr->_y[screen_y][screen_x] = ch;
-            }
-        }
+  if (!_gpu_mode || !_framebuffer)
+    return -1;
+
+  int win_top = win->_begy;
+  int win_left = win->_begx;
+
+  bool force_redraw = win->_clear || (curscr && curscr->_clear);
+
+  for (int y = 0; y < win->_maxy; y++) {
+    int screen_y = win_top + y;
+    if (screen_y >= LINES)
+      break;
+
+    for (int x = 0; x < win->_maxx; x++) {
+      int screen_x = win_left + x;
+      if (screen_x >= COLS)
+        break;
+
+      chtype ch = win->_y[y][x];
+
+      /* Only update if different from physical screen or force redraw */
+      if (ch != curscr->_y[screen_y][screen_x] || force_redraw) {
+        unsigned char c = (unsigned char)(ch & A_CHARTEXT);
+        chtype attrs = ch & ~A_CHARTEXT;
+
+        _gpu_draw_char(screen_x, screen_y, c, attrs);
+
+        curscr->_y[screen_y][screen_x] = ch;
+      }
     }
-    
-    win->_clear = false;
-    if (curscr) curscr->_clear = false;
-    
-    /* Flush framebuffer to display */
-    fb_flush();
-    
-    return 0;
+  }
+
+  win->_clear = false;
+  if (curscr)
+    curscr->_clear = false;
+
+  /* Flush framebuffer to display */
+  fb_flush();
+
+  return 0;
 }
 
 #endif /* GPU_ENABLED */
