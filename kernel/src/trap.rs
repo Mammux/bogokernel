@@ -651,22 +651,59 @@ fn sys_read(tf: &mut TrapFrame) {
     }
     len = cap_to_page(buf, len);
 
-    // --- STDIN (UART RX) ---
+    // --- STDIN (UART RX + Keyboard) ---
     if fd == 0 {
         let mut uart = crate::uart::Uart::new();
         let mut n = 0usize;
 
-        // Block for the first byte so read() is not spurious
-        let first = uart.read_byte();
-        unsafe {
-            with_sum_no_timer(|| {
-                core::ptr::write((buf as *mut u8).add(n), first);
-            });
+        // Block for the first byte - check both keyboard buffer and UART
+        loop {
+            // Poll keyboard for any pending events
+            crate::keyboard::poll();
+            
+            // Check keyboard buffer first
+            if let Some(b) = crate::keyboard::pop_input() {
+                unsafe {
+                    with_sum_no_timer(|| {
+                        core::ptr::write((buf as *mut u8).add(n), b);
+                    });
+                }
+                n += 1;
+                break;
+            }
+            
+            // Check UART
+            if let Some(b) = uart.try_read_byte() {
+                unsafe {
+                    with_sum_no_timer(|| {
+                        core::ptr::write((buf as *mut u8).add(n), b);
+                    });
+                }
+                n += 1;
+                break;
+            }
+            
+            // Small busy wait to avoid spinning too fast
+            core::hint::spin_loop();
         }
-        n += 1;
 
         // Drain any immediately available bytes without blocking further
         while n < len {
+            // Poll keyboard
+            crate::keyboard::poll();
+            
+            // Try keyboard buffer first
+            if let Some(b) = crate::keyboard::pop_input() {
+                unsafe {
+                    with_sum_no_timer(|| {
+                        core::ptr::write((buf as *mut u8).add(n), b);
+                    });
+                }
+                n += 1;
+                continue;
+            }
+            
+            // Try UART
             if let Some(b) = uart.try_read_byte() {
                 unsafe {
                     with_sum_no_timer(|| {

@@ -5,6 +5,7 @@ extern crate alloc;
 mod entry;
 mod fs;
 mod kalloc;
+mod keyboard;
 mod logging;
 mod sbi;
 mod sv39;
@@ -120,6 +121,13 @@ extern "C" fn rust_start() -> ! {
 
     boot::cmdline::parse_cmdline(cmdline);
     console::init_console();
+
+    // --- Initialize keyboard driver ---
+    if keyboard::init() {
+        let _ = writeln!(uart, "VirtIO keyboard initialized");
+    } else {
+        let _ = writeln!(uart, "No VirtIO keyboard found (using serial input only)");
+    }
 
     // 3) User code
     /*

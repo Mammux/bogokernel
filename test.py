@@ -15,6 +15,7 @@ def run_test():
             '-m', '128M',
             '-nographic',
             '-bios', 'default',
+            '-device', 'virtio-keyboard-device',
             '-kernel', 'target/riscv64gc-unknown-none-elf/debug/kernel'
         ],
         stdin=subprocess.PIPE,
