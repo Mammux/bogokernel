@@ -240,23 +240,16 @@ fn sys_write_cstr(tf: &mut super::trap::TrapFrame) {
 }
 
 fn sys_exit(tf: &mut TrapFrame) {
-    // exit code in a0
-    let _ = writeln!(crate::uart::Uart::new(), "sys_exit: reloading shell");
-    
     // Clear the FD table - use lock() which will wait if needed
-    let _ = writeln!(crate::uart::Uart::new(), "sys_exit: clearing FD_TABLE");
     {
         let mut tbl = FD_TABLE.lock();
         for fd in 3..MAX_FD {
             tbl[fd] = FdEntry::EMPTY;
         }
     } // Guard is dropped here
-    let _ = writeln!(crate::uart::Uart::new(), "sys_exit: FD_TABLE cleared");
     
-    // Load shell.elf
-    let _ = writeln!(crate::uart::Uart::new(), "sys_exit: loading shell");
+    // Reload shell.elf
     load_program(tf, "shell.elf", &["shell.elf"]);
-    let _ = writeln!(crate::uart::Uart::new(), "sys_exit: shell loaded, returning");
 }
 
 // File system stuff
@@ -289,9 +282,7 @@ impl FdEntry {
 static FD_TABLE: Mutex<[FdEntry; MAX_FD]> = Mutex::new([FdEntry::EMPTY; MAX_FD]);
 
 fn fd_alloc(file_type: FileType, writable: bool) -> Option<usize> {
-    let _ = writeln!(crate::uart::Uart::new(), "fd_alloc: about to lock FD_TABLE");
     let mut tbl = FD_TABLE.lock();
-    let _ = writeln!(crate::uart::Uart::new(), "fd_alloc: acquired FD_TABLE lock");
     for fd in 3..MAX_FD {
         if !tbl[fd].in_use {
             tbl[fd] = FdEntry {
@@ -300,11 +291,9 @@ fn fd_alloc(file_type: FileType, writable: bool) -> Option<usize> {
                 offset: 0,
                 writable,
             };
-            let _ = writeln!(crate::uart::Uart::new(), "fd_alloc: allocated fd={}", fd);
             return Some(fd);
         }
     }
-    let _ = writeln!(crate::uart::Uart::new(), "fd_alloc: no free fds");
     None
 }
 fn fd_get(fd: usize) -> Option<FdEntry> {
@@ -410,45 +399,20 @@ fn sys_open(tf: &mut TrapFrame) {
         }
     };
 
-    let _ = write!(crate::uart::Uart::new(), "sys_open: path='{}'\r\n", path);
-
     // First check writable files
     if let Some(idx) = fs::lookup_writable(path) {
-        let _ = write!(
-            crate::uart::Uart::new(),
-            "sys_open: writable file found at idx={}\r\n",
-            idx
-        );
         if let Some(fd) = fd_alloc(FileType::Writable(idx), false) {
-            let _ = write!(
-                crate::uart::Uart::new(),
-                "sys_open: allocated fd={}\r\n",
-                fd
-            );
             tf.a0 = fd;
         } else {
-            let _ = write!(crate::uart::Uart::new(), "sys_open: unable to alloc fd\r\n");
             tf.a0 = usize::MAX; // no fds
         }
     } else if let Some((idx, _f)) = fs::FILES.iter().enumerate().find(|(_, f)| f.name == path) {
-        let _ = write!(
-            crate::uart::Uart::new(),
-            "sys_open: file found at idx={}\r\n",
-            idx
-        );
         if let Some(fd) = fd_alloc(FileType::ReadOnly(idx), false) {
-            let _ = write!(
-                crate::uart::Uart::new(),
-                "sys_open: allocated fd={}\r\n",
-                fd
-            );
             tf.a0 = fd;
         } else {
-            let _ = write!(crate::uart::Uart::new(), "sys_open: unable to alloc fd\r\n");
             tf.a0 = usize::MAX; // no fds
         }
     } else {
-        let _ = write!(crate::uart::Uart::new(), "sys_open: file not found\r\n");
         tf.a0 = usize::MAX; // not found
     }
     tf.sepc = tf.sepc.wrapping_add(4);
@@ -471,33 +435,14 @@ fn sys_exec(tf: &mut TrapFrame) {
         }
     };
 
-    let _ = writeln!(crate::uart::Uart::new(), "sys_exec: path='{}'", path);
-    
-    // Debug: check if FD_TABLE is locked
-    if FD_TABLE.is_locked() {
-        let _ = writeln!(crate::uart::Uart::new(), "sys_exec: WARNING - FD_TABLE is locked!");
-    }
-    
     // Use path as argv[0]
     load_program(tf, path, &[path]);
-    
-    // Debug: check if FD_TABLE is locked after load_program
-    if FD_TABLE.is_locked() {
-        let _ = writeln!(crate::uart::Uart::new(), "sys_exec: WARNING - FD_TABLE locked after load_program!");
-    }
 }
 
 fn sys_execv(tf: &mut TrapFrame) {
     // a0 = path, a1 = argv (NULL-terminated array of C string pointers)
     let path_va = tf.a0;
     let argv_va = tf.a1;
-
-    let _ = writeln!(crate::uart::Uart::new(), "sys_execv: starting");
-    
-    // Debug: check if FD_TABLE is locked at start
-    if FD_TABLE.is_locked() {
-        let _ = writeln!(crate::uart::Uart::new(), "sys_execv: WARNING - FD_TABLE is locked at start!");
-    }
 
     let mut path_buf = [0u8; 256];
     let path = match read_user_cstr_in_page(path_va, 255, &mut path_buf) {
@@ -561,21 +506,9 @@ fn sys_execv(tf: &mut TrapFrame) {
     }
 
     load_program(tf, path, &argv_strs[..argv_count]);
-    
-    // Debug: check if FD_TABLE is locked after load_program
-    if FD_TABLE.is_locked() {
-        let _ = writeln!(crate::uart::Uart::new(), "sys_execv: WARNING - FD_TABLE locked after load_program!");
-    }
 }
 
 fn load_program(tf: &mut TrapFrame, name: &str, argv: &[&str]) {
-    let _ = writeln!(crate::uart::Uart::new(), "load_program: starting for '{}'", name);
-    
-    // Check if FD_TABLE is locked at start
-    if FD_TABLE.is_locked() {
-        let _ = writeln!(crate::uart::Uart::new(), "load_program: WARNING - FD_TABLE is locked at start!");
-    }
-    
     // Find file in writable filesystem
     let file_data = match fs::get_file_data(name) {
         Some(data) => data,
@@ -594,17 +527,13 @@ fn load_program(tf: &mut TrapFrame, name: &str, argv: &[&str]) {
     let user_stack_bytes: usize = 16 * 1024;
 
     // CRITICAL: Clear old user mappings and reset allocator before loading new program
-    let _ = writeln!(crate::uart::Uart::new(), "load_program: clearing user pages");
     unsafe {
         crate::sv39::reset_user_pages();
         crate::sv39::clear_user_mappings();
     }
 
-    let _ = writeln!(crate::uart::Uart::new(), "load_program: calling load_user_elf");
     match crate::elf::load_user_elf(&file_data, user_stack_top_va, user_stack_bytes, argv, &envp) {
         Ok(img) => {
-            let _ = writeln!(crate::uart::Uart::new(), "load_program: load_user_elf succeeded");
-            
             // Flush TLB to ensure old mappings are invalidated
             riscv::asm::sfence_vma_all();
 
@@ -619,13 +548,6 @@ fn load_program(tf: &mut TrapFrame, name: &str, argv: &[&str]) {
                 USER_BRK = img.brk;
             }
 
-            let _ = writeln!(crate::uart::Uart::new(), "load_program: TrapFrame updated");
-            
-            // Check if FD_TABLE is locked before returning
-            if FD_TABLE.is_locked() {
-                let _ = writeln!(crate::uart::Uart::new(), "load_program: WARNING - FD_TABLE is locked before return!");
-            }
-            
             // Success: do NOT increment sepc, just return to new entry
         }
         Err(e) => {
@@ -634,8 +556,6 @@ fn load_program(tf: &mut TrapFrame, name: &str, argv: &[&str]) {
             tf.sepc = tf.sepc.wrapping_add(4);
         }
     }
-    
-    let _ = writeln!(crate::uart::Uart::new(), "load_program: returning");
 }
 
 fn sys_read(tf: &mut TrapFrame) {
@@ -973,35 +893,15 @@ fn sys_creat(tf: &mut TrapFrame) {
         }
     };
 
-    let _ = write!(crate::uart::Uart::new(), "sys_creat: path='{}'\r\n", path);
-    
-    // Debug: check if FD_TABLE is locked before we do anything
-    if FD_TABLE.is_locked() {
-        let _ = write!(crate::uart::Uart::new(), "sys_creat: WARNING - FD_TABLE is already locked!\r\n");
-    }
-
     match fs::create_file(path) {
         Ok(idx) => {
-            let _ = write!(crate::uart::Uart::new(), "sys_creat: create_file ok\r\n");
-            
-            // Debug: check again before calling fd_alloc
-            if FD_TABLE.is_locked() {
-                let _ = write!(crate::uart::Uart::new(), "sys_creat: WARNING - FD_TABLE locked after create_file!\r\n");
-            }
-            
             if let Some(fd) = fd_alloc(FileType::Writable(idx), true) {
-                let _ = write!(crate::uart::Uart::new(), "sys_creat: created fd={}\r\n", fd);
                 tf.a0 = fd;
             } else {
-                let _ = write!(crate::uart::Uart::new(), "sys_creat: fd_alloc failed\r\n");
                 tf.a0 = usize::MAX;
             }
         }
         Err(_) => {
-            let _ = write!(
-                crate::uart::Uart::new(),
-                "sys_creat: create_file failed\r\n"
-            );
             tf.a0 = usize::MAX;
         }
     }
@@ -1020,8 +920,6 @@ fn sys_unlink(tf: &mut TrapFrame) {
             return;
         }
     };
-
-    let _ = write!(crate::uart::Uart::new(), "sys_unlink: path='{}'\r\n", path);
 
     match fs::unlink_file(path) {
         Ok(_) => tf.a0 = 0,
@@ -1044,8 +942,6 @@ fn sys_stat(tf: &mut TrapFrame) {
             return;
         }
     };
-
-    let _ = write!(crate::uart::Uart::new(), "sys_stat: path='{}'\r\n", path);
 
     match fs::stat_file(path) {
         Some(stat) => {
@@ -1083,13 +979,6 @@ fn sys_chmod(tf: &mut TrapFrame) {
             return;
         }
     };
-
-    let _ = write!(
-        crate::uart::Uart::new(),
-        "sys_chmod: path='{}' mode={:o}\r\n",
-        path,
-        mode
-    );
 
     match fs::chmod_file(path, mode) {
         Ok(_) => tf.a0 = 0,
