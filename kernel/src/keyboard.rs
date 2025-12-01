@@ -173,11 +173,16 @@ struct VirtioKeyboard {
     last_used_idx: u16,
 }
 
-// Static storage for keyboard driver
-static mut KEYBOARD: Option<VirtioKeyboard> = None;
-static mut KEYBOARD_INITIALIZED: bool = false;
+// Static storage for keyboard driver - protected by Mutex for thread safety
+static KEYBOARD: Mutex<Option<VirtioKeyboard>> = Mutex::new(None);
+
+// Use atomic for fast initialization check without locking
+static KEYBOARD_INITIALIZED: core::sync::atomic::AtomicBool = 
+    core::sync::atomic::AtomicBool::new(false);
 
 // Static memory for virtqueue (must be page-aligned)
+// Note: These are only accessed from init() and poll() which are serialized
+// through the KEYBOARD Mutex, so they remain safe.
 const PADDING_SIZE: usize = PAGE_SIZE - size_of::<[VirtqDesc; QUEUE_SIZE]>() - size_of::<VirtqAvail>();
 
 #[repr(C, align(4096))]
@@ -220,6 +225,7 @@ static mut EVENT_BUFFERS: [VirtioInputEvent; QUEUE_SIZE] = [VirtioInputEvent {
 #[allow(static_mut_refs)]
 pub fn init() -> bool {
     use core::fmt::Write;
+    use core::sync::atomic::Ordering;
     let mut uart = crate::uart::Uart::new();
 
     let _ = writeln!(uart, "[Keyboard] Starting VirtIO keyboard probe...");
@@ -343,12 +349,15 @@ fn init_device(mmio_base: usize) -> bool {
         // Notify device that we have buffers available
         core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_QUEUE_NOTIFY) as *mut u32, 0);
 
-        // Store keyboard state
-        KEYBOARD = Some(VirtioKeyboard {
-            mmio_base,
-            last_used_idx: 0,
-        });
-        KEYBOARD_INITIALIZED = true;
+        // Store keyboard state (protected by Mutex)
+        {
+            let mut kbd = KEYBOARD.lock();
+            *kbd = Some(VirtioKeyboard {
+                mmio_base,
+                last_used_idx: 0,
+            });
+        }
+        KEYBOARD_INITIALIZED.store(true, core::sync::atomic::Ordering::Release);
 
         let _ = writeln!(uart, "[Keyboard] Device initialized at 0x{:08x}", mmio_base);
         true
@@ -359,18 +368,27 @@ fn init_device(mmio_base: usize) -> bool {
 /// Should be called periodically (e.g., in timer interrupt or main loop).
 #[allow(static_mut_refs)]
 pub fn poll() {
+    use core::sync::atomic::Ordering;
+    
+    // Quick check without locking
+    if !KEYBOARD_INITIALIZED.load(Ordering::Acquire) {
+        return;
+    }
+
+    // Try to acquire lock, return if already held (avoid deadlock)
+    let mut kbd_guard = match KEYBOARD.try_lock() {
+        Some(guard) => guard,
+        None => return,
+    };
+
+    let keyboard = match kbd_guard.as_mut() {
+        Some(k) => k,
+        None => return,
+    };
+
+    let mmio_base = keyboard.mmio_base;
+
     unsafe {
-        if !KEYBOARD_INITIALIZED {
-            return;
-        }
-
-        let keyboard = match KEYBOARD.as_mut() {
-            Some(k) => k,
-            None => return,
-        };
-
-        let mmio_base = keyboard.mmio_base;
-
         // Check for completed events in the used ring
         core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst);
         let used_idx = core::ptr::read_volatile(&KEYBOARD_QUEUE.used.idx);
@@ -404,7 +422,7 @@ pub fn poll() {
         if isr != 0 {
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_INTERRUPT_ACK) as *mut u32, isr);
         }
-    }
+    } // end unsafe
 }
 
 /// Process a keyboard event and convert it to ASCII if applicable.
@@ -499,5 +517,5 @@ fn keycode_to_ascii(code: u16) -> Option<u8> {
 
 /// Check if keyboard is initialized.
 pub fn is_initialized() -> bool {
-    unsafe { KEYBOARD_INITIALIZED }
+    KEYBOARD_INITIALIZED.load(core::sync::atomic::Ordering::Acquire)
 }
