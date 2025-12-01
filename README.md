@@ -13,13 +13,14 @@ This project is educational — it demonstrates how to bring up a kernel in S-mo
 - **Sv39 paging** enabled with identity mapping for the kernel and U=1 mappings for user code/data.
 - **Minimal heap** (via `linked_list_allocator`) to allow kernel allocations.
 - **ELF64 loader**: Maps PT_LOAD segments, sets up argv/envp on user stack, and jumps to entry point in U-mode.
-- **Hybrid filesystem**: Embedded read-only RAMFS + in-memory writable filesystem layer.
+- **Unified writable filesystem**: Embedded files are copied to a writable in-memory filesystem at boot, supporting file creation, modification, and deletion.
 - **File descriptor table**: Supports stdin (fd 0), stdout (fd 1), stderr (fd 2), and regular files (fd 3+).
 - **Dynamic program loading**: `exec()` and `execv()` syscalls to load and run programs.
 - **User-space library** (`usys`): Syscall wrappers, I/O traits, and convenience macros (`print!`, `println!`).
-- **Minimal libc**: Standard C library with file I/O, string functions, malloc/free, and printf.
-- **Multiple user applications**: Interactive shell, rogue-like game, cat utility, and hello world examples.
-- **System calls** (17 total):  
+- **Minimal libc**: Standard C library with file I/O, string functions, malloc/free, printf, and curses support.
+- **Multiple user applications**: Interactive shell, rogue-like games, cat utility, filesystem tests, GPU tests, and hello world examples.
+- **VirtIO GPU support** (optional): Framebuffer-based display with font rendering for graphical output.
+- **System calls** (20 total):  
   - `write(ptr, len)` → write bytes to stdout  
   - `write_cstr(ptr)` → write NUL-terminated string  
   - `write_fd(fd, buf, len)` → write to file descriptor  
@@ -37,6 +38,9 @@ This project is educational — it demonstrates how to bring up a kernel in S-mo
   - `execv(path, argv)` → execute program with arguments  
   - `poweroff()` → shutdown via SBI  
   - `exit()` → reload shell  
+  - `readdir(buf, len)` → list files in the filesystem  
+  - `get_fb_info(buf)` → get framebuffer information (GPU mode)  
+  - `fb_flush()` → flush framebuffer to display (GPU mode)  
 - Works under **QEMU virt machine** with `-bios default` (OpenSBI).
 
 ---
@@ -48,20 +52,39 @@ This is a Cargo workspace with multiple packages:
 - **`kernel`** — The S-mode kernel (main binary)
 - **`uapi`** — Syscall number definitions (shared between kernel and userspace)
 - **`usys`** — User-space syscall wrapper library with I/O helpers
-- **`userapp`** — Example user application (currently rogue)
+- **`userapp`** — User applications (shell, rogue, fstest, mkfiles, gputest)
 - **`cat`** — Cat utility for reading files
-- **`c_hello`** — C language example (demonstrates C interop)
+- **`c_hello`** — C language hello world example
+- **`crogue`** — C mini rogue game
+- **`curses_test`** — C curses library test
+- **`rogue`** — Full rogue game port (C, builds as bigrogue.elf)
+- **`libc`** — C standard library with curses support
 
 ---
 
-## RAMFS (Embedded Filesystem)
+## Filesystem
 
-The kernel includes a simple read-only RAM filesystem with the following files:
+At boot, the kernel initializes a unified writable filesystem by copying all embedded files into memory. This supports:
+
+- **File creation**: Create new files with `creat()`
+- **File modification**: Write to existing files with `write_fd()`
+- **File deletion**: Remove files with `unlink()`
+- **Directory listing**: List files with `readdir()`
+
+### Embedded Files
+
+The following files are embedded at compile time and available at boot:
 
 - `dungeon.map` — Map data for the rogue game
 - `shell.elf` — Interactive shell (loaded at boot)
-- `rogue.elf` — Rogue-like game
-- `hello.elf` — Hello world example
+- `rogue.elf` — Rogue-like game (Rust)
+- `hello.elf` — Hello world example (C)
+- `crogue.elf` — Mini rogue game (C)
+- `curses_test.elf` — Curses library test (C)
+- `bigrogue.elf` — Full rogue game port (C)
+- `fstest.elf` — Filesystem test utility (Rust)
+- `mkfiles.elf` — File creation test (Rust)
+- `gputest.elf` — GPU/display test (Rust)
 - `etc/motd` — Message of the day
 
 Files are embedded at compile time via `include_bytes!` in `kernel/src/fs.rs`.
@@ -71,19 +94,31 @@ Files are embedded at compile time via `include_bytes!` in `kernel/src/fs.rs`.
 ## User Applications
 
 ### Shell (`shell.elf`)
-Interactive command shell loaded at boot. Supports:
-- Running programs via `exec()`
-- File I/O commands
-- Built-in commands
+Interactive command shell loaded at boot. Built-in commands:
+- `ls` — List files in the filesystem
+- `help` — Show available commands
+- `shutdown` — Power off the system
 
-### Rogue (`rogue.elf`)
-A rogue-like dungeon game that reads `dungeon.map` from RAMFS.
+Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`).
 
-### Cat (`cat.elf`)
-Utility to read and display file contents.
+### Games
+- **`rogue.elf`** — Rust rogue-like dungeon game
+- **`crogue.elf`** — C mini rogue game
+- **`bigrogue.elf`** — Full rogue game port (classic BSD rogue)
 
-### Hello (`hello.elf`)
-Simple hello world program (C version available in `c_hello/`).
+### Utilities
+- **`fstest.elf`** — Filesystem test utility (tests file creation/writing)
+- **`mkfiles.elf`** — File creation test
+
+### Tests
+- **`curses_test.elf`** — Curses library test
+- **`gputest.elf`** — GPU/framebuffer test (requires GPU mode)
+
+### Hello World
+- **`hello.elf`** — Simple hello world (C version)
+
+### Not Embedded (Build Separately)
+- **`cat`** — Display file contents (Rust package in `cat/`)
 
 ---
 
@@ -168,6 +203,9 @@ shell> _
 | 15 | `UNLINK` | `unlink(path) -> result` | Delete file |
 | 16 | `STAT` | `stat(path, buf) -> result` | Get file metadata |
 | 17 | `CHMOD` | `chmod(path, mode) -> result` | Change file permissions |
+| 18 | `READDIR` | `readdir(buf, len) -> n` | List files in filesystem |
+| 19 | `GET_FB_INFO` | `get_fb_info(buf) -> result` | Get framebuffer info (GPU) |
+| 20 | `FB_FLUSH` | `fb_flush() -> result` | Flush framebuffer (GPU) |
 
 All syscalls use the RISC-V calling convention: `a7` = syscall number, `a0-a2` = arguments, `a0` = return value.
 
@@ -179,9 +217,12 @@ Completed features:
 - ✅ Syscall table (open, read, write, close, lseek, brk, exec, poweroff, gettime)
 - ✅ User heap via brk
 - ✅ Embedded filesystem (RAMFS)
-- ✅ Dynamic program loading (exec)
+- ✅ Dynamic program loading (exec/execv)
 - ✅ Writable filesystem (in-memory)
 - ✅ File creation, deletion, and modification syscalls
+- ✅ Directory listing (readdir)
+- ✅ VirtIO GPU support with framebuffer console
+- ✅ Curses library for C applications
 
 Possible next steps:
 
