@@ -1,4 +1,4 @@
-const KTRAP_STACK_SIZE: usize = 4096;
+const KTRAP_STACK_SIZE: usize = 16384; // Increased from 4096 to 16K
 
 #[repr(align(16))]
 struct Trapstack([u8; KTRAP_STACK_SIZE]);
