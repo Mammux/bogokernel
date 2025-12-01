@@ -89,8 +89,6 @@ The following files are embedded at compile time and available at boot:
 
 Files are embedded at compile time via `include_bytes!` in `kernel/src/fs.rs`.
 
-> **Note**: The `cat` utility exists as a Rust package but is not currently embedded in the default filesystem. It can be built and added manually.
-
 ---
 
 ## User Applications
@@ -109,7 +107,6 @@ Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`).
 - **`bigrogue.elf`** — Full rogue game port (classic BSD rogue)
 
 ### Utilities
-- **`cat`** — Display file contents (Rust package, not embedded by default)
 - **`fstest.elf`** — Filesystem test utility (tests file creation/writing)
 - **`mkfiles.elf`** — File creation test
 
@@ -119,6 +116,9 @@ Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`).
 
 ### Hello World
 - **`hello.elf`** — Simple hello world (C version)
+
+### Not Embedded (Build Separately)
+- **`cat`** — Display file contents (Rust package in `cat/`)
 
 ---
 
