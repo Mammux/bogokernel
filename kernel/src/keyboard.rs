@@ -4,6 +4,7 @@
 //! This module implements a VirtIO input device driver that handles keyboard events.
 //! It provides a unified input buffer that can be read by user programs via stdin.
 
+use crate::klog;
 use core::mem::size_of;
 use spin::Mutex;
 
@@ -38,7 +39,28 @@ const VIRTIO_STATUS_DRIVER_OK: u32 = 4;
 const VIRTQ_DESC_F_WRITE: u16 = 2;
 
 // VirtIO input event types (from Linux input.h)
+const EV_SYN: u16 = 0x00;
 const EV_KEY: u16 = 0x01;
+const EV_REL: u16 = 0x02;
+const EV_ABS: u16 = 0x03;
+const EV_MSC: u16 = 0x04;
+const EV_SW: u16 = 0x05;
+const EV_LED: u16 = 0x11;
+const EV_SND: u16 = 0x12;
+const EV_REP: u16 = 0x14;
+const EV_FF: u16 = 0x15;
+const EV_PWR: u16 = 0x16;
+const EV_FF_STATUS: u16 = 0x17;
+const EV_MAX: u16 = 0x1f;
+const EV_CNT: u16 = (EV_MAX + 1);
+
+// Modifier keys
+const KEY_LEFTSHIFT: u16 = 42;
+const KEY_RIGHTSHIFT: u16 = 54;
+const KEY_LEFTCTRL: u16 = 29;
+const KEY_RIGHTCTRL: u16 = 97;
+const KEY_LEFTALT: u16 = 56;
+const KEY_RIGHTALT: u16 = 100;
 
 // Queue size
 const QUEUE_SIZE: usize = 16;
@@ -149,6 +171,11 @@ impl InputBuffer {
 /// Global input buffer shared between keyboard and serial
 static INPUT_BUFFER: Mutex<InputBuffer> = Mutex::new(InputBuffer::new());
 
+static SHIFT: Mutex<bool> = Mutex::new(false);
+static CAPS: Mutex<bool> = Mutex::new(false);
+static CTRL: Mutex<bool> = Mutex::new(false);
+static ALT: Mutex<bool> = Mutex::new(false);
+
 /// Push a byte to the global input buffer (used by both keyboard and serial).
 pub fn push_input(byte: u8) {
     let mut buf = INPUT_BUFFER.lock();
@@ -177,13 +204,14 @@ struct VirtioKeyboard {
 static KEYBOARD: Mutex<Option<VirtioKeyboard>> = Mutex::new(None);
 
 // Use atomic for fast initialization check without locking
-static KEYBOARD_INITIALIZED: core::sync::atomic::AtomicBool = 
+static KEYBOARD_INITIALIZED: core::sync::atomic::AtomicBool =
     core::sync::atomic::AtomicBool::new(false);
 
 // Static memory for virtqueue (must be page-aligned)
 // Note: These are only accessed from init() and poll() which are serialized
 // through the KEYBOARD Mutex, so they remain safe.
-const PADDING_SIZE: usize = PAGE_SIZE - size_of::<[VirtqDesc; QUEUE_SIZE]>() - size_of::<VirtqAvail>();
+const PADDING_SIZE: usize =
+    PAGE_SIZE - size_of::<[VirtqDesc; QUEUE_SIZE]>() - size_of::<VirtqAvail>();
 
 #[repr(C, align(4096))]
 struct KeyboardQueueMemory {
@@ -239,31 +267,43 @@ pub fn init() -> bool {
         let base = VIRTIO_MMIO_BASE + i * VIRTIO_MMIO_SIZE;
 
         // Check magic value
-        let magic = unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_MAGIC_VALUE) as *const u32) };
+        let magic =
+            unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_MAGIC_VALUE) as *const u32) };
         if magic != 0x74726976 {
             continue;
         }
 
         // Check version
-        let version = unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_VERSION) as *const u32) };
+        let version =
+            unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_VERSION) as *const u32) };
         if version != 1 && version != 2 {
             continue;
         }
 
         // Check device ID
-        let device_id = unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_DEVICE_ID) as *const u32) };
+        let device_id =
+            unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_DEVICE_ID) as *const u32) };
         if device_id == 0 {
             continue; // Empty slot
         }
-        
+
         if device_id == VIRTIO_INPUT_DEVICE_ID {
-            let _ = writeln!(uart, "[Keyboard] Found VirtIO input device at slot {} (0x{:08x})", i, base);
-            
+            let _ = writeln!(
+                uart,
+                "[Keyboard] Found VirtIO input device at slot {} (0x{:08x})",
+                i, base
+            );
+
             // Check if this is a keyboard (subtype in config space)
             // For VirtIO input, the config space contains device identification
-            let select_byte = unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_CONFIG) as *const u8) };
-            let _ = writeln!(uart, "[Keyboard]   Config select byte: 0x{:02x}", select_byte);
-            
+            let select_byte =
+                unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_CONFIG) as *const u8) };
+            let _ = writeln!(
+                uart,
+                "[Keyboard]   Config select byte: 0x{:02x}",
+                select_byte
+            );
+
             // Initialize the keyboard device
             if init_device(base) {
                 let _ = writeln!(uart, "[Keyboard] VirtIO keyboard initialized successfully");
@@ -295,7 +335,8 @@ fn init_device(mmio_base: usize) -> bool {
         core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *mut u32, status);
 
         // Read and accept device features
-        let _device_features = core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_DEVICE_FEATURES) as *const u32);
+        let _device_features =
+            core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_DEVICE_FEATURES) as *const u32);
         core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_DRIVER_FEATURES) as *mut u32, 0);
 
         // Features OK
@@ -311,24 +352,41 @@ fn init_device(mmio_base: usize) -> bool {
 
         // Set up eventq (queue 0) - receives keyboard events
         core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_QUEUE_SEL) as *mut u32, 0);
-        let queue_max = core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_QUEUE_NUM_MAX) as *const u32);
+        let queue_max =
+            core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_QUEUE_NUM_MAX) as *const u32);
         if queue_max < QUEUE_SIZE as u32 {
-            let _ = writeln!(uart, "[Keyboard] ERROR: Queue too small (max={})", queue_max);
+            let _ = writeln!(
+                uart,
+                "[Keyboard] ERROR: Queue too small (max={})",
+                queue_max
+            );
             return false;
         }
 
         // Set queue size
-        core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_QUEUE_NUM) as *mut u32, QUEUE_SIZE as u32);
+        core::ptr::write_volatile(
+            (mmio_base + VIRTIO_MMIO_QUEUE_NUM) as *mut u32,
+            QUEUE_SIZE as u32,
+        );
 
         // Set guest page size
-        core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_GUEST_PAGE_SIZE) as *mut u32, PAGE_SIZE as u32);
+        core::ptr::write_volatile(
+            (mmio_base + VIRTIO_MMIO_GUEST_PAGE_SIZE) as *mut u32,
+            PAGE_SIZE as u32,
+        );
 
         // Set queue alignment
-        core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_QUEUE_ALIGN) as *mut u32, PAGE_SIZE as u32);
+        core::ptr::write_volatile(
+            (mmio_base + VIRTIO_MMIO_QUEUE_ALIGN) as *mut u32,
+            PAGE_SIZE as u32,
+        );
 
         // Set queue PFN
         let queue_pfn = (&raw const KEYBOARD_QUEUE as usize) / PAGE_SIZE;
-        core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_QUEUE_PFN) as *mut u32, queue_pfn as u32);
+        core::ptr::write_volatile(
+            (mmio_base + VIRTIO_MMIO_QUEUE_PFN) as *mut u32,
+            queue_pfn as u32,
+        );
 
         // Initialize descriptors with event buffers (device writes events to us)
         for i in 0..QUEUE_SIZE {
@@ -369,7 +427,7 @@ fn init_device(mmio_base: usize) -> bool {
 #[allow(static_mut_refs)]
 pub fn poll() {
     use core::sync::atomic::Ordering;
-    
+
     // Quick check without locking
     if !KEYBOARD_INITIALIZED.load(Ordering::Acquire) {
         return;
@@ -404,7 +462,8 @@ pub fn poll() {
                 process_event(&event);
 
                 // Resubmit the buffer
-                KEYBOARD_QUEUE.avail.ring[KEYBOARD_QUEUE.avail.idx as usize % QUEUE_SIZE] = desc_idx as u16;
+                KEYBOARD_QUEUE.avail.ring[KEYBOARD_QUEUE.avail.idx as usize % QUEUE_SIZE] =
+                    desc_idx as u16;
                 core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst);
                 KEYBOARD_QUEUE.avail.idx = KEYBOARD_QUEUE.avail.idx.wrapping_add(1);
             }
@@ -418,7 +477,8 @@ pub fn poll() {
         }
 
         // Acknowledge any pending interrupts
-        let isr = core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_INTERRUPT_STATUS) as *const u32);
+        let isr =
+            core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_INTERRUPT_STATUS) as *const u32);
         if isr != 0 {
             core::ptr::write_volatile((mmio_base + VIRTIO_MMIO_INTERRUPT_ACK) as *mut u32, isr);
         }
@@ -427,6 +487,27 @@ pub fn poll() {
 
 /// Process a keyboard event and convert it to ASCII if applicable.
 fn process_event(event: &VirtioInputEvent) {
+    klog!(
+        uapi::LogLevel::Info,
+        "[Keyboard] Key {} event {} value {}",
+        event.code,
+        event.event_type,
+        event.value
+    );
+
+    // Register shift state
+    if event.event_type == EV_KEY && (event.code == KEY_LEFTSHIFT || event.code == KEY_RIGHTSHIFT) {
+        match event.value {
+            1 => {
+                *SHIFT.lock() = true;
+            }
+            0 => {
+                *SHIFT.lock() = false;
+            }
+            _ => {}
+        }
+    }
+
     // Only process key press events (value=1 means key down)
     if event.event_type != EV_KEY || event.value != 1 {
         return;
@@ -443,75 +524,151 @@ fn process_event(event: &VirtioInputEvent) {
 fn keycode_to_ascii(code: u16) -> Option<u8> {
     // Linux key codes (from linux/input-event-codes.h)
     // This is a subset covering common keys
-    match code {
-        // Number row
-        2 => Some(b'1'),
-        3 => Some(b'2'),
-        4 => Some(b'3'),
-        5 => Some(b'4'),
-        6 => Some(b'5'),
-        7 => Some(b'6'),
-        8 => Some(b'7'),
-        9 => Some(b'8'),
-        10 => Some(b'9'),
-        11 => Some(b'0'),
-        12 => Some(b'-'),
-        13 => Some(b'='),
-        14 => Some(0x08), // Backspace
-        
-        // Top row (QWERTY)
-        15 => Some(b'\t'), // Tab
-        16 => Some(b'q'),
-        17 => Some(b'w'),
-        18 => Some(b'e'),
-        19 => Some(b'r'),
-        20 => Some(b't'),
-        21 => Some(b'y'),
-        22 => Some(b'u'),
-        23 => Some(b'i'),
-        24 => Some(b'o'),
-        25 => Some(b'p'),
-        26 => Some(b'['),
-        27 => Some(b']'),
-        28 => Some(b'\n'), // Enter
-        
-        // Home row (ASDF)
-        30 => Some(b'a'),
-        31 => Some(b's'),
-        32 => Some(b'd'),
-        33 => Some(b'f'),
-        34 => Some(b'g'),
-        35 => Some(b'h'),
-        36 => Some(b'j'),
-        37 => Some(b'k'),
-        38 => Some(b'l'),
-        39 => Some(b';'),
-        40 => Some(b'\''),
-        41 => Some(b'`'),
-        43 => Some(b'\\'),
-        
-        // Bottom row (ZXCV)
-        44 => Some(b'z'),
-        45 => Some(b'x'),
-        46 => Some(b'c'),
-        47 => Some(b'v'),
-        48 => Some(b'b'),
-        49 => Some(b'n'),
-        50 => Some(b'm'),
-        51 => Some(b','),
-        52 => Some(b'.'),
-        53 => Some(b'/'),
-        
-        // Space
-        57 => Some(b' '),
-        
-        // Arrow keys (send ANSI escape sequences would require multiple bytes)
-        // For now, skip them
-        
-        // Escape
-        1 => Some(0x1b),
-        
-        _ => None,
+    match *SHIFT.lock() {
+        true => {
+            match code {
+                // Number row
+                2 => Some(b'!'),
+                3 => Some(b'"'),
+                4 => Some(b'#'),
+                5 => Some(b'$'),
+                6 => Some(b'%'),
+                7 => Some(b'&'),
+                8 => Some(b'/'),
+                9 => Some(b'('),
+                10 => Some(b')'),
+                11 => Some(b'='),
+                12 => Some(b'?'),
+                13 => Some(b'`'),
+                14 => Some(0x08), // Backspace
+
+                // Top row (QWERTY)
+                15 => Some(b'\t'), // Tab
+                16 => Some(b'Q'),
+                17 => Some(b'W'),
+                18 => Some(b'E'),
+                19 => Some(b'R'),
+                20 => Some(b'T'),
+                21 => Some(b'Y'),
+                22 => Some(b'U'),
+                23 => Some(b'I'),
+                24 => Some(b'O'),
+                25 => Some(b'P'),
+                26 => Some(b'{'),
+                27 => Some(b'}'),
+                28 => Some(b'\n'), // Enter
+
+                // Home row (ASDF)
+                30 => Some(b'A'),
+                31 => Some(b'S'),
+                32 => Some(b'D'),
+                33 => Some(b'F'),
+                34 => Some(b'G'),
+                35 => Some(b'H'),
+                36 => Some(b'J'),
+                37 => Some(b'K'),
+                38 => Some(b'L'),
+                39 => Some(b':'),
+                40 => Some(b'\''),
+                41 => Some(b'`'),
+                43 => Some(b'\\'),
+
+                // Bottom row (ZXCV)
+                44 => Some(b'Z'),
+                45 => Some(b'X'),
+                46 => Some(b'C'),
+                47 => Some(b'V'),
+                48 => Some(b'B'),
+                49 => Some(b'N'),
+                50 => Some(b'M'),
+                51 => Some(b';'),
+                52 => Some(b':'),
+                53 => Some(b'_'),
+
+                // Space
+                57 => Some(b' '),
+
+                // Arrow keys (send ANSI escape sequences would require multiple bytes)
+                // For now, skip them
+
+                // Escape
+                1 => Some(0x1b),
+
+                _ => None,
+            }
+        }
+        false => {
+            match code {
+                // Number row
+                2 => Some(b'1'),
+                3 => Some(b'2'),
+                4 => Some(b'3'),
+                5 => Some(b'4'),
+                6 => Some(b'5'),
+                7 => Some(b'6'),
+                8 => Some(b'7'),
+                9 => Some(b'8'),
+                10 => Some(b'9'),
+                11 => Some(b'0'),
+                12 => Some(b'-'),
+                13 => Some(b'='),
+                14 => Some(0x08), // Backspace
+
+                // Top row (QWERTY)
+                15 => Some(b'\t'), // Tab
+                16 => Some(b'q'),
+                17 => Some(b'w'),
+                18 => Some(b'e'),
+                19 => Some(b'r'),
+                20 => Some(b't'),
+                21 => Some(b'y'),
+                22 => Some(b'u'),
+                23 => Some(b'i'),
+                24 => Some(b'o'),
+                25 => Some(b'p'),
+                26 => Some(b'['),
+                27 => Some(b']'),
+                28 => Some(b'\n'), // Enter
+
+                // Home row (ASDF)
+                30 => Some(b'a'),
+                31 => Some(b's'),
+                32 => Some(b'd'),
+                33 => Some(b'f'),
+                34 => Some(b'g'),
+                35 => Some(b'h'),
+                36 => Some(b'j'),
+                37 => Some(b'k'),
+                38 => Some(b'l'),
+                39 => Some(b';'),
+                40 => Some(b'\''),
+                41 => Some(b'`'),
+                43 => Some(b'\\'),
+
+                // Bottom row (ZXCV)
+                44 => Some(b'z'),
+                45 => Some(b'x'),
+                46 => Some(b'c'),
+                47 => Some(b'v'),
+                48 => Some(b'b'),
+                49 => Some(b'n'),
+                50 => Some(b'm'),
+                51 => Some(b','),
+                52 => Some(b'.'),
+                53 => Some(b'-'),
+
+                // Space
+                57 => Some(b' '),
+
+                // Arrow keys (send ANSI escape sequences would require multiple bytes)
+                // For now, skip them
+
+                // Escape
+                1 => Some(0x1b),
+
+                _ => None,
+            }
+        }
     }
 }
 
