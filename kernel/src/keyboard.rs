@@ -1,3 +1,4 @@
+#![allow(unused)]
 // kernel/src/keyboard.rs
 //! VirtIO keyboard driver for QEMU virt machine.
 //!
@@ -52,7 +53,7 @@ const EV_FF: u16 = 0x15;
 const EV_PWR: u16 = 0x16;
 const EV_FF_STATUS: u16 = 0x17;
 const EV_MAX: u16 = 0x1f;
-const EV_CNT: u16 = (EV_MAX + 1);
+const EV_CNT: u16 = EV_MAX + 1;
 
 // Modifier keys
 const KEY_LEFTSHIFT: u16 = 42;
@@ -252,11 +253,10 @@ static mut EVENT_BUFFERS: [VirtioInputEvent; QUEUE_SIZE] = [VirtioInputEvent {
 /// Returns true if keyboard was found and initialized.
 #[allow(static_mut_refs)]
 pub fn init() -> bool {
-    use core::fmt::Write;
-    use core::sync::atomic::Ordering;
-    let mut uart = crate::uart::Uart::new();
-
-    let _ = writeln!(uart, "[Keyboard] Starting VirtIO keyboard probe...");
+    klog!(
+        uapi::LogLevel::Info,
+        "[Keyboard] Starting VirtIO keyboard probe..."
+    );
 
     // Scan VirtIO MMIO slots
     const VIRTIO_MMIO_BASE: usize = 0x10001000;
@@ -288,31 +288,38 @@ pub fn init() -> bool {
         }
 
         if device_id == VIRTIO_INPUT_DEVICE_ID {
-            let _ = writeln!(
-                uart,
+            klog!(
+                uapi::LogLevel::Info,
                 "[Keyboard] Found VirtIO input device at slot {} (0x{:08x})",
-                i, base
+                i,
+                base
             );
 
             // Check if this is a keyboard (subtype in config space)
             // For VirtIO input, the config space contains device identification
             let select_byte =
                 unsafe { core::ptr::read_volatile((base + VIRTIO_MMIO_CONFIG) as *const u8) };
-            let _ = writeln!(
-                uart,
+            klog!(
+                uapi::LogLevel::Info,
                 "[Keyboard]   Config select byte: 0x{:02x}",
                 select_byte
             );
 
             // Initialize the keyboard device
             if init_device(base) {
-                let _ = writeln!(uart, "[Keyboard] VirtIO keyboard initialized successfully");
+                klog!(
+                    uapi::LogLevel::Info,
+                    "[Keyboard] VirtIO keyboard initialized successfully"
+                );
                 return true;
             }
         }
     }
 
-    let _ = writeln!(uart, "[Keyboard] No VirtIO keyboard device found");
+    klog!(
+        uapi::LogLevel::Warn,
+        "[Keyboard] No VirtIO keyboard device found"
+    );
     false
 }
 
@@ -346,7 +353,10 @@ fn init_device(mmio_base: usize) -> bool {
         // Verify features OK
         let status_check = core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_STATUS) as *const u32);
         if (status_check & VIRTIO_STATUS_FEATURES_OK) == 0 {
-            let _ = writeln!(uart, "[Keyboard] ERROR: Device rejected features");
+            klog!(
+                uapi::LogLevel::Error,
+                "[Keyboard] ERROR: Device rejected features"
+            );
             return false;
         }
 
@@ -355,8 +365,8 @@ fn init_device(mmio_base: usize) -> bool {
         let queue_max =
             core::ptr::read_volatile((mmio_base + VIRTIO_MMIO_QUEUE_NUM_MAX) as *const u32);
         if queue_max < QUEUE_SIZE as u32 {
-            let _ = writeln!(
-                uart,
+            klog!(
+                uapi::LogLevel::Error,
                 "[Keyboard] ERROR: Queue too small (max={})",
                 queue_max
             );
@@ -417,7 +427,11 @@ fn init_device(mmio_base: usize) -> bool {
         }
         KEYBOARD_INITIALIZED.store(true, core::sync::atomic::Ordering::Release);
 
-        let _ = writeln!(uart, "[Keyboard] Device initialized at 0x{:08x}", mmio_base);
+        klog!(
+            uapi::LogLevel::Info,
+            "[Keyboard] Device initialized at 0x{:08x}",
+            mmio_base
+        );
         true
     }
 }
