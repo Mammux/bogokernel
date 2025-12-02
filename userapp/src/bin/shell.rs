@@ -68,7 +68,7 @@ fn main() {
             "help" => {
                 println!("Built-in commands: ls, help, shutdown");
                 println!("To run a program, type its name without the .elf extension");
-                println!("Example: hello, rogue, crogue, bigrogue, curses_test, fstest, mkfiles");
+                println!("Example: hello, rogue, crogue, bigrogue, curses_test, fstest, mkfiles, lisp");
             },
             "ls" => {
                 // List files in writable filesystem
