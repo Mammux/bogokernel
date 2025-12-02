@@ -107,15 +107,15 @@ fn write_char_internal(c: u8) {
             }
         }
         b'\x08' => {
-            // Backspace: move cursor back one position
+            // Backspace: move cursor back one position and clear the character
             if state.cursor_x > 0 {
                 state.cursor_x -= 1;
-                // Optionally clear the character at cursor position
+                // Clear the character at cursor position
                 draw_char(fb, state, b' ');
             }
         }
         c if c >= 32 && c <= 126 => {
-            // Printable character
+            // Printable character: draw overwrites any cursor that was there
             draw_char(fb, state, c);
             state.cursor_x += 1;
             if state.cursor_x >= state.width_chars {
@@ -144,10 +144,25 @@ pub fn write_char(c: u8) {
 
 /// Write a string to the console
 pub fn write_str(s: &str) {
+    // First, erase the cursor at its current position
+    let fb = match get_framebuffer() {
+        Some(fb) => fb,
+        None => return,
+    };
+    
+    {
+        let mut state_guard = CONSOLE_STATE.lock();
+        if let Some(state) = state_guard.as_mut() {
+            erase_cursor(fb, state);
+        }
+    }
+    
+    // Then write all the characters
     for byte in s.bytes() {
         write_char_internal(byte);
     }
-    // Reset cursor to visible and draw it after writing
+    
+    // Finally, reset cursor to visible and draw it after writing
     reset_cursor_blink();
     // Flush once after writing all characters for better performance
     crate::display::flush_framebuffer();
