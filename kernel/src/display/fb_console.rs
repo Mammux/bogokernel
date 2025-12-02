@@ -1,6 +1,9 @@
 use crate::display::{get_framebuffer, font};
 use spin::Mutex;
 
+// Cursor appearance constants
+const CURSOR_HEIGHT: usize = 3;  // Height of cursor bar in pixels
+
 /// Console state for text rendering
 pub struct ConsoleState {
     pub cursor_x: usize,
@@ -9,6 +12,7 @@ pub struct ConsoleState {
     pub height_chars: usize,
     pub fg_color: u32,  // Foreground color (XRGB8888)
     pub bg_color: u32,  // Background color (XRGB8888)
+    pub cursor_visible: bool,  // Whether cursor is currently visible (for blinking)
 }
 
 static CONSOLE_STATE: Mutex<Option<ConsoleState>> = Mutex::new(None);
@@ -29,6 +33,7 @@ pub fn init_fb_console() -> Result<(), ()> {
             height_chars,
             fg_color: 0x00FFFFFF,  // White text
             bg_color: 0x00000000,  // Black background
+            cursor_visible: true,  // Start with visible cursor
         };
         
         // Clear screen to background color
@@ -36,6 +41,11 @@ pub fn init_fb_console() -> Result<(), ()> {
         
         // Store console state
         *CONSOLE_STATE.lock() = Some(state);
+        
+        // Draw initial cursor
+        if let Some(ref state) = *CONSOLE_STATE.lock() {
+            draw_cursor(fb, state);
+        }
         
         // Flush framebuffer to display device (GPU)
         crate::display::flush_framebuffer();
@@ -126,6 +136,8 @@ fn write_char_internal(c: u8) {
 #[allow(dead_code)]
 pub fn write_char(c: u8) {
     write_char_internal(c);
+    // Reset cursor to visible after writing
+    reset_cursor_blink();
     // Flush framebuffer to display device (GPU)
     crate::display::flush_framebuffer();
 }
@@ -135,8 +147,124 @@ pub fn write_str(s: &str) {
     for byte in s.bytes() {
         write_char_internal(byte);
     }
+    // Reset cursor to visible and draw it after writing
+    reset_cursor_blink();
     // Flush once after writing all characters for better performance
     crate::display::flush_framebuffer();
+}
+
+/// Draw the cursor at the current position
+fn draw_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
+    if !state.cursor_visible {
+        return;
+    }
+    
+    let info = fb.info();
+    let x_pixel = state.cursor_x * font::FONT_WIDTH;
+    let y_pixel = state.cursor_y * font::FONT_HEIGHT;
+    
+    // Draw cursor as a solid block at the bottom of the character cell
+    unsafe {
+        let buf = fb.back_buffer() as *mut u32;
+        
+        // Draw cursor bar at the bottom
+        for row in (font::FONT_HEIGHT - CURSOR_HEIGHT)..font::FONT_HEIGHT {
+            let y = y_pixel + row;
+            if y >= info.height {
+                break;
+            }
+            
+            for col in 0..font::FONT_WIDTH {
+                let x = x_pixel + col;
+                if x >= info.width {
+                    break;
+                }
+                
+                let offset = y * info.width + x;
+                *buf.add(offset) = state.fg_color;
+            }
+        }
+    }
+}
+
+/// Erase the cursor at the current position
+fn erase_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
+    let info = fb.info();
+    let x_pixel = state.cursor_x * font::FONT_WIDTH;
+    let y_pixel = state.cursor_y * font::FONT_HEIGHT;
+    
+    // Erase cursor by drawing background color
+    unsafe {
+        let buf = fb.back_buffer() as *mut u32;
+        
+        // Erase the cursor bar at the bottom
+        for row in (font::FONT_HEIGHT - CURSOR_HEIGHT)..font::FONT_HEIGHT {
+            let y = y_pixel + row;
+            if y >= info.height {
+                break;
+            }
+            
+            for col in 0..font::FONT_WIDTH {
+                let x = x_pixel + col;
+                if x >= info.width {
+                    break;
+                }
+                
+                let offset = y * info.width + x;
+                *buf.add(offset) = state.bg_color;
+            }
+        }
+    }
+}
+
+/// Toggle cursor visibility and redraw (called from timer interrupt)
+pub fn update_cursor() {
+    let fb = match get_framebuffer() {
+        Some(fb) => fb,
+        None => return,
+    };
+    
+    let mut state_guard = CONSOLE_STATE.lock();
+    let state = match state_guard.as_mut() {
+        Some(s) => s,
+        None => return,
+    };
+    
+    // Erase current cursor
+    if state.cursor_visible {
+        erase_cursor(fb, state);
+    }
+    
+    // Toggle cursor visibility
+    state.cursor_visible = !state.cursor_visible;
+    
+    // Draw cursor if now visible
+    if state.cursor_visible {
+        draw_cursor(fb, state);
+    }
+    
+    // Flush to display
+    crate::display::flush_framebuffer();
+}
+
+/// Reset cursor blink (make it visible after user input)
+fn reset_cursor_blink() {
+    let fb = match get_framebuffer() {
+        Some(fb) => fb,
+        None => return,
+    };
+    
+    let mut state_guard = CONSOLE_STATE.lock();
+    let state = match state_guard.as_mut() {
+        Some(s) => s,
+        None => return,
+    };
+    
+    // Make cursor visible
+    state.cursor_visible = true;
+    
+    // Draw the cursor
+    draw_cursor(fb, state);
 }
 
 /// Draw a character at the current cursor position

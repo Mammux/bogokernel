@@ -274,8 +274,8 @@ impl VirtioGpu {
     fn init_device(mmio_base: usize) -> Option<&'static Self> {
         ktrace!("[VirtIO-GPU] Initializing device at 0x{:08x}", mmio_base);
 
-        const W: usize = 1024;
-        const H: usize = 768;
+        const W: usize = 1920;
+        const H: usize = 1080;
         const SIZE: usize = W * H * 4;
 
         ktrace!("[VirtIO-GPU] Framebuffer: {}x{} = {} bytes", W, H, SIZE);
