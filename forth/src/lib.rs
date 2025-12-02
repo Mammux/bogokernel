@@ -170,7 +170,8 @@ impl Forth {
             }
             "negate" => {
                 let a = self.pop()?;
-                self.push(-a)?;
+                let result = a.checked_neg().ok_or("Arithmetic overflow")?;
+                self.push(result)?;
             }
             
             // Constants
@@ -449,6 +450,13 @@ mod tests {
         let mut forth = Forth::new();
         assert!(forth.eval("5 negate").is_ok());
         assert_eq!(forth.pop(), Ok(-5));
+    }
+
+    #[test]
+    fn test_negate_overflow() {
+        let mut forth = Forth::new();
+        // i32::MIN cannot be negated
+        assert_eq!(forth.eval("-2147483648 negate"), Err("Arithmetic overflow"));
     }
 
     #[test]
