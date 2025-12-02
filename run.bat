@@ -1,7 +1,7 @@
 @echo off
 rem Build libc
 cd libc
-start /b build.bat
+start /wait /b cmd /c build.bat
 cd ..
 
 rem Build User Apps
@@ -16,19 +16,19 @@ cd forth
 cargo build --release --bin forth
 cd ..
 cd rogue
-start /b build.bat
+start /wait /b cmd /c build.bat
 cd ..
 cd crogue
-start /b build.bat
+start /wait /b cmd /c build.bat
 cd ..
 cd c_hello
-start /b build.bat
+start /wait /b cmd /c build.bat
 cd ..
 cd curses_test
-start /b build.bat
+start /wait /b cmd /c build.bat
 cd ..
 cd lisp
-start /b build.bat
+start /wait /b cmd /c build.bat
 cd ..
 
 rem Copy binaries
