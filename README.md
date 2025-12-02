@@ -99,7 +99,10 @@ Interactive command shell loaded at boot. Built-in commands:
 - `help` — Show available commands
 - `shutdown` — Power off the system
 
-Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`).
+Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`, `lisp`).
+
+### Programming Languages
+- **`lisp.elf`** — Interactive LISP REPL with lambda functions and first-class functions ([see LISP README](lisp/README.md))
 
 ### Games
 - **`rogue.elf`** — Rust rogue-like dungeon game
