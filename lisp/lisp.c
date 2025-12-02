@@ -6,6 +6,7 @@
  * - Core primitives: quote, car, cdr, cons, atom, eq, +, -, *, /
  * - Lambda expressions and function application
  * - Define for binding variables
+ * - Macro support with defmacro
  * - Simple garbage collection with mark-and-sweep
  */
 
@@ -28,6 +29,7 @@ typedef enum {
     CELL_SYMBOL,
     CELL_CONS,
     CELL_LAMBDA,
+    CELL_MACRO,
     CELL_PRIMITIVE
 } CellType;
 
@@ -54,6 +56,10 @@ typedef struct Cell {
             struct Cell* body;
             struct Env* env;
         } lambda;
+        struct {
+            struct Cell* params;
+            struct Cell* body;
+        } macro;
         PrimFunc prim;
     };
 } Cell;
@@ -150,6 +156,14 @@ static Cell* make_lambda(Cell* params, Cell* body, Env* env) {
     cell->lambda.params = params;
     cell->lambda.body = body;
     cell->lambda.env = env;
+    return cell;
+}
+
+static Cell* make_macro(Cell* params, Cell* body) {
+    Cell* cell = alloc_cell();
+    cell->type = CELL_MACRO;
+    cell->macro.params = params;
+    cell->macro.body = body;
     return cell;
 }
 
@@ -367,6 +381,46 @@ static Cell* parse_expr() {
 }
 
 /* Evaluator */
+/* Macro expansion */
+static Cell* macroexpand(Cell* expr, Env* env) {
+    if (!expr || expr->type != CELL_CONS) {
+        return expr;
+    }
+    
+    Cell* op = expr->car;
+    if (op->type != CELL_SYMBOL) {
+        return expr;
+    }
+    
+    // Look up the symbol in the environment
+    Cell* value = env_lookup(op, env);
+    if (value->type != CELL_MACRO) {
+        return expr;
+    }
+    
+    // It's a macro - expand it by evaluating the macro body
+    // with parameters bound to the (unevaluated) arguments
+    Cell* args = expr->cdr;
+    
+    // Bind macro parameters to arguments in a new environment
+    Env* macro_env = global_env;  // Start with global environment
+    Cell* params = value->macro.params;
+    Cell* arg_list = args;
+    
+    while (params && params->type == CELL_CONS &&
+           arg_list && arg_list->type == CELL_CONS) {
+        macro_env = env_extend(params->car, arg_list->car, macro_env);
+        params = params->cdr;
+        arg_list = arg_list->cdr;
+    }
+    
+    // Evaluate the macro body with these bindings
+    Cell* expanded = eval(value->macro.body, macro_env);
+    
+    // Recursively expand in case the result is also a macro call
+    return macroexpand(expanded, env);
+}
+
 static Cell* eval_list(Cell* list, Env* env) {
     if (!list || list->type == CELL_NIL) {
         return nil_cell;
@@ -388,12 +442,19 @@ static Cell* eval(Cell* expr, Env* env) {
         case CELL_NUM:
         case CELL_PRIMITIVE:
         case CELL_LAMBDA:
+        case CELL_MACRO:
             return expr;
             
         case CELL_SYMBOL:
             return env_lookup(expr, env);
             
         case CELL_CONS: {
+            // Try macro expansion first
+            Cell* expanded = macroexpand(expr, env);
+            if (expanded != expr) {
+                return eval(expanded, env);
+            }
+            
             Cell* op = expr->car;
             Cell* args = expr->cdr;
             
@@ -427,6 +488,20 @@ static Cell* eval(Cell* expr, Env* env) {
                     if (!args || args->type != CELL_CONS) return nil_cell;
                     Cell* body = args->car;
                     return make_lambda(params, body, env);
+                }
+                else if (strcmp(op->symbol, "defmacro") == 0) {
+                    if (!args || args->type != CELL_CONS) return nil_cell;
+                    Cell* name = args->car;
+                    args = args->cdr;
+                    if (!args || args->type != CELL_CONS) return nil_cell;
+                    Cell* params = args->car;
+                    args = args->cdr;
+                    if (!args || args->type != CELL_CONS) return nil_cell;
+                    Cell* body = args->car;
+                    
+                    Cell* macro = make_macro(params, body);
+                    global_env = env_extend(name, macro, global_env);
+                    return macro;
                 }
                 else if (strcmp(op->symbol, "define") == 0) {
                     if (!args || args->type != CELL_CONS) return nil_cell;
@@ -510,6 +585,9 @@ static void print_cell(Cell* cell) {
             break;
         case CELL_LAMBDA:
             printf("<lambda>");
+            break;
+        case CELL_MACRO:
+            printf("<macro>");
             break;
         case CELL_PRIMITIVE:
             printf("<primitive>");

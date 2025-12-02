@@ -8,7 +8,8 @@ A minimal but functional LISP interpreter running on BogoKernel.
 - **Core primitives**: `car`, `cdr`, `cons`, `atom`, `eq`
 - **Arithmetic**: `+`, `-`, `*`, `/`
 - **Control flow**: `if` conditionals
-- **Special forms**: `quote`, `lambda`, `define`
+- **Special forms**: `quote`, `lambda`, `define`, `defmacro`
+- **Macros**: Compile-time code transformation with macro expansion
 - **Function application**: First-class functions with closures
 - **Simple REPL**: Read-Eval-Print Loop with basic line editing
 
@@ -158,6 +159,42 @@ lisp> (zero? 5)
 nil
 ```
 
+### Macros
+
+Macros allow compile-time code transformation. The macro body is evaluated with the unevaluated arguments bound to the parameters, and the result is inserted into the code for evaluation.
+
+Define a simple `when` macro:
+```lisp
+lisp> (defmacro when (cond body) (cons 'if (cons cond (cons body (cons 'nil 'nil)))))
+<macro>
+
+lisp> (when (eq 1 1) (* 5 5))
+25
+
+lisp> (when (eq 1 2) (* 5 5))
+nil
+```
+
+Define an `inc` macro that increments a number:
+```lisp
+lisp> (defmacro inc (x) (cons '+ (cons x (cons 1 'nil))))
+<macro>
+
+lisp> (inc 41)
+42
+```
+
+Define an `unless` macro (opposite of when):
+```lisp
+lisp> (defmacro unless (cond body) (cons 'if (cons cond (cons 'nil (cons body 'nil)))))
+<macro>
+
+lisp> (unless (eq 1 2) (+ 10 20))
+30
+```
+
+Macros can be used to create custom control structures and syntax extensions. They are expanded before evaluation, allowing you to manipulate code as data.
+
 ## Language Reference
 
 ### Primitives
@@ -181,6 +218,7 @@ nil
 - `(if cond then else)` - Evaluates `then` if `cond` is non-nil, else evaluates `else`
 - `(lambda (params...) body)` - Creates an anonymous function
 - `(define symbol value)` - Binds symbol to value in global environment
+- `(defmacro name (params...) body)` - Defines a macro for compile-time code transformation
 
 ### Data Types
 
