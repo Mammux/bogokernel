@@ -584,7 +584,7 @@ fn keycode_to_ascii(code: u16) -> Option<u8> {
                 38 => Some(b'L'),
                 39 => Some(b':'),
                 40 => Some(b'\''),
-                41 => Some(b'`'),
+                41 => Some(b'*'),
                 43 => Some(b'\\'),
 
                 // Bottom row (ZXCV)
@@ -624,8 +624,8 @@ fn keycode_to_ascii(code: u16) -> Option<u8> {
                 9 => Some(b'8'),
                 10 => Some(b'9'),
                 11 => Some(b'0'),
-                12 => Some(b'-'),
-                13 => Some(b'='),
+                12 => Some(b'+'),
+                13 => Some(b'\\'),
                 14 => Some(0x08), // Backspace
 
                 // Top row (QWERTY)
@@ -656,7 +656,7 @@ fn keycode_to_ascii(code: u16) -> Option<u8> {
                 38 => Some(b'l'),
                 39 => Some(b';'),
                 40 => Some(b'\''),
-                41 => Some(b'`'),
+                41 => Some(b'\''),
                 43 => Some(b'\\'),
 
                 // Bottom row (ZXCV)
