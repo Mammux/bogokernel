@@ -487,7 +487,7 @@ char *fgets(char *s, int size, FILE *stream) {
       }
       s[i++] = c;
       /* Echo the character back to stdout for visibility */
-      write(1, &c, 1);
+      write(STDOUT_FILENO, &c, 1);
       if (c == '\n') {
         break;
       }
