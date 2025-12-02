@@ -56,6 +56,10 @@ pub static FILES: &[File] = &[
         data: include_bytes!("../gputest.elf"),
     },
     File {
+        name: "forth.elf",
+        data: include_bytes!("../forth.elf"),
+    },
+    File {
         name: "etc/motd",
         data: ETC_MOTD,
     },

@@ -1,0 +1,16 @@
+[package]
+name = "forth"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "forth"
+test = false
+bench = false
+
+[package.metadata.cargo-xbuild]
+target = "riscv64gc-unknown-none-elf"
+
+[dependencies]
+usys = { path = "../usys" }
+uapi = { path = "../uapi" }

@@ -29,6 +29,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "361a90feb7004eca4019fb28352a9465666b24f840f5c3cddf0ff13920590b89"
 
 [[package]]
+name = "forth"
+version = "0.1.0"
+dependencies = [
+ "uapi",
+ "usys",
+]
+
+[[package]]
 name = "goblin"
 version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
