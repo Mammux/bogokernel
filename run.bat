@@ -1,7 +1,7 @@
 @echo off
 rem Build libc
 cd libc
-call build.bat
+start /b build.bat
 cd ..
 
 rem Build User Apps
@@ -12,17 +12,23 @@ cargo build --release --bin fstest
 cargo build --release --bin mkfiles
 cargo build --release --bin gputest
 cd ..
+cd forth
+cargo build --release --bin forth
+cd ..
 cd rogue
-call build.bat
+start /b build.bat
 cd ..
 cd crogue
-call build.bat
+start /b build.bat
 cd ..
 cd c_hello
-call build.bat
+start /b build.bat
 cd ..
 cd curses_test
-call build.bat
+start /b build.bat
+cd ..
+cd lisp
+start /b build.bat
 cd ..
 
 rem Copy binaries
@@ -31,7 +37,7 @@ copy target\riscv64gc-unknown-none-elf\release\rogue kernel\rogue.elf
 copy target\riscv64gc-unknown-none-elf\release\fstest kernel\fstest.elf
 copy target\riscv64gc-unknown-none-elf\release\mkfiles kernel\mkfiles.elf
 copy target\riscv64gc-unknown-none-elf\release\gputest kernel\gputest.elf
-copy target\riscv64gc-unknown-none-elf\release\curses_test kernel\curses_test.elf
+copy target\riscv64gc-unknown-none-elf\release\forth kernel\forth.elf
 
 rem Build C App (if compiler exists, otherwise assume hello.elf exists or skip)
 if exist c_hello\hello.elf copy c_hello\hello.elf kernel\hello.elf
