@@ -107,6 +107,11 @@ extern "C" fn rust_start() -> ! {
     }
     let _ = writeln!(uart, "Vec sum = {}", v.iter().sum::<u32>());
 
+    // --- Calibrate BogoMIPS ---
+    let _ = writeln!(uart, "Calibrating delay loop... ");
+    let bogomips = timer::calibrate_bogomips();
+    let _ = writeln!(uart, "BogoMIPS: {}.{:02}", bogomips / 100, bogomips % 100);
+
     // --- Initialize writable filesystem with embedded files ---
     fs::init_writable_fs();
     let _ = writeln!(uart, "Writable filesystem initialized with embedded files");

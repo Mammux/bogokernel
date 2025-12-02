@@ -31,3 +31,40 @@ pub fn on_timer() {
         let _ = writeln!(uart, "tick {t}");
     } */
 }
+
+/// Calibrate bogomips by running a delay loop for a fixed duration
+/// Returns the calculated bogomips value scaled by 100 (for XX.YY format)
+pub fn calibrate_bogomips() -> u64 {
+    // Get the timebase frequency from OpenSBI
+    // On QEMU virt, it's typically 10 MHz (10,000,000 Hz)
+    const TIMEBASE_HZ: u64 = 10_000_000;
+    
+    // Calibration duration in seconds
+    const CALIBRATION_SECONDS: u64 = 1;
+    const CALIBRATION_CYCLES: u64 = TIMEBASE_HZ * CALIBRATION_SECONDS;
+    
+    // Measure time before
+    let start_time: u64 = time::read() as u64;
+    let target_time = start_time + CALIBRATION_CYCLES;
+    
+    // Run the delay loop and count iterations
+    let mut loops: u64 = 0;
+    while (time::read() as u64) < target_time {
+        // Simple delay loop - similar to Linux's delay_loop
+        for _ in 0..1000 {
+            core::hint::black_box(());
+        }
+        loops += 1;
+    }
+    
+    let end_time: u64 = time::read() as u64;
+    let elapsed_cycles = end_time - start_time;
+    
+    // Calculate loops per second
+    let total_loops = loops * 1000; // multiply by inner loop count
+    let loops_per_second = (total_loops * TIMEBASE_HZ) / elapsed_cycles;
+    
+    // BogoMIPS = (loops per second * 100) / 1,000,000
+    // This gives us a value scaled by 100 for XX.YY format
+    (loops_per_second * 100) / 1_000_000
+}
