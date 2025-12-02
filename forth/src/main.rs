@@ -2,263 +2,7 @@
 #![no_main]
 
 use usys::{print, println, IoRead, STDIN, exit};
-
-// Maximum stack depth
-const STACK_SIZE: usize = 64;
-
-// Forth interpreter state
-struct Forth {
-    stack: [i32; STACK_SIZE],
-    sp: usize, // stack pointer (points to next free slot)
-}
-
-impl Forth {
-    fn new() -> Self {
-        Forth {
-            stack: [0; STACK_SIZE],
-            sp: 0,
-        }
-    }
-
-    fn push(&mut self, val: i32) -> Result<(), &'static str> {
-        if self.sp >= STACK_SIZE {
-            Err("Stack overflow")
-        } else {
-            self.stack[self.sp] = val;
-            self.sp += 1;
-            Ok(())
-        }
-    }
-
-    fn pop(&mut self) -> Result<i32, &'static str> {
-        if self.sp == 0 {
-            Err("Stack underflow")
-        } else {
-            self.sp -= 1;
-            Ok(self.stack[self.sp])
-        }
-    }
-
-    fn peek(&self) -> Result<i32, &'static str> {
-        if self.sp == 0 {
-            Err("Stack empty")
-        } else {
-            Ok(self.stack[self.sp - 1])
-        }
-    }
-
-    // Execute a single word
-    fn execute_word(&mut self, word: &str) -> Result<(), &'static str> {
-        match word {
-            // Arithmetic operations (using checked arithmetic to prevent overflow)
-            "+" => {
-                let b = self.pop()?;
-                let a = self.pop()?;
-                let result = a.checked_add(b).ok_or("Arithmetic overflow")?;
-                self.push(result)?;
-            }
-            "-" => {
-                let b = self.pop()?;
-                let a = self.pop()?;
-                let result = a.checked_sub(b).ok_or("Arithmetic overflow")?;
-                self.push(result)?;
-            }
-            "*" => {
-                let b = self.pop()?;
-                let a = self.pop()?;
-                let result = a.checked_mul(b).ok_or("Arithmetic overflow")?;
-                self.push(result)?;
-            }
-            "/" => {
-                let b = self.pop()?;
-                if b == 0 {
-                    return Err("Division by zero");
-                }
-                let a = self.pop()?;
-                // Handle special case: i32::MIN / -1 causes overflow
-                let result = a.checked_div(b).ok_or("Arithmetic overflow")?;
-                self.push(result)?;
-            }
-            "mod" => {
-                let b = self.pop()?;
-                if b == 0 {
-                    return Err("Division by zero");
-                }
-                let a = self.pop()?;
-                // Handle special case: i32::MIN % -1 causes overflow
-                let result = a.checked_rem(b).ok_or("Arithmetic overflow")?;
-                self.push(result)?;
-            }
-            
-            // Stack manipulation
-            "dup" => {
-                let a = self.peek()?;
-                self.push(a)?;
-            }
-            "drop" => {
-                self.pop()?;
-            }
-            "swap" => {
-                let b = self.pop()?;
-                let a = self.pop()?;
-                self.push(b)?;
-                self.push(a)?;
-            }
-            "over" => {
-                if self.sp < 2 {
-                    return Err("Stack underflow");
-                }
-                let val = self.stack[self.sp - 2];
-                self.push(val)?;
-            }
-            "rot" => {
-                // ( a b c -- b c a )
-                if self.sp < 3 {
-                    return Err("Stack underflow");
-                }
-                let c = self.pop()?;
-                let b = self.pop()?;
-                let a = self.pop()?;
-                self.push(b)?;
-                self.push(c)?;
-                self.push(a)?;
-            }
-            
-            // I/O operations
-            "." => {
-                let val = self.pop()?;
-                println!("{} ", val);
-            }
-            ".s" => {
-                print!("<{}> ", self.sp);
-                for i in 0..self.sp {
-                    print!("{} ", self.stack[i]);
-                }
-                println!();
-            }
-            "cr" => {
-                println!();
-            }
-            "emit" => {
-                let val = self.pop()?;
-                if val >= 0 && val <= 127 {
-                    print!("{}", val as u8 as char);
-                } else {
-                    return Err("Invalid character code");
-                }
-            }
-            
-            // Comparison operations
-            "=" => {
-                let b = self.pop()?;
-                let a = self.pop()?;
-                self.push(if a == b { -1 } else { 0 })?;
-            }
-            "<" => {
-                let b = self.pop()?;
-                let a = self.pop()?;
-                self.push(if a < b { -1 } else { 0 })?;
-            }
-            ">" => {
-                let b = self.pop()?;
-                let a = self.pop()?;
-                self.push(if a > b { -1 } else { 0 })?;
-            }
-            
-            // Logical operations
-            "and" => {
-                let b = self.pop()?;
-                let a = self.pop()?;
-                self.push(a & b)?;
-            }
-            "or" => {
-                let b = self.pop()?;
-                let a = self.pop()?;
-                self.push(a | b)?;
-            }
-            "xor" => {
-                let b = self.pop()?;
-                let a = self.pop()?;
-                self.push(a ^ b)?;
-            }
-            "invert" => {
-                let a = self.pop()?;
-                self.push(!a)?;
-            }
-            "negate" => {
-                let a = self.pop()?;
-                self.push(-a)?;
-            }
-            
-            // Constants
-            "true" => {
-                self.push(-1)?;
-            }
-            "false" => {
-                self.push(0)?;
-            }
-            
-            "" => {
-                // Empty word, do nothing
-            }
-            
-            _ => {
-                // Try to parse as a number
-                if let Some(num) = parse_number(word) {
-                    self.push(num)?;
-                } else {
-                    return Err("Unknown word");
-                }
-            }
-        }
-        Ok(())
-    }
-
-    // Evaluate a line of Forth code
-    fn eval(&mut self, line: &str) -> Result<(), &'static str> {
-        let words = line.split_whitespace();
-        for word in words {
-            self.execute_word(word)?;
-        }
-        Ok(())
-    }
-}
-
-// Parse a number (handles negative numbers)
-fn parse_number(s: &str) -> Option<i32> {
-    let mut result = 0i32;
-    let mut chars = s.chars();
-    let mut negative = false;
-    
-    // Check for negative sign
-    if let Some(first) = chars.next() {
-        if first == '-' {
-            negative = true;
-        } else if let Some(digit) = first.to_digit(10) {
-            result = digit as i32;
-        } else {
-            return None;
-        }
-    } else {
-        return None;
-    }
-    
-    // Parse remaining digits
-    for c in chars {
-        if let Some(digit) = c.to_digit(10) {
-            result = result.checked_mul(10)?;
-            result = result.checked_add(digit as i32)?;
-        } else {
-            return None;
-        }
-    }
-    
-    if negative {
-        result = -result;
-    }
-    
-    Some(result)
-}
+use forth::Forth;
 
 // Read a line from stdin
 fn read_line(buf: &mut [u8]) -> usize {
@@ -283,6 +27,49 @@ fn read_line(buf: &mut [u8]) -> usize {
         }
     }
     len
+}
+
+// Execute a word with I/O operations
+fn execute_word_with_io(forth: &mut Forth, word: &str) -> Result<(), &'static str> {
+    match word {
+        // I/O operations that need usys
+        "." => {
+            let val = forth.pop()?;
+            println!("{} ", val);
+        }
+        ".s" => {
+            print!("<{}> ", forth.depth());
+            for val in forth.stack_contents() {
+                print!("{} ", val);
+            }
+            println!();
+        }
+        "cr" => {
+            println!();
+        }
+        "emit" => {
+            let val = forth.pop()?;
+            if val >= 0 && val <= 127 {
+                print!("{}", val as u8 as char);
+            } else {
+                return Err("Invalid character code");
+            }
+        }
+        // For all other words, use the library implementation
+        _ => {
+            forth.execute_word(word)?;
+        }
+    }
+    Ok(())
+}
+
+// Evaluate a line with I/O support
+fn eval_with_io(forth: &mut Forth, line: &str) -> Result<(), &'static str> {
+    let words = line.split_whitespace();
+    for word in words {
+        execute_word_with_io(forth, word)?;
+    }
+    Ok(())
 }
 
 #[no_mangle]
@@ -325,7 +112,7 @@ pub extern "C" fn _start(_argc: usize, _argv: *const *const u8, _envp: *const *c
         }
         
         // Evaluate the input
-        match forth.eval(input) {
+        match eval_with_io(&mut forth, input) {
             Ok(()) => {
                 // Success - show "ok" on next iteration
             }
