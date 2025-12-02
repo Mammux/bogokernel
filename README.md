@@ -101,7 +101,11 @@ Interactive command shell loaded at boot. Built-in commands:
 - `help` — Show available commands
 - `shutdown` — Power off the system
 
-Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`, `forth`).
+Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`, `forth`, `lisp`).
+
+### Programming Languages
+- **`lisp.elf`** — Interactive LISP REPL with lambda functions and first-class functions ([see LISP README](lisp/README.md))
+- **`forth.elf`** — Forth interpreter with REPL (stack-based programming language)
 
 ### Games
 - **`rogue.elf`** — Rust rogue-like dungeon game
@@ -111,7 +115,7 @@ Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`, `forth`).
 ### Utilities
 - **`fstest.elf`** — Filesystem test utility (tests file creation/writing)
 - **`mkfiles.elf`** — File creation test
-- **`forth.elf`** — Forth interpreter with REPL (stack-based programming language)
+
 
 ### Tests
 - **`curses_test.elf`** — Curses library test
