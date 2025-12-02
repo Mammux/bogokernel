@@ -294,9 +294,10 @@ fn draw_char(fb: &dyn crate::display::Framebuffer, state: &ConsoleState, c: u8) 
                     break;
                 }
                 
-                // Check if pixel is set (bit position matches column)
-                // This corrects the horizontally mirrored characters
-                let pixel_set = (bitmap_row & (1 << col)) != 0;
+                // Check if pixel is set
+                // Font format: bit 7 (MSB) is leftmost pixel, bit 0 is rightmost
+                // So for column 0 (leftmost), we check bit 7; for column 7 (rightmost), we check bit 0
+                let pixel_set = (bitmap_row & (1 << (7 - col))) != 0;
                 let color = if pixel_set {
                     state.fg_color
                 } else {
