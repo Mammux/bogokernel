@@ -144,20 +144,7 @@ Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`, `forth`, `
 
 ### Build Steps
 
-The project uses a Cargo workspace. Build individual applications, then build the kernel which embeds them:
-
-```sh
-# Build user applications
-cargo build -p cat --release
-cargo build -p userapp --release  # rogue
-
-# Copy to kernel directory (embedded via include_bytes!)
-cp target/riscv64gc-unknown-none-elf/release/cat kernel/cat.elf
-cp target/riscv64gc-unknown-none-elf/release/userapp kernel/rogue.elf
-
-# Build the kernel (embeds all .elf files)
-cargo build -Z build-std=core --target riscv64gc-unknown-none-elf -p kernel
-```
+The project uses a Cargo workspace. Build individual applications, then build the kernel which embeds them. See `run.bat` for a complete build script.
 
 ### Run in QEMU
 
