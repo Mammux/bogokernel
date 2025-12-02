@@ -19,6 +19,9 @@ pub fn init() {
     sbi::set_timer(now + TICK_INTERVAL); // program next interrupt
 }
 
+// Cursor blink rate in timer ticks (50 ticks * 10ms = 500ms)
+const CURSOR_BLINK_TICKS: u64 = 50;
+
 pub fn on_timer() {
     // acknowledge and schedule next
     let now: u64 = time::read().try_into().unwrap();
@@ -26,8 +29,8 @@ pub fn on_timer() {
 
     let t = TICKS.fetch_add(1, Ordering::Relaxed) + 1;
 
-    // Update cursor blink every 50 ticks (~500ms with 10ms ticks)
-    if t % 50 == 0 {
+    // Update cursor blink every CURSOR_BLINK_TICKS (~500ms with 10ms ticks)
+    if t % CURSOR_BLINK_TICKS == 0 {
         crate::console::update_cursor_blink();
     }
 

@@ -135,8 +135,8 @@ fn write_char_internal(c: u8) {
 #[allow(dead_code)]
 pub fn write_char(c: u8) {
     write_char_internal(c);
-    // Update cursor after writing
-    update_cursor();
+    // Reset cursor to visible after writing
+    reset_cursor_blink();
     // Flush framebuffer to display device (GPU)
     crate::display::flush_framebuffer();
 }
@@ -146,8 +146,8 @@ pub fn write_str(s: &str) {
     for byte in s.bytes() {
         write_char_internal(byte);
     }
-    // Update cursor after writing
-    update_cursor();
+    // Reset cursor to visible and draw it after writing
+    reset_cursor_blink();
     // Flush once after writing all characters for better performance
     crate::display::flush_framebuffer();
 }
@@ -186,7 +186,37 @@ fn draw_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
     }
 }
 
-/// Update the cursor display (handle blinking)
+/// Erase the cursor at the current position
+fn erase_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
+    let info = fb.info();
+    let x_pixel = state.cursor_x * font::FONT_WIDTH;
+    let y_pixel = state.cursor_y * font::FONT_HEIGHT;
+    
+    // Erase cursor by drawing background color
+    unsafe {
+        let buf = fb.back_buffer() as *mut u32;
+        
+        // Erase the 3-pixel high cursor bar at the bottom
+        for row in (font::FONT_HEIGHT - 3)..font::FONT_HEIGHT {
+            let y = y_pixel + row;
+            if y >= info.height {
+                break;
+            }
+            
+            for col in 0..font::FONT_WIDTH {
+                let x = x_pixel + col;
+                if x >= info.width {
+                    break;
+                }
+                
+                let offset = y * info.width + x;
+                *buf.add(offset) = state.bg_color;
+            }
+        }
+    }
+}
+
+/// Toggle cursor visibility and redraw (called from timer interrupt)
 pub fn update_cursor() {
     let fb = match get_framebuffer() {
         Some(fb) => fb,
@@ -199,14 +229,39 @@ pub fn update_cursor() {
         None => return,
     };
     
-    // Increment blink counter
-    state.cursor_blink_counter += 1;
-    
-    // Toggle cursor visibility every 30 calls (adjust for desired blink rate)
-    if state.cursor_blink_counter >= 30 {
-        state.cursor_visible = !state.cursor_visible;
-        state.cursor_blink_counter = 0;
+    // Erase current cursor
+    if state.cursor_visible {
+        erase_cursor(fb, state);
     }
+    
+    // Toggle cursor visibility
+    state.cursor_visible = !state.cursor_visible;
+    
+    // Draw cursor if now visible
+    if state.cursor_visible {
+        draw_cursor(fb, state);
+    }
+    
+    // Flush to display
+    crate::display::flush_framebuffer();
+}
+
+/// Reset cursor blink (make it visible after user input)
+fn reset_cursor_blink() {
+    let fb = match get_framebuffer() {
+        Some(fb) => fb,
+        None => return,
+    };
+    
+    let mut state_guard = CONSOLE_STATE.lock();
+    let state = match state_guard.as_mut() {
+        Some(s) => s,
+        None => return,
+    };
+    
+    // Make cursor visible and reset counter
+    state.cursor_visible = true;
+    state.cursor_blink_counter = 0;
     
     // Draw the cursor
     draw_cursor(fb, state);
