@@ -6,9 +6,6 @@ use usys::{print, println, IoRead, STDIN, exit};
 // Maximum stack depth
 const STACK_SIZE: usize = 64;
 
-// Maximum word length
-const MAX_WORD_LEN: usize = 32;
-
 // Forth interpreter state
 struct Forth {
     stack: [i32; STACK_SIZE],
@@ -50,28 +47,27 @@ impl Forth {
         }
     }
 
-    fn depth(&self) -> usize {
-        self.sp
-    }
-
     // Execute a single word
     fn execute_word(&mut self, word: &str) -> Result<(), &'static str> {
         match word {
-            // Arithmetic operations
+            // Arithmetic operations (using checked arithmetic to prevent overflow)
             "+" => {
                 let b = self.pop()?;
                 let a = self.pop()?;
-                self.push(a + b)?;
+                let result = a.checked_add(b).ok_or("Arithmetic overflow")?;
+                self.push(result)?;
             }
             "-" => {
                 let b = self.pop()?;
                 let a = self.pop()?;
-                self.push(a - b)?;
+                let result = a.checked_sub(b).ok_or("Arithmetic overflow")?;
+                self.push(result)?;
             }
             "*" => {
                 let b = self.pop()?;
                 let a = self.pop()?;
-                self.push(a * b)?;
+                let result = a.checked_mul(b).ok_or("Arithmetic overflow")?;
+                self.push(result)?;
             }
             "/" => {
                 let b = self.pop()?;
@@ -79,7 +75,9 @@ impl Forth {
                     return Err("Division by zero");
                 }
                 let a = self.pop()?;
-                self.push(a / b)?;
+                // Handle special case: i32::MIN / -1 causes overflow
+                let result = a.checked_div(b).ok_or("Arithmetic overflow")?;
+                self.push(result)?;
             }
             "mod" => {
                 let b = self.pop()?;
@@ -87,7 +85,9 @@ impl Forth {
                     return Err("Division by zero");
                 }
                 let a = self.pop()?;
-                self.push(a % b)?;
+                // Handle special case: i32::MIN % -1 causes overflow
+                let result = a.checked_rem(b).ok_or("Arithmetic overflow")?;
+                self.push(result)?;
             }
             
             // Stack manipulation
