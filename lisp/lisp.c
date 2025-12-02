@@ -394,7 +394,8 @@ static Cell* macroexpand(Cell* expr, Env* env) {
     
     // Look up the symbol in the environment
     Cell* value = env_lookup(op, env);
-    if (value->type != CELL_MACRO) {
+    // Check if lookup succeeded and value is a macro
+    if (!value || value->type == CELL_NIL || value->type != CELL_MACRO) {
         return expr;
     }
     
@@ -402,8 +403,9 @@ static Cell* macroexpand(Cell* expr, Env* env) {
     // with parameters bound to the (unevaluated) arguments
     Cell* args = expr->cdr;
     
-    // Bind macro parameters to arguments in a new environment
-    Env* macro_env = global_env;  // Start with global environment
+    // Bind macro parameters to arguments starting from current environment
+    // This allows macros to access locally defined functions/variables
+    Env* macro_env = env;
     Cell* params = value->macro.params;
     Cell* arg_list = args;
     
