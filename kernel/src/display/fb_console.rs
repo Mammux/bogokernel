@@ -1,6 +1,9 @@
 use crate::display::{get_framebuffer, font};
 use spin::Mutex;
 
+// Cursor appearance constants
+const CURSOR_HEIGHT: usize = 3;  // Height of cursor bar in pixels
+
 /// Console state for text rendering
 pub struct ConsoleState {
     pub cursor_x: usize,
@@ -10,7 +13,6 @@ pub struct ConsoleState {
     pub fg_color: u32,  // Foreground color (XRGB8888)
     pub bg_color: u32,  // Background color (XRGB8888)
     pub cursor_visible: bool,  // Whether cursor is currently visible (for blinking)
-    pub cursor_blink_counter: usize,  // Counter for cursor blinking
 }
 
 static CONSOLE_STATE: Mutex<Option<ConsoleState>> = Mutex::new(None);
@@ -32,7 +34,6 @@ pub fn init_fb_console() -> Result<(), ()> {
             fg_color: 0x00FFFFFF,  // White text
             bg_color: 0x00000000,  // Black background
             cursor_visible: true,  // Start with visible cursor
-            cursor_blink_counter: 0,
         };
         
         // Clear screen to background color
@@ -162,12 +163,12 @@ fn draw_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
     let x_pixel = state.cursor_x * font::FONT_WIDTH;
     let y_pixel = state.cursor_y * font::FONT_HEIGHT;
     
-    // Draw cursor as a solid block at the bottom 3 pixels of the character cell
+    // Draw cursor as a solid block at the bottom of the character cell
     unsafe {
         let buf = fb.back_buffer() as *mut u32;
         
-        // Draw a 3-pixel high cursor bar at the bottom
-        for row in (font::FONT_HEIGHT - 3)..font::FONT_HEIGHT {
+        // Draw cursor bar at the bottom
+        for row in (font::FONT_HEIGHT - CURSOR_HEIGHT)..font::FONT_HEIGHT {
             let y = y_pixel + row;
             if y >= info.height {
                 break;
@@ -196,8 +197,8 @@ fn erase_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
     unsafe {
         let buf = fb.back_buffer() as *mut u32;
         
-        // Erase the 3-pixel high cursor bar at the bottom
-        for row in (font::FONT_HEIGHT - 3)..font::FONT_HEIGHT {
+        // Erase the cursor bar at the bottom
+        for row in (font::FONT_HEIGHT - CURSOR_HEIGHT)..font::FONT_HEIGHT {
             let y = y_pixel + row;
             if y >= info.height {
                 break;
@@ -259,9 +260,8 @@ fn reset_cursor_blink() {
         None => return,
     };
     
-    // Make cursor visible and reset counter
+    // Make cursor visible
     state.cursor_visible = true;
-    state.cursor_blink_counter = 0;
     
     // Draw the cursor
     draw_cursor(fb, state);
