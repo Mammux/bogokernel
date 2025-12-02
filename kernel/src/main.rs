@@ -83,8 +83,8 @@ extern "C" fn rust_start() -> ! {
     trap::init(); // set stvec + enable SIE/STIE
     let _ = writeln!(uart, "traps enabled");
 
-    // timer::init(); // arm first tick
-    // let _ = writeln!(uart, "timers initialized");
+    timer::init(); // arm first tick
+    let _ = writeln!(uart, "timers initialized");
 
     unsafe {
         sv39::enable_sv39();

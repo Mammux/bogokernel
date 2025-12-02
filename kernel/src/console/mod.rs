@@ -34,3 +34,11 @@ pub fn init_console() {
         }
     }
 }
+
+/// Update cursor blink state (called from timer interrupt)
+pub fn update_cursor_blink() {
+    // Only update if GPU mode is active
+    if cmdline::display_mode() == crate::display::DisplayMode::Gpu {
+        fb_console::update_cursor();
+    }
+}

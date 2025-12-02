@@ -13,11 +13,10 @@ const TICK_INTERVAL: u64 = 100_000;
 // Timebase frequency in Hz (10 MHz on QEMU virt with OpenSBI)
 const TIMEBASE_HZ: u64 = 10_000_000;
 
-#[allow(dead_code)]
 pub fn init() {
     // Arm first tick
-    // let now: u64 = time::read().try_into().unwrap(); // allowed in S-mode on QEMU virt (OpenSBI delegates time)
-    // sbi::set_timer(now + TICK_INTERVAL); // program next interrupt
+    let now: u64 = time::read().try_into().unwrap(); // allowed in S-mode on QEMU virt (OpenSBI delegates time)
+    sbi::set_timer(now + TICK_INTERVAL); // program next interrupt
 }
 
 pub fn on_timer() {
@@ -25,7 +24,12 @@ pub fn on_timer() {
     let now: u64 = time::read().try_into().unwrap();
     sbi::set_timer(now + TICK_INTERVAL);
 
-    let _t = TICKS.fetch_add(1, Ordering::Relaxed) + 1;
+    let t = TICKS.fetch_add(1, Ordering::Relaxed) + 1;
+
+    // Update cursor blink every 50 ticks (~500ms with 10ms ticks)
+    if t % 50 == 0 {
+        crate::console::update_cursor_blink();
+    }
 
     // light logging every 50 ticks to avoid spamming
     /* if t.is_multiple_of(50) {

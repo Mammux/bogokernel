@@ -41,6 +41,11 @@ pub fn init_fb_console() -> Result<(), ()> {
         // Store console state
         *CONSOLE_STATE.lock() = Some(state);
         
+        // Draw initial cursor
+        if let Some(ref state) = *CONSOLE_STATE.lock() {
+            draw_cursor(fb, state);
+        }
+        
         // Flush framebuffer to display device (GPU)
         crate::display::flush_framebuffer();
         Ok(())
@@ -157,12 +162,12 @@ fn draw_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
     let x_pixel = state.cursor_x * font::FONT_WIDTH;
     let y_pixel = state.cursor_y * font::FONT_HEIGHT;
     
-    // Draw cursor as a block at the bottom of the character cell
+    // Draw cursor as a solid block at the bottom 3 pixels of the character cell
     unsafe {
         let buf = fb.back_buffer() as *mut u32;
         
-        // Draw a 2-pixel high cursor bar at the bottom
-        for row in (font::FONT_HEIGHT - 2)..font::FONT_HEIGHT {
+        // Draw a 3-pixel high cursor bar at the bottom
+        for row in (font::FONT_HEIGHT - 3)..font::FONT_HEIGHT {
             let y = y_pixel + row;
             if y >= info.height {
                 break;
