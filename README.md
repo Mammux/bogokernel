@@ -54,6 +54,7 @@ This is a Cargo workspace with multiple packages:
 - **`usys`** — User-space syscall wrapper library with I/O helpers
 - **`userapp`** — User applications (shell, rogue, fstest, mkfiles, gputest)
 - **`cat`** — Cat utility for reading files
+- **`forth`** — Forth interpreter (stack-based programming language)
 - **`c_hello`** — C language hello world example
 - **`crogue`** — C mini rogue game
 - **`curses_test`** — C curses library test
@@ -78,6 +79,7 @@ The following files are embedded at compile time and available at boot:
 - `dungeon.map` — Map data for the rogue game
 - `shell.elf` — Interactive shell (loaded at boot)
 - `rogue.elf` — Rogue-like game (Rust)
+- `forth.elf` — Forth interpreter (Rust)
 - `hello.elf` — Hello world example (C)
 - `crogue.elf` — Mini rogue game (C)
 - `curses_test.elf` — Curses library test (C)
@@ -99,7 +101,7 @@ Interactive command shell loaded at boot. Built-in commands:
 - `help` — Show available commands
 - `shutdown` — Power off the system
 
-Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`).
+Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`, `forth`).
 
 ### Games
 - **`rogue.elf`** — Rust rogue-like dungeon game
@@ -109,6 +111,7 @@ Run any program by typing its name (e.g., `hello`, `rogue`, `crogue`).
 ### Utilities
 - **`fstest.elf`** — Filesystem test utility (tests file creation/writing)
 - **`mkfiles.elf`** — File creation test
+- **`forth.elf`** — Forth interpreter with REPL (stack-based programming language)
 
 ### Tests
 - **`curses_test.elf`** — Curses library test
