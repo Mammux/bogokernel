@@ -502,7 +502,7 @@ pub fn poll() {
 /// Process a keyboard event and convert it to ASCII if applicable.
 fn process_event(event: &VirtioInputEvent) {
     klog!(
-        uapi::LogLevel::Info,
+        uapi::LogLevel::Trace,
         "[Keyboard] Key {} event {} value {}",
         event.code,
         event.event_type,

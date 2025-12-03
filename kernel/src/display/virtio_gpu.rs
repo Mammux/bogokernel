@@ -1,5 +1,7 @@
 use crate::display::{register_framebuffer, Framebuffer, FramebufferInfo};
 use crate::ktrace;
+use crate::{kinfo, kwarn};
+use core::fmt::Write;
 use core::mem::size_of;
 
 // VirtIO GPU device constants
@@ -858,7 +860,7 @@ impl VirtioGpu {
             if !success {
                 ktrace!("[VirtIO-GPU]   ERROR: TRANSFER command failed!");
             } else {
-                ktrace!("[VirtIO-GPU]   TRANSFER command succeeded");
+                kwarn!("[VirtIO-GPU]   TRANSFER command succeeded");
             }
 
             // Flush resource
@@ -894,7 +896,7 @@ impl VirtioGpu {
             if !success {
                 ktrace!("[VirtIO-GPU]   ERROR: FLUSH command failed!");
             } else {
-                ktrace!("[VirtIO-GPU]   FLUSH command succeeded");
+                kwarn!("[VirtIO-GPU]   FLUSH command succeeded");
             }
         }
     }
