@@ -61,7 +61,7 @@ static bool _gpu_mode = false;
 /*
  * 8x16 VGA-style bitmap font (ASCII 32-126)
  * Each character is represented by 16 bytes, one per row
- * Bit 0 (LSB) corresponds to the leftmost pixel in our rendering
+ * Bit 7 (MSB) is the leftmost pixel, bit 0 (LSB) is the rightmost pixel
  */
 static const unsigned char FONT_8X16_NORMAL[95][16] = {
     /* 32: Space */
@@ -314,8 +314,8 @@ static void _gpu_draw_char(int screen_x, int screen_y, unsigned char c,
       if (offset >= fb_size)
         continue; /* Safety bounds check */
 
-      /* Check if pixel is set (bit 0 is leftmost in our rendering) */
-      bool pixel_set = (bitmap_row & (1 << col)) != 0;
+      /* Check if pixel is set (bit 7/MSB is leftmost, bit 0 is rightmost) */
+      bool pixel_set = (bitmap_row & (1 << (7 - col))) != 0;
       unsigned int color = pixel_set ? fg : bg;
 
       _framebuffer[offset] = color;
