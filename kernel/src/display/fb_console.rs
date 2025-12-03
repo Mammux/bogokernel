@@ -153,7 +153,8 @@ pub fn write_char(c: u8) {
 
 /// Write a string to the console
 pub fn write_str(s: &str) {
-    // Write all the characters
+    // Write each character individually with cursor management
+    // Each character operation erases the cursor first, then processes the character
     for byte in s.bytes() {
         write_char_internal(byte);
     }
@@ -200,6 +201,11 @@ fn draw_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
 
 /// Erase the cursor at the current position
 fn erase_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
+    // Only erase if cursor is currently visible
+    if !state.cursor_visible {
+        return;
+    }
+    
     let info = fb.info();
     let x_pixel = state.cursor_x * font::FONT_WIDTH;
     let y_pixel = state.cursor_y * font::FONT_HEIGHT;
