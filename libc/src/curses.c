@@ -67,7 +67,12 @@ static const unsigned char *_gpu_get_font(unsigned char c, bool bold) {
    * white color (COLOR_BRIGHT_WHITE) for visual distinction. */
   (void)bold;
   
-  return get_char_bitmap(c); /* Returns NULL for unsupported chars */
+  const unsigned char *bitmap = get_char_bitmap(c);
+  /* Return space glyph for unsupported characters */
+  if (bitmap == NULL) {
+    bitmap = get_char_bitmap(' ');
+  }
+  return bitmap;
 }
 
 /* Draw a character directly to the framebuffer */
@@ -80,6 +85,10 @@ static void _gpu_draw_char(int screen_x, int screen_y, unsigned char c,
   bool reverse = (attrs & (A_STANDOUT | A_REVERSE)) != 0;
 
   const unsigned char *bitmap = _gpu_get_font(c, bold);
+  
+  /* Safety check - should never be NULL due to fallback in _gpu_get_font */
+  if (!bitmap)
+    return;
 
   unsigned int fg = reverse ? COLOR_BLACK : COLOR_WHITE;
   unsigned int bg = reverse ? COLOR_WHITE : COLOR_BLACK;
