@@ -258,7 +258,10 @@ static const unsigned char FONT_8X16_NORMAL[95][16] = {
 
 /* Get font bitmap for a character (currently only normal 8x16 font supported) */
 static const unsigned char *_gpu_get_font(unsigned char c, bool bold) {
-  /* Bold not yet implemented for 8x16 font, use normal */
+  /* Bold not yet implemented for 8x16 font.
+   * When A_BOLD attribute is used, the text will still be rendered with the 
+   * normal 8x16 font, but the _gpu_draw_char function will use a brighter 
+   * white color (COLOR_BRIGHT_WHITE) for visual distinction. */
   (void)bold;
   
   if (c < 32 || c > 126) {
