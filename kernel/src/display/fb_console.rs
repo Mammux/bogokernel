@@ -82,7 +82,9 @@ fn write_char_internal(c: u8) {
     
     match c {
         b'\n' => {
-            // Newline: move to start of next line
+            // Newline: erase cursor before moving since we're not drawing anything
+            erase_cursor(fb, state);
+            // Move to start of next line
             state.cursor_x = 0;
             state.cursor_y += 1;
             if state.cursor_y >= state.height_chars {
@@ -90,11 +92,15 @@ fn write_char_internal(c: u8) {
             }
         }
         b'\r' => {
-            // Carriage return: move to start of line
+            // Carriage return: erase cursor before moving
+            erase_cursor(fb, state);
+            // Move to start of line
             state.cursor_x = 0;
         }
         b'\t' => {
-            // Tab: move to next tab stop (8 characters)
+            // Tab: erase cursor before moving
+            erase_cursor(fb, state);
+            // Move to next tab stop (8 characters)
             let next_tab = ((state.cursor_x / 8) + 1) * 8;
             if next_tab < state.width_chars {
                 state.cursor_x = next_tab;
@@ -107,7 +113,8 @@ fn write_char_internal(c: u8) {
             }
         }
         b'\x08' => {
-            // Backspace: move cursor back one position and clear the character
+            // Backspace: erase cursor, move cursor back one position, clear the character
+            erase_cursor(fb, state);
             if state.cursor_x > 0 {
                 state.cursor_x -= 1;
                 // Clear the character at cursor position
@@ -115,7 +122,9 @@ fn write_char_internal(c: u8) {
             }
         }
         c if c >= 32 && c <= 126 => {
-            // Printable character: draw overwrites any cursor that was there
+            // Printable character: erase cursor first since it might be at this position
+            erase_cursor(fb, state);
+            // Draw character (this overwrites where cursor was)
             draw_char(fb, state, c);
             state.cursor_x += 1;
             if state.cursor_x >= state.width_chars {
@@ -144,25 +153,12 @@ pub fn write_char(c: u8) {
 
 /// Write a string to the console
 pub fn write_str(s: &str) {
-    // First, erase the cursor at its current position
-    let fb = match get_framebuffer() {
-        Some(fb) => fb,
-        None => return,
-    };
-    
-    {
-        let mut state_guard = CONSOLE_STATE.lock();
-        if let Some(state) = state_guard.as_mut() {
-            erase_cursor(fb, state);
-        }
-    }
-    
-    // Then write all the characters
+    // Write all the characters
     for byte in s.bytes() {
         write_char_internal(byte);
     }
     
-    // Finally, reset cursor to visible and draw it after writing
+    // Reset cursor to visible and draw it after writing
     reset_cursor_blink();
     // Flush once after writing all characters for better performance
     crate::display::flush_framebuffer();
