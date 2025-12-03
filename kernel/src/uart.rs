@@ -50,6 +50,7 @@ impl Uart {
     }
 
     /// Blocking read: waits until a byte arrives.
+    #[allow(dead_code)]
     pub fn read_byte(&mut self) -> u8 {
         loop {
             if let Some(b) = self.try_read_byte() { return b; }

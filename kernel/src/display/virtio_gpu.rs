@@ -1,6 +1,5 @@
 use crate::display::{register_framebuffer, Framebuffer, FramebufferInfo};
 use crate::ktrace;
-use core::fmt::Write;
 use core::mem::size_of;
 
 // VirtIO GPU device constants
