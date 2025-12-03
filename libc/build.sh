@@ -27,8 +27,9 @@ $CC $CFLAGS -c src/signal.c -o src/signal.o
 $CC $CFLAGS -c src/time.c -o src/time.o
 $CC $CFLAGS -c src/stat.c -o src/stat.o
 $CC $CFLAGS -c src/ctype.c -o src/ctype.o
+$CC $CFLAGS -c src/font.c -o src/font.o
 
 # Create static library
-$AR rcs libc.a src/crt0.o src/syscall.o src/unistd.o src/string.o src/stdlib.o src/stdio.o src/curses.o src/signal.o src/time.o src/stat.o src/ctype.o
+$AR rcs libc.a src/crt0.o src/syscall.o src/unistd.o src/string.o src/stdlib.o src/stdio.o src/curses.o src/signal.o src/time.o src/stat.o src/ctype.o src/font.o
 
 echo "Build complete: libc.a"

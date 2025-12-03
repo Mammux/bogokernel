@@ -1,5 +1,7 @@
 #![no_std]
 
+pub mod font;
+
 pub mod nr {
     pub const WRITE: usize = 1; // write(ptr,len) -> usize
     pub const EXIT: usize = 2; // exit()

@@ -1,4 +1,4 @@
-use crate::display::{get_framebuffer, font};
+use crate::display::{get_framebuffer};
 use spin::Mutex;
 
 // Cursor appearance constants
@@ -22,8 +22,8 @@ pub fn init_fb_console() -> Result<(), ()> {
         let info = fb.info();
         
         // Calculate console dimensions in characters
-        let width_chars = info.width / font::FONT_WIDTH;
-        let height_chars = info.height / font::FONT_HEIGHT;
+        let width_chars = info.width / uapi::font::FONT_WIDTH;
+        let height_chars = info.height / uapi::font::FONT_HEIGHT;
         
         // Initialize console state
         let state = ConsoleState {
@@ -172,21 +172,21 @@ fn draw_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
     }
     
     let info = fb.info();
-    let x_pixel = state.cursor_x * font::FONT_WIDTH;
-    let y_pixel = state.cursor_y * font::FONT_HEIGHT;
+    let x_pixel = state.cursor_x * uapi::font::FONT_WIDTH;
+    let y_pixel = state.cursor_y * uapi::font::FONT_HEIGHT;
     
     // Draw cursor as a solid block at the bottom of the character cell
     unsafe {
         let buf = fb.back_buffer() as *mut u32;
         
         // Draw cursor bar at the bottom
-        for row in (font::FONT_HEIGHT - CURSOR_HEIGHT)..font::FONT_HEIGHT {
+        for row in (uapi::font::FONT_HEIGHT - CURSOR_HEIGHT)..uapi::font::FONT_HEIGHT {
             let y = y_pixel + row;
             if y >= info.height {
                 break;
             }
             
-            for col in 0..font::FONT_WIDTH {
+            for col in 0..uapi::font::FONT_WIDTH {
                 let x = x_pixel + col;
                 if x >= info.width {
                     break;
@@ -207,21 +207,21 @@ fn erase_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
     }
     
     let info = fb.info();
-    let x_pixel = state.cursor_x * font::FONT_WIDTH;
-    let y_pixel = state.cursor_y * font::FONT_HEIGHT;
+    let x_pixel = state.cursor_x * uapi::font::FONT_WIDTH;
+    let y_pixel = state.cursor_y * uapi::font::FONT_HEIGHT;
     
     // Erase cursor by drawing background color
     unsafe {
         let buf = fb.back_buffer() as *mut u32;
         
         // Erase the cursor bar at the bottom
-        for row in (font::FONT_HEIGHT - CURSOR_HEIGHT)..font::FONT_HEIGHT {
+        for row in (uapi::font::FONT_HEIGHT - CURSOR_HEIGHT)..uapi::font::FONT_HEIGHT {
             let y = y_pixel + row;
             if y >= info.height {
                 break;
             }
             
-            for col in 0..font::FONT_WIDTH {
+            for col in 0..uapi::font::FONT_WIDTH {
                 let x = x_pixel + col;
                 if x >= info.width {
                     break;
@@ -286,26 +286,26 @@ fn reset_cursor_blink() {
 
 /// Draw a character at the current cursor position
 fn draw_char(fb: &dyn crate::display::Framebuffer, state: &ConsoleState, c: u8) {
-    let bitmap = match font::get_char_bitmap(c) {
+    let bitmap = match uapi::font::get_char_bitmap(c) {
         Some(b) => b,
         None => return,  // Unsupported character
     };
     
     let info = fb.info();
-    let x_pixel = state.cursor_x * font::FONT_WIDTH;
-    let y_pixel = state.cursor_y * font::FONT_HEIGHT;
+    let x_pixel = state.cursor_x * uapi::font::FONT_WIDTH;
+    let y_pixel = state.cursor_y * uapi::font::FONT_HEIGHT;
     
     unsafe {
         let buf = fb.back_buffer() as *mut u32;
         
-        for row in 0..font::FONT_HEIGHT {
+        for row in 0..uapi::font::FONT_HEIGHT {
             let bitmap_row = bitmap[row];
             let y = y_pixel + row;
             if y >= info.height {
                 break;
             }
             
-            for col in 0..font::FONT_WIDTH {
+            for col in 0..uapi::font::FONT_WIDTH {
                 let x = x_pixel + col;
                 if x >= info.width {
                     break;
@@ -331,7 +331,7 @@ fn draw_char(fb: &dyn crate::display::Framebuffer, state: &ConsoleState, c: u8) 
 /// Scroll the screen up by one line
 fn scroll_up(fb: &dyn crate::display::Framebuffer, state: &mut ConsoleState) {
     let info = fb.info();
-    let line_height_pixels = font::FONT_HEIGHT;
+    let line_height_pixels = uapi::font::FONT_HEIGHT;
     
     unsafe {
         let buf = fb.back_buffer() as *mut u32;
