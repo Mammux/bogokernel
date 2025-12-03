@@ -82,7 +82,9 @@ fn write_char_internal(c: u8) {
     
     match c {
         b'\n' => {
-            // Newline: move to start of next line
+            // Newline: erase cursor before moving since we're not drawing anything
+            erase_cursor(fb, state);
+            // Move to start of next line
             state.cursor_x = 0;
             state.cursor_y += 1;
             if state.cursor_y >= state.height_chars {
@@ -90,11 +92,15 @@ fn write_char_internal(c: u8) {
             }
         }
         b'\r' => {
-            // Carriage return: move to start of line
+            // Carriage return: erase cursor before moving
+            erase_cursor(fb, state);
+            // Move to start of line
             state.cursor_x = 0;
         }
         b'\t' => {
-            // Tab: move to next tab stop (8 characters)
+            // Tab: erase cursor before moving
+            erase_cursor(fb, state);
+            // Move to next tab stop (8 characters)
             let next_tab = ((state.cursor_x / 8) + 1) * 8;
             if next_tab < state.width_chars {
                 state.cursor_x = next_tab;
@@ -107,15 +113,18 @@ fn write_char_internal(c: u8) {
             }
         }
         b'\x08' => {
-            // Backspace: move cursor back one position
+            // Backspace: erase cursor, move cursor back one position, clear the character
+            erase_cursor(fb, state);
             if state.cursor_x > 0 {
                 state.cursor_x -= 1;
-                // Optionally clear the character at cursor position
+                // Clear the character at cursor position
                 draw_char(fb, state, b' ');
             }
         }
         c if c >= 32 && c <= 126 => {
-            // Printable character
+            // Printable character: erase cursor first since it might be at this position
+            erase_cursor(fb, state);
+            // Draw character (this overwrites where cursor was)
             draw_char(fb, state, c);
             state.cursor_x += 1;
             if state.cursor_x >= state.width_chars {
@@ -144,9 +153,12 @@ pub fn write_char(c: u8) {
 
 /// Write a string to the console
 pub fn write_str(s: &str) {
+    // Write each character individually with cursor management
+    // Each character operation erases the cursor first, then processes the character
     for byte in s.bytes() {
         write_char_internal(byte);
     }
+    
     // Reset cursor to visible and draw it after writing
     reset_cursor_blink();
     // Flush once after writing all characters for better performance
@@ -189,6 +201,11 @@ fn draw_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
 
 /// Erase the cursor at the current position
 fn erase_cursor(fb: &dyn crate::display::Framebuffer, state: &ConsoleState) {
+    // Only erase if cursor is currently visible
+    if !state.cursor_visible {
+        return;
+    }
+    
     let info = fb.info();
     let x_pixel = state.cursor_x * font::FONT_WIDTH;
     let y_pixel = state.cursor_y * font::FONT_HEIGHT;
@@ -294,9 +311,10 @@ fn draw_char(fb: &dyn crate::display::Framebuffer, state: &ConsoleState, c: u8) 
                     break;
                 }
                 
-                // Check if pixel is set (bit position matches column)
-                // This corrects the horizontally mirrored characters
-                let pixel_set = (bitmap_row & (1 << col)) != 0;
+                // Check if pixel is set
+                // Font format: bit 7 (MSB) is leftmost pixel, bit 0 is rightmost
+                // So for column 0 (leftmost), we check bit 7; for column 7 (rightmost), we check bit 0
+                let pixel_set = (bitmap_row & (1 << (7 - col))) != 0;
                 let color = if pixel_set {
                     state.fg_color
                 } else {
