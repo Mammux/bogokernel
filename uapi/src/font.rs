@@ -1,15 +1,13 @@
-/// 8x16 VGA-style bitmap font for console rendering
+/// Shared 8x16 VGA-style bitmap font for console rendering
+/// Used by both kernel and libc for consistent font rendering
+/// 
 /// Each character is represented by 16 bytes, one per row
-/// Bit 7 (MSB) is the leftmost pixel
+/// Bit 7 (MSB) is the leftmost pixel, bit 0 (LSB) is the rightmost pixel
 
-/// Get font bitmap for a character (8x16 font for better readability)
-/// Returns None for unsupported characters (outside ASCII 32-126)
-pub fn get_char_bitmap(c: u8) -> Option<&'static [u8; 16]> {
-    get_char_bitmap_8x16(c)
-}
+pub const FONT_WIDTH: usize = 8;
+pub const FONT_HEIGHT: usize = 16;
 
-
-// 8x16 VGA-style font for better readability
+/// 8x16 VGA-style font data for ASCII characters 32-126
 pub const FONT_8X16: [[u8; 16]; 95] = [
     // 32: Space
     [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
@@ -203,18 +201,15 @@ pub const FONT_8X16: [[u8; 16]; 95] = [
     [0x00, 0x00, 0x76, 0xDC, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
 ];
 
-/// Get 8x16 font bitmap for a character
+/// Get font bitmap for a character (8x16 font)
 /// Returns None for unsupported characters (outside ASCII 32-126)
-pub fn get_char_bitmap_8x16(c: u8) -> Option<&'static [u8; 16]> {
+pub fn get_char_bitmap(c: u8) -> Option<&'static [u8; 16]> {
     if c >= 32 && c <= 126 {
         Some(&FONT_8X16[(c - 32) as usize])
     } else {
         None
     }
 }
-
-pub const FONT_WIDTH: usize = 8;
-pub const FONT_HEIGHT: usize = 16;
 
 #[cfg(test)]
 mod tests {

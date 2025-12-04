@@ -1,5 +1,4 @@
 pub mod fb_console;
-pub mod font;
 pub mod virtio_gpu;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
