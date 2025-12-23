@@ -414,9 +414,9 @@ mod tests {
 
     #[test]
     fn test_page_size_constants() {
-        assert_eq!(SIZE_4K, 4096);
-        assert_eq!(SIZE_2M, 2 * 1024 * 1024);
-        assert_eq!(SIZE_1G, 1024 * 1024 * 1024);
+        assert_eq!(SIZE_4K, 1 << 12);
+        assert_eq!(SIZE_2M, 1 << 21);
+        assert_eq!(SIZE_1G, 1 << 30);
     }
 
     #[test]

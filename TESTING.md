@@ -20,7 +20,7 @@ BogoKernel presents unique testing challenges:
 Test code has been added directly to kernel modules using `#[cfg(test)]` blocks. While these tests cannot be executed with `cargo test` due to the `no_std` environment, they serve important purposes:
 
 - **Documentation**: Tests document expected behavior and usage patterns
-- **Design Validation**: Writing tests helps identify  and validate API design
+- **Design Validation**: Writing tests helps identify and validate API design
 - **Future Refactoring**: Tests can be extracted to a std environment if modules are refactored
 
 #### Modules with Test Coverage
