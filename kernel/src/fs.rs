@@ -281,3 +281,283 @@ pub fn get_file_data(name: &str) -> Option<Vec<u8>> {
     let files = WRITABLE_FILES.lock();
     files.iter().find(|f| f.name == name).map(|f| f.data.clone())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use alloc::vec;
+
+    // Helper to reset filesystem state between tests
+    fn reset_fs() {
+        let mut files = WRITABLE_FILES.lock();
+        files.clear();
+    }
+
+    #[test]
+    fn test_create_file() {
+        reset_fs();
+        
+        let result = create_file("test.txt");
+        assert!(result.is_ok());
+        
+        let idx = result.unwrap();
+        assert_eq!(idx, 0);
+        
+        // Verify file was created
+        assert!(lookup_writable("test.txt").is_some());
+    }
+
+    #[test]
+    fn test_create_file_truncates_existing() {
+        reset_fs();
+        
+        // Create file with some data
+        let idx1 = create_file("test.txt").unwrap();
+        write_file(idx1, 0, b"Hello").unwrap();
+        
+        // Create again (should truncate)
+        let idx2 = create_file("test.txt").unwrap();
+        assert_eq!(idx1, idx2);
+        
+        // Verify file is empty
+        let size = file_size(idx2);
+        assert_eq!(size, Some(0));
+    }
+
+    #[test]
+    fn test_write_and_read_file() {
+        reset_fs();
+        
+        let idx = create_file("test.txt").unwrap();
+        let data = b"Hello, World!";
+        
+        // Write data
+        let written = write_file(idx, 0, data).unwrap();
+        assert_eq!(written, data.len());
+        
+        // Read data back
+        let mut buf = vec![0u8; data.len()];
+        let read = read_file(idx, 0, &mut buf).unwrap();
+        assert_eq!(read, data.len());
+        assert_eq!(&buf[..], data);
+    }
+
+    #[test]
+    fn test_write_at_offset() {
+        reset_fs();
+        
+        let idx = create_file("test.txt").unwrap();
+        
+        // Write at offset 0
+        write_file(idx, 0, b"Hello").unwrap();
+        
+        // Write at offset 5 (should extend file with zeros)
+        write_file(idx, 5, b" World").unwrap();
+        
+        // Read entire file
+        let mut buf = vec![0u8; 11];
+        let read = read_file(idx, 0, &mut buf).unwrap();
+        assert_eq!(read, 11);
+        assert_eq!(&buf[..], b"Hello World");
+    }
+
+    #[test]
+    fn test_read_at_offset() {
+        reset_fs();
+        
+        let idx = create_file("test.txt").unwrap();
+        write_file(idx, 0, b"Hello, World!").unwrap();
+        
+        // Read from middle of file
+        let mut buf = vec![0u8; 5];
+        let read = read_file(idx, 7, &mut buf).unwrap();
+        assert_eq!(read, 5);
+        assert_eq!(&buf[..], b"World");
+    }
+
+    #[test]
+    fn test_read_beyond_end() {
+        reset_fs();
+        
+        let idx = create_file("test.txt").unwrap();
+        write_file(idx, 0, b"Hello").unwrap();
+        
+        // Try to read beyond file end
+        let mut buf = vec![0u8; 10];
+        let read = read_file(idx, 5, &mut buf).unwrap();
+        assert_eq!(read, 0);
+    }
+
+    #[test]
+    fn test_read_partial() {
+        reset_fs();
+        
+        let idx = create_file("test.txt").unwrap();
+        write_file(idx, 0, b"Hello").unwrap();
+        
+        // Read with buffer smaller than file
+        let mut buf = vec![0u8; 3];
+        let read = read_file(idx, 0, &mut buf).unwrap();
+        assert_eq!(read, 3);
+        assert_eq!(&buf[..], b"Hel");
+    }
+
+    #[test]
+    fn test_file_size() {
+        reset_fs();
+        
+        let idx = create_file("test.txt").unwrap();
+        
+        // Empty file
+        assert_eq!(file_size(idx), Some(0));
+        
+        // After writing
+        write_file(idx, 0, b"Hello").unwrap();
+        assert_eq!(file_size(idx), Some(5));
+        
+        // After writing at offset (extends file)
+        write_file(idx, 10, b"World").unwrap();
+        assert_eq!(file_size(idx), Some(15));
+    }
+
+    #[test]
+    fn test_unlink_file() {
+        reset_fs();
+        
+        create_file("test.txt").unwrap();
+        assert!(lookup_writable("test.txt").is_some());
+        
+        // Delete file
+        let result = unlink_file("test.txt");
+        assert!(result.is_ok());
+        
+        // Verify file is gone
+        assert!(lookup_writable("test.txt").is_none());
+    }
+
+    #[test]
+    fn test_unlink_nonexistent() {
+        reset_fs();
+        
+        let result = unlink_file("nonexistent.txt");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_chmod_file() {
+        reset_fs();
+        
+        create_file("test.txt").unwrap();
+        
+        // Change mode
+        let result = chmod_file("test.txt", 0o755);
+        assert!(result.is_ok());
+        
+        // Verify mode changed
+        let stat = stat_file("test.txt").unwrap();
+        assert_eq!(stat.mode, 0o755);
+    }
+
+    #[test]
+    fn test_chmod_nonexistent() {
+        reset_fs();
+        
+        let result = chmod_file("nonexistent.txt", 0o755);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_file_exists() {
+        reset_fs();
+        
+        assert!(!file_exists("test.txt"));
+        
+        create_file("test.txt").unwrap();
+        assert!(file_exists("test.txt"));
+    }
+
+    #[test]
+    fn test_stat_file() {
+        reset_fs();
+        
+        let idx = create_file("test.txt").unwrap();
+        write_file(idx, 0, b"Hello").unwrap();
+        
+        let stat = stat_file("test.txt").unwrap();
+        assert_eq!(stat.size, 5);
+        assert_eq!(stat.mode, 0o600);
+        assert!(stat.is_writable);
+    }
+
+    #[test]
+    fn test_stat_nonexistent() {
+        reset_fs();
+        
+        let stat = stat_file("nonexistent.txt");
+        assert!(stat.is_none());
+    }
+
+    #[test]
+    fn test_multiple_files() {
+        reset_fs();
+        
+        // Create multiple files
+        let idx1 = create_file("file1.txt").unwrap();
+        let idx2 = create_file("file2.txt").unwrap();
+        let idx3 = create_file("file3.txt").unwrap();
+        
+        // Write different data to each
+        write_file(idx1, 0, b"File 1").unwrap();
+        write_file(idx2, 0, b"File 2").unwrap();
+        write_file(idx3, 0, b"File 3").unwrap();
+        
+        // Read and verify each file
+        let mut buf = vec![0u8; 10];
+        
+        read_file(idx1, 0, &mut buf).unwrap();
+        assert_eq!(&buf[..6], b"File 1");
+        
+        read_file(idx2, 0, &mut buf).unwrap();
+        assert_eq!(&buf[..6], b"File 2");
+        
+        read_file(idx3, 0, &mut buf).unwrap();
+        assert_eq!(&buf[..6], b"File 3");
+    }
+
+    #[test]
+    fn test_lookup_writable() {
+        reset_fs();
+        
+        assert!(lookup_writable("test.txt").is_none());
+        
+        create_file("test.txt").unwrap();
+        let idx = lookup_writable("test.txt");
+        assert!(idx.is_some());
+        assert_eq!(idx.unwrap(), 0);
+    }
+
+    #[test]
+    fn test_write_file_invalid_index() {
+        reset_fs();
+        
+        let result = write_file(999, 0, b"data");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_read_file_invalid_index() {
+        reset_fs();
+        
+        let mut buf = vec![0u8; 10];
+        let result = read_file(999, 0, &mut buf);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_file_size_invalid_index() {
+        reset_fs();
+        
+        let size = file_size(999);
+        assert!(size.is_none());
+    }
+}

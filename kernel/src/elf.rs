@@ -91,7 +91,7 @@ unsafe fn memzero_pa(dst_pa: usize, len: usize) {
 
 /// Map ELF p_flags to PTE flags (always V|U|A; add D if W).
 #[inline(always)]
-fn pte_flags_from_pf(pf: u32) -> u64 {
+pub fn pte_flags_from_pf(pf: u32) -> u64 {
     let mut f = PTE_V | PTE_U | PTE_A;
     if (pf & 0x4) != 0 { f |= PTE_R; }           // PF_R
     if (pf & 0x2) != 0 { f |= PTE_W | PTE_D; }   // PF_W
@@ -299,4 +299,122 @@ unsafe fn setup_user_stack(
     sp &= !15;
 
     Ok((sp, envp_va, argv_va, argc))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pte_flags_from_pf_no_perms() {
+        // No permissions (0)
+        let flags = pte_flags_from_pf(0);
+        assert_eq!(flags & PTE_V, PTE_V); // Valid
+        assert_eq!(flags & PTE_U, PTE_U); // User
+        assert_eq!(flags & PTE_A, PTE_A); // Accessed
+        assert_eq!(flags & PTE_R, 0);     // Not readable
+        assert_eq!(flags & PTE_W, 0);     // Not writable
+        assert_eq!(flags & PTE_X, 0);     // Not executable
+    }
+
+    #[test]
+    fn test_pte_flags_from_pf_read_only() {
+        // Read-only (PF_R = 0x4)
+        let flags = pte_flags_from_pf(0x4);
+        assert_eq!(flags & PTE_R, PTE_R);
+        assert_eq!(flags & PTE_W, 0);
+        assert_eq!(flags & PTE_X, 0);
+        assert_eq!(flags & PTE_D, 0); // No dirty bit for read-only
+    }
+
+    #[test]
+    fn test_pte_flags_from_pf_read_write() {
+        // Read-write (PF_R | PF_W = 0x6)
+        let flags = pte_flags_from_pf(0x6);
+        assert_eq!(flags & PTE_R, PTE_R);
+        assert_eq!(flags & PTE_W, PTE_W);
+        assert_eq!(flags & PTE_D, PTE_D); // Dirty bit set for writable
+        assert_eq!(flags & PTE_X, 0);
+    }
+
+    #[test]
+    fn test_pte_flags_from_pf_read_exec() {
+        // Read-execute (PF_R | PF_X = 0x5)
+        let flags = pte_flags_from_pf(0x5);
+        assert_eq!(flags & PTE_R, PTE_R);
+        assert_eq!(flags & PTE_X, PTE_X);
+        assert_eq!(flags & PTE_W, 0);
+        assert_eq!(flags & PTE_D, 0);
+    }
+
+    #[test]
+    fn test_pte_flags_from_pf_all_perms() {
+        // All permissions (PF_R | PF_W | PF_X = 0x7)
+        let flags = pte_flags_from_pf(0x7);
+        assert_eq!(flags & PTE_R, PTE_R);
+        assert_eq!(flags & PTE_W, PTE_W);
+        assert_eq!(flags & PTE_X, PTE_X);
+        assert_eq!(flags & PTE_D, PTE_D);
+        assert_eq!(flags & PTE_V, PTE_V);
+        assert_eq!(flags & PTE_U, PTE_U);
+        assert_eq!(flags & PTE_A, PTE_A);
+    }
+
+    #[test]
+    fn test_pte_flags_from_pf_write_only() {
+        // Write-only (PF_W = 0x2) - unusual but valid
+        let flags = pte_flags_from_pf(0x2);
+        assert_eq!(flags & PTE_W, PTE_W);
+        assert_eq!(flags & PTE_D, PTE_D);
+        assert_eq!(flags & PTE_R, 0);
+        assert_eq!(flags & PTE_X, 0);
+    }
+
+    #[test]
+    fn test_pte_flags_from_pf_exec_only() {
+        // Execute-only (PF_X = 0x1)
+        let flags = pte_flags_from_pf(0x1);
+        assert_eq!(flags & PTE_X, PTE_X);
+        assert_eq!(flags & PTE_R, 0);
+        assert_eq!(flags & PTE_W, 0);
+        assert_eq!(flags & PTE_D, 0);
+    }
+
+    #[test]
+    fn test_elf_load_error_types() {
+        // Verify error types are distinct
+        use core::mem::discriminant;
+        assert_ne!(discriminant(&ElfLoadError::Short), discriminant(&ElfLoadError::BadMagic));
+        assert_ne!(discriminant(&ElfLoadError::Not64LE), discriminant(&ElfLoadError::NotRiscv));
+        assert_ne!(discriminant(&ElfLoadError::PhOutOfBounds), discriminant(&ElfLoadError::SatpNotSet));
+    }
+
+    #[test]
+    fn test_loaded_struct_fields() {
+        // Test that Loaded struct can be created and accessed
+        let loaded = Loaded {
+            entry_va: 0x10000,
+            user_sp: 0x20000,
+            argc: 2,
+            argv_va: 0x1F000,
+            envp_va: 0x1E000,
+            brk: 0x30000,
+        };
+        
+        assert_eq!(loaded.entry_va, 0x10000);
+        assert_eq!(loaded.user_sp, 0x20000);
+        assert_eq!(loaded.argc, 2);
+        assert_eq!(loaded.argv_va, 0x1F000);
+        assert_eq!(loaded.envp_va, 0x1E000);
+        assert_eq!(loaded.brk, 0x30000);
+    }
+
+    #[test]
+    fn test_elf_constants() {
+        // Verify ELF constants are correct
+        use goblin::elf::header::*;
+        assert_eq!(ELFCLASS64, 2);
+        assert_eq!(ELFDATA2LSB, 1);
+        assert_eq!(EM_RISCV, 243);
+    }
 }
