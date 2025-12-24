@@ -13,8 +13,9 @@
 #include <unistd.h>
 
 #ifdef GPU_ENABLED
-#include <gpu.h>
 #include <font.h>
+#include <gpu.h>
+
 #endif
 
 /* Termcap compatibility - stub */
@@ -62,11 +63,11 @@ static bool _gpu_mode = false;
 /* Get font bitmap for a character (uses shared font from font.h) */
 static const unsigned char *_gpu_get_font(unsigned char c, bool bold) {
   /* Bold not yet implemented for 8x16 font.
-   * When A_BOLD attribute is used, the text will still be rendered with the 
-   * normal 8x16 font, but the _gpu_draw_char function will use a brighter 
+   * When A_BOLD attribute is used, the text will still be rendered with the
+   * normal 8x16 font, but the _gpu_draw_char function will use a brighter
    * white color (COLOR_BRIGHT_WHITE) for visual distinction. */
   (void)bold;
-  
+
   const unsigned char *bitmap = get_char_bitmap(c);
   /* Return space glyph for unsupported characters */
   if (bitmap == NULL) {
@@ -85,7 +86,7 @@ static void _gpu_draw_char(int screen_x, int screen_y, unsigned char c,
   bool reverse = (attrs & (A_STANDOUT | A_REVERSE)) != 0;
 
   const unsigned char *bitmap = _gpu_get_font(c, bold);
-  
+
   /* Safety check - should never be NULL due to fallback in _gpu_get_font */
   if (!bitmap)
     return;
@@ -123,8 +124,8 @@ static void _gpu_draw_char(int screen_x, int screen_y, unsigned char c,
       if (offset >= fb_size)
         continue; /* Safety bounds check */
 
-      /* Check if pixel is set (bit 7/MSB is leftmost, bit 0 is rightmost) */
-      bool pixel_set = (bitmap_row & (1 << (7 - col))) != 0;
+      /* Check if pixel is set (bit 0/LSB is leftmost, bit 7 is rightmost) */
+      bool pixel_set = (bitmap_row & (1 << col)) != 0;
       unsigned int color = pixel_set ? fg : bg;
 
       _framebuffer[offset] = color;
