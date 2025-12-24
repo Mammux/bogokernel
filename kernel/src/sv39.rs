@@ -85,7 +85,7 @@ pub unsafe fn root_pt() -> *mut u64 {
 }
 
 #[inline]
-fn vpn_indices(va: usize) -> [usize; 3] {
+pub fn vpn_indices(va: usize) -> [usize; 3] {
     // Sv39: VPN[2]=bits 38..30, VPN[1]=29..21, VPN[0]=20..12
     [(va >> 12) & 0x1ff, (va >> 21) & 0x1ff, (va >> 30) & 0x1ff]
 }
@@ -331,4 +331,107 @@ pub unsafe fn map_framebuffer_to_user(fb_pa: usize, fb_size: usize) -> usize {
     }
     
     FB_VA_BASE
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ppn_calculation() {
+        // Test PPN calculation from physical address
+        assert_eq!(ppn(0x0000), 0);
+        assert_eq!(ppn(0x1000), 1);
+        assert_eq!(ppn(0x2000), 2);
+        assert_eq!(ppn(0x8000_0000), 0x80000);
+        assert_eq!(ppn(0xFFFF_F000), 0xFFFFF);
+    }
+
+    #[test]
+    fn test_vpn_indices_simple() {
+        // Test VPN extraction for simple addresses
+        // VA = 0x0000_0000: all VPNs should be 0
+        let indices = vpn_indices(0x0000_0000);
+        assert_eq!(indices, [0, 0, 0]);
+        
+        // VA = 0x0000_1000: VPN[0] = 1, others = 0
+        let indices = vpn_indices(0x0000_1000);
+        assert_eq!(indices, [1, 0, 0]);
+        
+        // VA = 0x0020_0000: VPN[1] = 1, others = 0
+        let indices = vpn_indices(0x0020_0000);
+        assert_eq!(indices, [0, 1, 0]);
+    }
+
+    #[test]
+    fn test_vpn_indices_complex() {
+        // Test VPN extraction for more complex addresses
+        // VA with all VPN fields set
+        // VPN[0]=0x123, VPN[1]=0x45, VPN[2]=0x6
+        let va = (0x6 << 30) | (0x45 << 21) | (0x123 << 12);
+        let indices = vpn_indices(va);
+        assert_eq!(indices, [0x123, 0x45, 0x6]);
+    }
+
+    #[test]
+    fn test_vpn_indices_mask() {
+        // Test that VPN extraction properly masks bits
+        // Each VPN should be 9 bits (0-511)
+        let va = (0x1FF << 30) | (0x1FF << 21) | (0x1FF << 12);
+        let indices = vpn_indices(va);
+        assert_eq!(indices, [0x1FF, 0x1FF, 0x1FF]);
+        
+        // Values should not exceed 511 (0x1FF)
+        assert!(indices[0] <= 0x1FF);
+        assert!(indices[1] <= 0x1FF);
+        assert!(indices[2] <= 0x1FF);
+    }
+
+    #[test]
+    fn test_vpn_indices_kernel_addresses() {
+        // Test with typical kernel addresses
+        // DRAM_BASE = 0x8000_0000
+        let indices = vpn_indices(DRAM_BASE);
+        assert_eq!(indices, [0, 0, 2]);
+        
+        // USER_VA_BASE = 0x4000_0000
+        let indices = vpn_indices(USER_VA_BASE);
+        assert_eq!(indices, [0, 0, 1]);
+    }
+
+    #[test]
+    fn test_pte_flags_constants() {
+        // Verify PTE flag bit positions are correct
+        assert_eq!(PTE_V, 1 << 0);
+        assert_eq!(PTE_R, 1 << 1);
+        assert_eq!(PTE_W, 1 << 2);
+        assert_eq!(PTE_X, 1 << 3);
+        assert_eq!(PTE_U, 1 << 4);
+        assert_eq!(PTE_G, 1 << 5);
+        assert_eq!(PTE_A, 1 << 6);
+        assert_eq!(PTE_D, 1 << 7);
+    }
+
+    #[test]
+    fn test_page_size_constants() {
+        assert_eq!(SIZE_4K, 1 << 12);
+        assert_eq!(SIZE_2M, 1 << 21);
+        assert_eq!(SIZE_1G, 1 << 30);
+    }
+
+    #[test]
+    fn test_memory_layout_constants() {
+        // Verify memory layout is sensible
+        assert!(DRAM_SIZE > 0);
+        assert!(USER_PA_POOL_START < USER_PA_POOL_END);
+        assert!(USER_PA_POOL_END <= DRAM_BASE + DRAM_SIZE);
+    }
+
+    #[test]
+    fn test_user_address_space() {
+        // Verify user space layout
+        assert_eq!(USER_CODE_VA, USER_VA_BASE);
+        assert_eq!(USER_STACK_VA, USER_VA_BASE + 0x1000);
+        assert!(USER_STACK_VA > USER_CODE_VA);
+    }
 }

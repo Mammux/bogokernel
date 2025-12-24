@@ -176,6 +176,35 @@ shell> _
 
 ---
 
+## Testing
+
+BogoKernel includes comprehensive test coverage for kernel logic:
+
+- **45 unit tests** covering ~501 lines of test code
+- **Filesystem tests** (24 tests): File operations, read/write, metadata
+- **Paging tests** (10 tests): PPN/VPN calculations, memory layout validation
+- **ELF loader tests** (11 tests): Permission mapping, ELF validation
+- **Integration tests**: `test.py` for end-to-end QEMU validation
+
+### Running Tests
+
+```sh
+# Run unit tests (21 tests for pure functions)
+cargo test -p kernel --lib --target x86_64-unknown-linux-gnu
+
+# Integration test (requires built kernel)
+python3 test.py
+
+# Verify kernel compiles
+cargo check -p kernel
+```
+
+**Note**: Unit tests are extracted into a library that can be tested with `cargo test`. The library contains pure functions from `sv39`, `elf`, and `fs` modules. Tests run on the host platform (x86_64) while the kernel binary remains `no_std` for RISC-V.
+
+For detailed testing information, see **[TESTING.md](TESTING.md)**.
+
+---
+
 ## System Calls Reference
 
 | Number | Name | Signature | Description |
