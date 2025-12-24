@@ -189,6 +189,9 @@ BogoKernel includes comprehensive test coverage for kernel logic:
 ### Running Tests
 
 ```sh
+# Run unit tests (21 tests for pure functions)
+cargo test -p kernel --lib --target x86_64-unknown-linux-gnu
+
 # Integration test (requires built kernel)
 python3 test.py
 
@@ -196,9 +199,9 @@ python3 test.py
 cargo check -p kernel
 ```
 
-For detailed testing information, see **[TESTING.md](TESTING.md)**.
+**Note**: Unit tests are extracted into a library that can be tested with `cargo test`. The library contains pure functions from `sv39`, `elf`, and `fs` modules. Tests run on the host platform (x86_64) while the kernel binary remains `no_std` for RISC-V.
 
-**Note**: Unit tests use `#[cfg(test)]` blocks but cannot run with `cargo test` due to the `no_std` kernel environment. They serve as documentation and design validation.
+For detailed testing information, see **[TESTING.md](TESTING.md)**.
 
 ---
 

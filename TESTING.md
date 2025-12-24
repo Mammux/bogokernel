@@ -85,6 +85,22 @@ cargo run -p kernel
 
 ## Running Tests
 
+### Unit Tests
+
+Unit tests can now be executed using `cargo test`:
+
+```bash
+# Run all unit tests (21 tests)
+cargo test -p kernel --lib --target x86_64-unknown-linux-gnu
+
+# Run tests for a specific module
+cargo test -p kernel --lib --target x86_64-unknown-linux-gnu sv39
+cargo test -p kernel --lib --target x86_64-unknown-linux-gnu elf
+cargo test -p kernel --lib --target x86_64-unknown-linux-gnu fs
+```
+
+**How it works**: Pure functions are extracted into a separate library (`kernel/src/lib.rs`) that compiles with `std` for testing on the host platform. The kernel binary (`kernel/src/main.rs`) remains `no_std` and compiles for RISC-V.
+
 ### Integration Tests
 
 ```bash

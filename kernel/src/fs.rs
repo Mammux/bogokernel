@@ -1,8 +1,16 @@
 // kernel/src/fs.rs
 #![allow(dead_code)]
 
+#[cfg(not(test))]
 use alloc::vec::Vec;
+#[cfg(not(test))]
 use alloc::string::String;
+
+#[cfg(test)]
+use std::vec::Vec;
+#[cfg(test)]
+use std::string::String;
+
 use spin::Mutex;
 
 pub struct File {
@@ -285,8 +293,7 @@ pub fn get_file_data(name: &str) -> Option<Vec<u8>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloc::vec;
-
+    
     // Helper to reset filesystem state between tests
     fn reset_fs() {
         let mut files = WRITABLE_FILES.lock();

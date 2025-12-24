@@ -8,6 +8,11 @@ name = "kernel"
 test = false
 bench = false
 
+[lib]
+name = "kernel_lib"
+path = "src/lib.rs"
+# Library tests should run on host, not riscv target
+
 [features]
 # Enable GPU display mode for testing virtio-gpu framebuffer
 gpu = []
